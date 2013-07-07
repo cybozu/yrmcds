@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::gc_thread" name="gc_thread">
+  <base access="public">
+    <type name="cybozu::thread_base&lt;yrmcds::gc_thread, 1&gt;" />
+  </base>
+  <constructor id="yrmcds::gc_thread::gc_thread" name="gc_thread">
+    <argument id="yrmcds::gc_thread::gc_thread::m" name="m">
+      <type name="cybozu::hash_map&lt;yrmcds::object&gt;" qualifier="&amp;" />
+    </argument>
+    <argument id="yrmcds::gc_thread::gc_thread::slaves" name="slaves">
+      <type name="std::vector&lt;cybozu::tcp_socket *, std::allocator&lt;cybozu::tcp_socket *&gt; &gt;" qualifier="const &amp;" />
+    </argument>
+    <argument id="yrmcds::gc_thread::gc_thread::new_slaves" name="new_slaves">
+      <type name="std::vector&lt;cybozu::tcp_socket *, std::allocator&lt;cybozu::tcp_socket *&gt; &gt;" qualifier="const &amp;" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::gc_thread::gc_thread" name="gc_thread">
+    <argument id="yrmcds::gc_thread::gc_thread::" name="">
+      <type name="gc_thread" qualifier="const &amp;" ref="yrmcds::gc_thread#yrmcds::gc_thread" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::gc_thread::gc_thread" name="gc_thread">
+    <argument id="yrmcds::gc_thread::gc_thread::" name="">
+      <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </constructor>
+  <destructor id="yrmcds::gc_thread::~gc_thread" name="~gc_thread" />
+  <method abstract="yes" id="yrmcds::gc_thread::operator=" name="operator=">
+    <return>
+      <type name="gc_thread" qualifier="&amp;" ref="yrmcds::gc_thread#yrmcds::gc_thread" />
+    </return>
+    <argument id="yrmcds::gc_thread::operator=::" name="">
+      <type name="gc_thread" qualifier="const &amp;" ref="yrmcds::gc_thread#yrmcds::gc_thread" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::gc_thread::operator=" name="operator=">
+    <return>
+      <type name="gc_thread" qualifier="&amp;" ref="yrmcds::gc_thread#yrmcds::gc_thread" />
+    </return>
+    <argument id="yrmcds::gc_thread::operator=::" name="">
+      <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::gc_thread::run" name="run">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+</class>

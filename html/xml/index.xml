@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='utf-8'?>
+<index>
+  <brief>Index.</brief>
+  <doc>yrmcds documents
+----------------
+
+yrmcds is an object cache system featuring master-slave replication.
+</doc>
+  <category name="Design Notes" ref="Design Notes#Design Notes">
+    <brief>Design Notes</brief>
+  </category>
+  <category name="Usage" ref="Usage#Usage">
+    <brief>Configuration and execution of `yrmcdsd`.</brief>
+  </category>
+  <category name="Future Plans" ref="Future Plans#Future Plans">
+    <brief>List of future plans.</brief>
+  </category>
+  <category name="Benchmark Results" ref="Benchmark Results#Benchmark Results">
+    <brief>Benchmark results.</brief>
+  </category>
+  <category name="Differences from memcached" ref="Differences from memcached#Differences from memcached">
+    <brief>Differences from memcached.</brief>
+  </category>
+  <namespace name="yrmcds" ref="yrmcds#yrmcds">
+    <brief>Implementing yrmcds.</brief>
+    <namespace name="memcache" ref="yrmcds::memcache#yrmcds::memcache">
+      <class name="text_request" ref="yrmcds::memcache::text_request#yrmcds::memcache::text_request">
+        <brief>Text request parser.</brief>
+      </class>
+      <class name="text_response" ref="yrmcds::memcache::text_response#yrmcds::memcache::text_response">
+        <brief>Text response sender.</brief>
+      </class>
+      <class name="binary_request" ref="yrmcds::memcache::binary_request#yrmcds::memcache::binary_request">
+        <brief>Binary request parser</brief>
+      </class>
+      <class name="binary_response" ref="yrmcds::memcache::binary_response#yrmcds::memcache::binary_response">
+        <brief>Binary response sender.</brief>
+      </class>
+    </namespace>
+    <class name="config" ref="yrmcds::config#yrmcds::config">
+      <brief>Configurations for yrmcds.</brief>
+      <struct name="bad_config" ref="yrmcds::config::bad_config#yrmcds::config::bad_config" />
+    </class>
+    <struct name="statistics" ref="yrmcds::statistics#yrmcds::statistics">
+      <brief>statistics counters.</brief>
+    </struct>
+    <class name="tempfile" ref="yrmcds::tempfile#yrmcds::tempfile">
+      <brief>A temporary file abstraction.</brief>
+    </class>
+    <class name="object" ref="yrmcds::object#yrmcds::object">
+      <brief>Object in the hash table.</brief>
+      <struct name="not_a_number" ref="yrmcds::object::not_a_number#yrmcds::object::not_a_number">
+        <brief>Exception thrown by <ref ref="yrmcds::object#yrmcds::object::incr">incr</ref> or <ref ref="yrmcds::object#yrmcds::object::decr">decr</ref>.</brief>
+      </struct>
+    </class>
+    <class name="gc_thread" ref="yrmcds::gc_thread#yrmcds::gc_thread" />
+    <class name="worker" ref="yrmcds::worker#yrmcds::worker">
+      <brief>Worker thread and its data structures.</brief>
+    </class>
+    <class name="sync_request" ref="yrmcds::sync_request#yrmcds::sync_request" />
+    <class name="syncer" ref="yrmcds::syncer#yrmcds::syncer" />
+    <class name="server" ref="yrmcds::server#yrmcds::server">
+      <brief>The yrmcds server</brief>
+    </class>
+    <class name="memcache_socket" ref="yrmcds::memcache_socket#yrmcds::memcache_socket" />
+    <class name="repl_socket" ref="yrmcds::repl_socket#yrmcds::repl_socket" />
+    <class name="repl_client_socket" ref="yrmcds::repl_client_socket#yrmcds::repl_client_socket" />
+  </namespace>
+  <namespace name="cybozu" ref="cybozu#cybozu">
+    <brief>General utilities.</brief>
+    <namespace name="test" ref="cybozu::test#cybozu::test">
+      <class name="AutoRun" ref="cybozu::test::AutoRun#cybozu::test::AutoRun" />
+    </namespace>
+    <class name="config_parser" ref="cybozu::config_parser#cybozu::config_parser">
+      <brief>Parse configuration files.</brief>
+      <struct name="parse_error" ref="cybozu::config_parser::parse_error#cybozu::config_parser::parse_error">
+        <brief>exception for invalid file format.</brief>
+      </struct>
+      <struct name="not_found" ref="cybozu::config_parser::not_found#cybozu::config_parser::not_found">
+        <brief>exception for key not found error.</brief>
+      </struct>
+      <struct name="illegal_value" ref="cybozu::config_parser::illegal_value#cybozu::config_parser::illegal_value">
+        <brief>exception for illegal value error.</brief>
+      </struct>
+    </class>
+    <class name="dynbuf" ref="cybozu::dynbuf#cybozu::dynbuf">
+      <brief>A fast, dynamic-sized char buffer.</brief>
+    </class>
+    <class name="demangler" ref="cybozu::demangler#cybozu::demangler">
+      <brief>Demangle C++ symbol names.</brief>
+    </class>
+    <class name="hash_key" ref="cybozu::hash_key#cybozu::hash_key">
+      <brief>Key class for <ref ref="cybozu::hash_map#cybozu::hash_map">hash_map</ref>.</brief>
+    </class>
+    <classtemplate name="hash_map" ref="cybozu::hash_map#cybozu::hash_map">
+      <brief>Highly concurrent object hash map.</brief>
+      <class name="bucket" ref="cybozu::hash_map::bucket#cybozu::hash_map::bucket">
+        <brief>Hash map bucket.</brief>
+      </class>
+    </classtemplate>
+    <class name="ip_address" ref="cybozu::ip_address#cybozu::ip_address">
+      <brief>Abstract IP address.</brief>
+      <struct name="bad_address" ref="cybozu::ip_address::bad_address#cybozu::ip_address::bad_address" />
+    </class>
+    <class name="logstream" ref="cybozu::logstream#cybozu::logstream">
+      <brief>Output stream to the logger.</brief>
+    </class>
+    <class name="logger" ref="cybozu::logger#cybozu::logger">
+      <brief>A thread-safe logger.</brief>
+    </class>
+    <class name="spinlock" ref="cybozu::spinlock#cybozu::spinlock">
+      <brief>A simple spinlock.</brief>
+    </class>
+    <class name="reactor" ref="cybozu::reactor#cybozu::reactor">
+      <brief>The reactor.</brief>
+    </class>
+    <class name="resource" ref="cybozu::resource#cybozu::resource">
+      <brief>An abstraction of a file descriptor.</brief>
+    </class>
+    <class name="signal_reader" ref="cybozu::signal_reader#cybozu::signal_reader">
+      <brief>A <ref ref="cybozu::resource#cybozu::resource">resource</ref> subclass for [`signalfd`](http://manpages.ubuntu.com/manpages/precise/en/man2/signalfd.2.html).</brief>
+    </class>
+    <class name="tcp_socket" ref="cybozu::tcp_socket#cybozu::tcp_socket">
+      <brief>A <ref ref="cybozu::resource#cybozu::resource">resource</ref> subclass for connected TCP sockets.</brief>
+    </class>
+    <class name="tcp_server_socket" ref="cybozu::tcp_server_socket#cybozu::tcp_server_socket">
+      <brief>A <ref ref="cybozu::resource#cybozu::resource">resource</ref> subclass to accept new TCP connections.</brief>
+    </class>
+    <classtemplate name="thread_base" ref="cybozu::thread_base#cybozu::thread_base">
+      <brief>A CRTP template wrapping std::thread.</brief>
+    </classtemplate>
+  </namespace>
+  <function id="main" name="main">
+    <return>
+      <type builtin="yes" name="int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="main::argc" name="argc">
+      <type builtin="yes" name="int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="main::argv" name="argv">
+      <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </function>
+</index>

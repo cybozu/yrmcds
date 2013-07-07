@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::logger" name="logger">
+  <brief>A thread-safe logger.</brief>
+  <doc>A simple thread-safe logger.  By default, this logger outputs
+logs to the standard error.</doc>
+  <constructor abstract="yes" id="cybozu::logger::logger" name="logger">
+    <argument id="cybozu::logger::logger::" name="">
+      <type name="logger" qualifier="const &amp;" ref="cybozu::logger#cybozu::logger" />
+    </argument>
+  </constructor>
+  <destructor id="cybozu::logger::~logger" name="~logger">
+    <brief>fsync and close the log file.</brief>
+  </destructor>
+  <method id="cybozu::logger::instance" name="instance" static="yes">
+    <brief>Return the singleton.</brief>
+    <return>
+      <doc><ref ref="cybozu::logger#cybozu::logger::logger">logger</ref> and <ref ref="cybozu::logger#cybozu::logger::logger">logger</ref> object.</doc>
+      <type name="logger" qualifier="&amp;" ref="cybozu::logger#cybozu::logger" />
+    </return>
+  </method>
+  <method abstract="yes" id="cybozu::logger::operator=" name="operator=">
+    <return>
+      <type name="logger" qualifier="&amp;" ref="cybozu::logger#cybozu::logger" />
+    </return>
+    <argument id="cybozu::logger::operator=::" name="">
+      <type name="logger" qualifier="const &amp;" ref="cybozu::logger#cybozu::logger" />
+    </argument>
+  </method>
+  <method id="cybozu::logger::threshold" name="threshold" static="yes">
+    <return>
+      <type name="severity" ref="cybozu#cybozu::severity" />
+    </return>
+  </method>
+  <method id="cybozu::logger::set_threshold" name="set_threshold" static="yes">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::logger::set_threshold::new_threshold" name="new_threshold">
+      <type name="severity" ref="cybozu#cybozu::severity" />
+    </argument>
+  </method>
+  <method id="cybozu::logger::open" name="open">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::logger::open::path" name="path">
+      <type name="std::string" qualifier="const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::logger::reopen" name="reopen">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="cybozu::logger::close" name="close">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="cybozu::logger::log" name="log">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::logger::log::msg" name="msg">
+      <type name="std::string" qualifier="const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::logger::error" name="error" static="yes">
+    <return>
+      <type name="logstream" ref="cybozu::logstream#cybozu::logstream" />
+    </return>
+  </method>
+  <method id="cybozu::logger::warning" name="warning" static="yes">
+    <return>
+      <type name="logstream" ref="cybozu::logstream#cybozu::logstream" />
+    </return>
+  </method>
+  <method id="cybozu::logger::info" name="info" static="yes">
+    <return>
+      <type name="logstream" ref="cybozu::logstream#cybozu::logstream" />
+    </return>
+  </method>
+  <method id="cybozu::logger::debug" name="debug" static="yes">
+    <return>
+      <type name="logstream" ref="cybozu::logstream#cybozu::logstream" />
+    </return>
+  </method>
+</class>

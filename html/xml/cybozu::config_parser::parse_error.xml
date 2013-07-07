@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="cybozu::config_parser::parse_error" name="parse_error">
+  <brief>exception for invalid file format.</brief>
+  <base access="public">
+    <type name="std::runtime_error" />
+  </base>
+  <constructor id="cybozu::config_parser::parse_error::parse_error" name="parse_error">
+    <argument id="cybozu::config_parser::parse_error::parse_error::path" name="path">
+      <type name="std::string" qualifier="const &amp;" />
+    </argument>
+    <argument id="cybozu::config_parser::parse_error::parse_error::lineno" name="lineno">
+      <type builtin="yes" name="unsigned int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </constructor>
+</struct>

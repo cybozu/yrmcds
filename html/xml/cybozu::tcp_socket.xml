@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::tcp_socket" name="tcp_socket">
+  <brief>A <ref ref="cybozu::resource#cybozu::resource">resource</ref> subclass for connected TCP sockets.</brief>
+  <doc>This is an abstract base class implementing <ref ref="cybozu::resource#cybozu::resource::on_writable">resource::on_writable</ref>
+and provides <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::send">send</ref>, <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::sendv">sendv</ref>, <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::send_close">send_close</ref>, and <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::sendv_close">sendv_close</ref> member
+functions for connected TCP sockets.
+
+Derived classes still need to implement <ref ref="cybozu::resource#cybozu::resource::on_readable">resource::on_readable</ref>.</doc>
+  <base access="public">
+    <type name="resource" ref="cybozu::resource#cybozu::resource" />
+    <brief>An abstraction of a file descriptor.</brief>
+  </base>
+  <subclass access="public" name="yrmcds::memcache_socket" ref="yrmcds::memcache_socket#yrmcds::memcache_socket" />
+  <subclass access="public" name="yrmcds::repl_client_socket" ref="yrmcds::repl_client_socket#yrmcds::repl_client_socket" />
+  <subclass access="public" name="yrmcds::repl_socket" ref="yrmcds::repl_socket#yrmcds::repl_socket" />
+  <variable id="cybozu::tcp_socket::MAX_IOVCNT" name="MAX_IOVCNT">
+    <brief>The maximum size of <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::iovec">iovec</ref> array for <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::sendv">sendv</ref>.</brief>
+    <type builtin="yes" name="int" qualifier="const" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <struct id="cybozu::tcp_socket::iovec" name="iovec">
+    <brief>struct for <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::sendv">sendv</ref> and <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::sendv_close">sendv_close</ref>.</brief>
+    <field id="cybozu::tcp_socket::iovec::p" name="p">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </field>
+    <field id="cybozu::tcp_socket::iovec::len" name="len">
+      <type name="std::size_t" />
+    </field>
+  </struct>
+  <constructor abstract="yes" id="cybozu::tcp_socket::tcp_socket" name="tcp_socket">
+    <brief>Construct an already connected socket.</brief>
+    <doc>Construct a socket resource with a connected socket file descriptor.
+The socket should already be set non-blocking.</doc>
+    <argument id="cybozu::tcp_socket::tcp_socket::fd" name="fd">
+      <doc>A file descriptor of a connected socket.</doc>
+      <type builtin="yes" name="int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::tcp_socket::tcp_socket::bufcnt" name="bufcnt">
+      <doc>The number of 1 MiB buffers for pending send data.</doc>
+      <type builtin="yes" name="unsigned int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </constructor>
+  <destructor id="cybozu::tcp_socket::~tcp_socket" name="~tcp_socket" virtual="yes" />
+  <method id="cybozu::tcp_socket::send" name="send">
+    <brief>Atomically send data.</brief>
+    <doc>This function sends a chunk of data atomically.  The reactor
+thread should not call this, or it may be blocked forever.
+
+</doc>
+    <return>
+      <doc>`true` if this socket is valid, `false` otherwise.</doc>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::tcp_socket::send::p" name="p">
+      <doc>Data to be sent.</doc>
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::tcp_socket::send::len" name="len">
+      <doc>Length of data starting from `p`.</doc>
+      <type name="std::size_t" />
+    </argument>
+    <argument id="cybozu::tcp_socket::send::flush" name="flush">
+      <doc>If `true`, the kernel send buffer will be flushed.</doc>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method id="cybozu::tcp_socket::sendv" name="sendv">
+    <brief>Atomically send multiple data.</brief>
+    <doc>This function sends a chunk of data atomically.  The reactor
+thread should not call this, or it may be blocked forever.
+
+</doc>
+    <return>
+      <doc>`true` if this socket is valid, `false` otherwise.</doc>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::tcp_socket::sendv::iov" name="iov">
+      <doc>Array of <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::iovec">iovec</ref>.</doc>
+      <type name="iovec" qualifier="const *" ref="cybozu::tcp_socket#cybozu::tcp_socket::iovec" />
+    </argument>
+    <argument id="cybozu::tcp_socket::sendv::iovcnt" name="iovcnt">
+      <doc>Number of elements in `iov`.</doc>
+      <type builtin="yes" name="int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::tcp_socket::sendv::flush" name="flush">
+      <doc>If `true`, the kernel send buffer will be flushed.</doc>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method id="cybozu::tcp_socket::send_close" name="send_close">
+    <brief>Atomically send data, then close the socket.</brief>
+    <doc>This function sends a chunk of data atomically.  The socket
+will be closed after data are sent.  The reactor thread should
+not call this, or it may be blocked forever.
+
+</doc>
+    <return>
+      <doc>`true` if this socket is valid, `false` otherwise.</doc>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::tcp_socket::send_close::p" name="p">
+      <doc>Data to be sent.</doc>
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::tcp_socket::send_close::len" name="len">
+      <doc>Length of data starting from `p`.</doc>
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method id="cybozu::tcp_socket::sendv_close" name="sendv_close">
+    <brief>Atomically send multiple data, then close the socket.</brief>
+    <doc>This function sends a chunk of data atomically.  The socket
+will be closed after data are sent.  The reactor thread should
+not call this, or it may be blocked forever.
+
+</doc>
+    <return>
+      <doc>`true` if this socket is valid, `false` otherwise.</doc>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::tcp_socket::sendv_close::iov" name="iov">
+      <doc>Array of <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::iovec">iovec</ref>.</doc>
+      <type name="iovec" qualifier="const *" ref="cybozu::tcp_socket#cybozu::tcp_socket::iovec" />
+    </argument>
+    <argument id="cybozu::tcp_socket::sendv_close::iovcnt" name="iovcnt">
+      <doc>Number of elements in `iov`.</doc>
+      <type builtin="yes" name="int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+</class>

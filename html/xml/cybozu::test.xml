@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='utf-8'?>
+<namespace id="cybozu::test" name="test">
+  <variable id="cybozu::test::autoRun" name="autoRun">
+    <type name="AutoRun" qualifier="&amp;" ref="cybozu::test::AutoRun#cybozu::test::AutoRun" />
+  </variable>
+  <class name="AutoRun" ref="cybozu::test::AutoRun#cybozu::test::AutoRun" />
+  <function id="cybozu::test::test" name="test">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::test::ret" name="ret">
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::test::msg" name="msg">
+      <type name="std::string" qualifier="const &amp;" />
+    </argument>
+    <argument id="cybozu::test::test::param" name="param">
+      <type name="std::string" qualifier="const &amp;" />
+    </argument>
+    <argument id="cybozu::test::test::file" name="file">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::test::line" name="line">
+      <type builtin="yes" name="int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </function>
+  <functiontemplate id="cybozu::test::isEqual" name="isEqual">
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::isEqual::lhs" name="lhs">
+      <type name="" qualifier="const &amp;" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::isEqual::rhs" name="rhs">
+      <type name="" qualifier="const &amp;" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </functiontemplate>
+  <function id="cybozu::test::isEqual" name="isEqual">
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::isEqual::lhs" name="lhs">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::isEqual::rhs" name="rhs">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </function>
+  <function id="cybozu::test::isEqual" name="isEqual">
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::isEqual::lhs" name="lhs">
+      <type builtin="yes" name="char" qualifier="*" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::isEqual::rhs" name="rhs">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </function>
+  <function id="cybozu::test::isEqual" name="isEqual">
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::isEqual::lhs" name="lhs">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::isEqual::rhs" name="rhs">
+      <type builtin="yes" name="char" qualifier="*" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </function>
+  <function id="cybozu::test::isEqual" name="isEqual">
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::isEqual::lhs" name="lhs">
+      <type builtin="yes" name="char" qualifier="*" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::isEqual::rhs" name="rhs">
+      <type builtin="yes" name="char" qualifier="*" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </function>
+  <function id="cybozu::test::isEqual" name="isEqual">
+    <brief>avoid to compare float directly</brief>
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::isEqual::lhs" name="lhs">
+      <type builtin="yes" name="float" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::isEqual::rhs" name="rhs">
+      <type builtin="yes" name="float" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </function>
+  <function id="cybozu::test::isEqual" name="isEqual">
+    <brief>avoid to compare double directly</brief>
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::isEqual::lhs" name="lhs">
+      <type builtin="yes" name="double" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::isEqual::rhs" name="rhs">
+      <type builtin="yes" name="double" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </function>
+</namespace>

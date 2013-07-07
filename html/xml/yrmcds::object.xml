@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::object" name="object">
+  <brief>Object in the hash table.</brief>
+  <doc>This class represents an object in the hash table.
+Large objects are stored in temporary files.</doc>
+  <struct name="not_a_number" ref="yrmcds::object::not_a_number#yrmcds::object::not_a_number">
+    <brief>Exception thrown by <ref ref="yrmcds::object#yrmcds::object::incr">incr</ref> or <ref ref="yrmcds::object#yrmcds::object::decr">decr</ref>.</brief>
+  </struct>
+  <constructor abstract="yes" id="yrmcds::object::object" name="object">
+    <argument id="yrmcds::object::object::p" name="p">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::object::object::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+    <argument id="yrmcds::object::object::flags_" name="flags_">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="yrmcds::object::object::exptime" name="exptime">
+      <type name="time_t" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::object::object" name="object">
+    <argument id="yrmcds::object::object::initial" name="initial">
+      <type name="uint64_t" />
+    </argument>
+    <argument id="yrmcds::object::object::exptime" name="exptime">
+      <type name="time_t" />
+    </argument>
+  </constructor>
+  <method abstract="yes" id="yrmcds::object::set" name="set">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::object::set::p" name="p">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::object::set::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+    <argument id="yrmcds::object::set::flags_" name="flags_">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="yrmcds::object::set::exptime" name="exptime">
+      <type name="time_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::object::append" name="append">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::object::append::p" name="p">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::object::append::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::object::prepend" name="prepend">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::object::prepend::p" name="p">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::object::prepend::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::object::incr" name="incr">
+    <return>
+      <type name="uint64_t" />
+    </return>
+    <argument id="yrmcds::object::incr::n" name="n">
+      <type name="uint64_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::object::decr" name="decr">
+    <return>
+      <type name="uint64_t" />
+    </return>
+    <argument id="yrmcds::object::decr::n" name="n">
+      <type name="uint64_t" />
+    </argument>
+  </method>
+  <method id="yrmcds::object::touch" name="touch">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::object::touch::exptime" name="exptime">
+      <type name="time_t" />
+    </argument>
+  </method>
+  <method id="yrmcds::object::data" name="data">
+    <return>
+      <type name="cybozu::dynbuf" qualifier="const &amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </return>
+    <argument id="yrmcds::object::data::buf" name="buf">
+      <type name="cybozu::dynbuf" qualifier="&amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+  </method>
+  <method id="yrmcds::object::size" name="size">
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method id="yrmcds::object::flags" name="flags">
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method id="yrmcds::object::cas_unique" name="cas_unique">
+    <return>
+      <type name="uint64_t" />
+    </return>
+  </method>
+  <method id="yrmcds::object::exptime" name="exptime">
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method id="yrmcds::object::expired" name="expired">
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::object::age" name="age">
+    <return>
+      <type builtin="yes" name="unsigned int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::object::survive" name="survive">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+</class>

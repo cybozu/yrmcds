@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::worker" name="worker">
+  <brief>Worker thread and its data structures.</brief>
+  <base access="public">
+    <type name="cybozu::thread_base&lt;yrmcds::worker, 1&gt;" />
+  </base>
+  <constructor abstract="yes" id="yrmcds::worker::worker" name="worker">
+    <argument id="yrmcds::worker::worker::m" name="m">
+      <type name="cybozu::hash_map&lt;yrmcds::object&gt;" qualifier="&amp;" />
+    </argument>
+    <argument id="yrmcds::worker::worker::get_slaves" name="get_slaves">
+      <type name="slave_copier" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::worker::worker" name="worker">
+    <argument id="yrmcds::worker::worker::" name="">
+      <type name="worker" qualifier="const &amp;" ref="yrmcds::worker#yrmcds::worker" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::worker::worker" name="worker">
+    <argument id="yrmcds::worker::worker::" name="">
+      <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </constructor>
+  <destructor abstract="yes" id="yrmcds::worker::~worker" name="~worker" />
+  <method abstract="yes" id="yrmcds::worker::operator=" name="operator=">
+    <return>
+      <type name="worker" qualifier="&amp;" ref="yrmcds::worker#yrmcds::worker" />
+    </return>
+    <argument id="yrmcds::worker::operator=::" name="">
+      <type name="worker" qualifier="const &amp;" ref="yrmcds::worker#yrmcds::worker" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::worker::operator=" name="operator=">
+    <return>
+      <type name="worker" qualifier="&amp;" ref="yrmcds::worker#yrmcds::worker" />
+    </return>
+    <argument id="yrmcds::worker::operator=::" name="">
+      <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::worker::run" name="run">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::worker::is_running" name="is_running">
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::worker::wait" name="wait">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::worker::get_buffer" name="get_buffer">
+    <return>
+      <type name="cybozu::dynbuf" qualifier="&amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </return>
+  </method>
+  <method id="yrmcds::worker::post_job" name="post_job">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::worker::post_job::s" name="s">
+      <type name="cybozu::tcp_socket" qualifier="*" ref="cybozu::tcp_socket#cybozu::tcp_socket" />
+    </argument>
+    <argument id="yrmcds::worker::post_job::saver" name="saver">
+      <type name="std::function&lt;void (const char *, unsigned long)&gt;" />
+    </argument>
+  </method>
+  <method id="yrmcds::worker::stop" name="stop">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+</class>

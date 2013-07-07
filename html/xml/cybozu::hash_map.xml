@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='utf-8'?>
+<classtemplate id="cybozu::hash_map" name="hash_map">
+  <brief>Highly concurrent object hash map.</brief>
+  <doc>Keys for this hash map are <ref ref="cybozu::hash_key#cybozu::hash_key">hash_key</ref> whereas objects are of type `T`.
+
+Each bucket in the hash map has its unique mutex to guard itself.
+This design reduces contensions between threads drastically in exchange
+for some functions such as dynamic resizing of the number of buckets.</doc>
+  <class name="bucket" ref="cybozu::hash_map::bucket#cybozu::hash_map::bucket">
+    <brief>Hash map bucket.</brief>
+  </class>
+  <typedef name="handler" ref="cybozu::hash_map::handler#cybozu::hash_map::handler">
+    <type name="std::function&lt;_Signature&gt;" />
+  </typedef>
+  <typedef id="cybozu::hash_map::creator" name="creator">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </typedef>
+  <constructor id="cybozu::hash_map::hash_map&lt;T&gt;" name="hash_map&lt;T&gt;">
+    <argument id="cybozu::hash_map::hash_map&lt;T&gt;::buckets" name="buckets">
+      <type builtin="yes" name="unsigned int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </constructor>
+  <method id="cybozu::hash_map::apply_nolock" name="apply_nolock">
+    <brief>Handle or insert an object.</brief>
+    <doc>This function can be used to handle an existing object, or
+to insert a new object when such an object does not exist.
+
+If `handler` is not `nullptr` and there is no existing object
+for `key`, `false` is returned.  If `creator` is not `nullptr`
+and an object for `key` exists, `false` is returned.
+
+`handler` can return `false` if it failed to handle the object.
+Otherwise, `handler` should return `true`.
+
+</doc>
+    <return>
+      <doc>`true` if succeeded, `false` otherwise.</doc>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::hash_map::apply_nolock::key" name="key">
+      <doc>The object's key.</doc>
+      <type name="hash_key" qualifier="const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="cybozu::hash_map::apply_nolock::h" name="h">
+      <doc>A function to handle an existing object.</doc>
+      <type name="hash_map&lt;T&gt;::handler" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::hash_map::apply_nolock::c" name="c">
+      <doc>A function to create a new object.</doc>
+      <type name="hash_map&lt;T&gt;::creator" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::apply" name="apply">
+    <brief>Thread-safe <ref ref="cybozu::hash_map#cybozu::hash_map::apply_nolock">apply_nolock</ref>.</brief>
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::hash_map::apply::key" name="key">
+      <type name="hash_key" qualifier="const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="cybozu::hash_map::apply::h" name="h">
+      <type name="hash_map&lt;T&gt;::handler" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::hash_map::apply::c" name="c">
+      <type name="hash_map&lt;T&gt;::creator" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::remove_nolock" name="remove_nolock">
+    <brief>Remove an object for `key`.</brief>
+    <doc>This removes an object associated with `key`.  If there is no
+object associated with `key`, return `false`.  If `callback`
+is not `nullptr`, it is called when an object is removed.
+
+</doc>
+    <return>
+      <doc>`true` if successfully removed, `false` otherwise.</doc>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::hash_map::remove_nolock::key" name="key">
+      <doc>The object's key.</doc>
+      <type name="hash_key" qualifier="const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="cybozu::hash_map::remove_nolock::callback" name="callback">
+      <doc>A function called when an object is removed.</doc>
+      <type name="std::function&lt;void (const cybozu::hash_key &amp;)&gt;" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::remove" name="remove">
+    <brief>Thread-safe <ref ref="cybozu::hash_map#cybozu::hash_map::remove_nolock">remove_nolock</ref>.</brief>
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::hash_map::remove::key" name="key">
+      <type name="hash_key" qualifier="const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="cybozu::hash_map::remove::callback" name="callback">
+      <type name="std::function&lt;void (const cybozu::hash_key &amp;)&gt;" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::bucket_count" name="bucket_count">
+    <brief> Bucket interfaces </brief>
+    <doc>Return the number of buckets in this hash map.</doc>
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method id="cybozu::hash_map::get_bucket" name="get_bucket">
+    <return>
+      <type name="hash_map&lt;T&gt;::bucket" qualifier="&amp;" ref="cybozu::hash_map::bucket#cybozu::hash_map::bucket" />
+    </return>
+    <argument id="cybozu::hash_map::get_bucket::key" name="key">
+      <type name="hash_key" qualifier="const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::begin" name="begin">
+    <return>
+      <type name="hash_map&lt;T&gt;::iterator" />
+    </return>
+  </method>
+  <method id="cybozu::hash_map::end" name="end">
+    <return>
+      <type name="hash_map&lt;T&gt;::iterator" />
+    </return>
+  </method>
+</classtemplate>

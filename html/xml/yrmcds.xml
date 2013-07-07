@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='utf-8'?>
+<namespace id="yrmcds" name="yrmcds">
+  <brief>Implementing yrmcds.</brief>
+  <variable id="yrmcds::DEFAULT_MEMCACHE_PORT" name="DEFAULT_MEMCACHE_PORT">
+    <type name="uint16_t" qualifier="const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_REPL_PORT" name="DEFAULT_REPL_PORT">
+    <type name="uint16_t" qualifier="const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_BUCKETS" name="DEFAULT_BUCKETS">
+    <type builtin="yes" name="unsigned int" qualifier="const" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_MAX_DATA_SIZE" name="DEFAULT_MAX_DATA_SIZE">
+    <type name="std::size_t" qualifier="const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_HEAP_DATA_LIMIT" name="DEFAULT_HEAP_DATA_LIMIT">
+    <type name="std::size_t" qualifier="const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_MEMORY_LIMIT" name="DEFAULT_MEMORY_LIMIT">
+    <type name="std::size_t" qualifier="const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_WORKER_THREADS" name="DEFAULT_WORKER_THREADS">
+    <type builtin="yes" name="int" qualifier="const" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_GC_INTERVAL" name="DEFAULT_GC_INTERVAL">
+    <type builtin="yes" name="unsigned int" qualifier="const" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_TMPDIR" name="DEFAULT_TMPDIR">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::MAX_KEY_LENGTH" name="MAX_KEY_LENGTH">
+    <type name="std::size_t" qualifier="const" />
+  </variable>
+  <variable id="yrmcds::MASTER_CHECKS" name="MASTER_CHECKS">
+    <brief>250 bytes</brief>
+    <type builtin="yes" name="int" qualifier="const" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::FLUSH_AGE" name="FLUSH_AGE">
+    <brief>wait 50 * 100ms = 5 seconds</brief>
+    <type builtin="yes" name="int" qualifier="const" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::MAX_RECVSIZE" name="MAX_RECVSIZE">
+    <type name="std::size_t" qualifier="const" />
+  </variable>
+  <variable id="yrmcds::WORKER_BUFSIZE" name="WORKER_BUFSIZE">
+    <brief>2 MiB</brief>
+    <type name="std::size_t" qualifier="const" />
+  </variable>
+  <variable id="yrmcds::MAX_WORKERS" name="MAX_WORKERS">
+    <brief>5 MiB</brief>
+    <type builtin="yes" name="int" qualifier="const" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::MAX_REQUEST_LENGTH" name="MAX_REQUEST_LENGTH">
+    <type name="std::size_t" qualifier="const" />
+  </variable>
+  <variable id="yrmcds::MAX_SLAVES" name="MAX_SLAVES">
+    <brief>30 MiB</brief>
+    <type builtin="yes" name="int" qualifier="const" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::VERSION" name="VERSION">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::g_config" name="g_config">
+    <brief>Global configuration object.</brief>
+    <type name="config" ref="yrmcds::config#yrmcds::config" />
+  </variable>
+  <variable id="yrmcds::g_stats" name="g_stats">
+    <type name="statistics" ref="yrmcds::statistics#yrmcds::statistics" />
+  </variable>
+  <namespace name="memcache" ref="yrmcds::memcache#yrmcds::memcache" />
+  <class name="config" ref="yrmcds::config#yrmcds::config">
+    <brief>Configurations for yrmcds.</brief>
+  </class>
+  <struct name="statistics" ref="yrmcds::statistics#yrmcds::statistics">
+    <brief>statistics counters.</brief>
+  </struct>
+  <class name="tempfile" ref="yrmcds::tempfile#yrmcds::tempfile">
+    <brief>A temporary file abstraction.</brief>
+  </class>
+  <class name="object" ref="yrmcds::object#yrmcds::object">
+    <brief>Object in the hash table.</brief>
+  </class>
+  <class name="gc_thread" ref="yrmcds::gc_thread#yrmcds::gc_thread" />
+  <class name="worker" ref="yrmcds::worker#yrmcds::worker">
+    <brief>Worker thread and its data structures.</brief>
+  </class>
+  <class name="sync_request" ref="yrmcds::sync_request#yrmcds::sync_request" />
+  <class name="syncer" ref="yrmcds::syncer#yrmcds::syncer" />
+  <class name="server" ref="yrmcds::server#yrmcds::server">
+    <brief>The yrmcds server</brief>
+  </class>
+  <class name="memcache_socket" ref="yrmcds::memcache_socket#yrmcds::memcache_socket" />
+  <class name="repl_socket" ref="yrmcds::repl_socket#yrmcds::repl_socket" />
+  <class name="repl_client_socket" ref="yrmcds::repl_client_socket#yrmcds::repl_client_socket" />
+  <function id="yrmcds::mkstemp_wrap" name="mkstemp_wrap">
+    <brief>A helper function for <ref ref="yrmcds::tempfile#yrmcds::tempfile">tempfile</ref>.</brief>
+    <return>
+      <type builtin="yes" name="int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::mkstemp_wrap::tempdir" name="tempdir">
+      <type name="std::string" qualifier="const &amp;" />
+    </argument>
+  </function>
+  <function id="yrmcds::repl_object" name="repl_object">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::repl_object::slaves" name="slaves">
+      <type name="std::vector&lt;cybozu::tcp_socket *, std::allocator&lt;cybozu::tcp_socket *&gt; &gt;" qualifier="const &amp;" />
+    </argument>
+    <argument id="yrmcds::repl_object::key" name="key">
+      <type name="cybozu::hash_key" qualifier="const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="yrmcds::repl_object::obj" name="obj">
+      <type name="object" qualifier="const &amp;" ref="yrmcds::object#yrmcds::object" />
+    </argument>
+    <argument id="yrmcds::repl_object::flush" name="flush">
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </function>
+  <function id="yrmcds::repl_delete" name="repl_delete">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::repl_delete::slaves" name="slaves">
+      <type name="std::vector&lt;cybozu::tcp_socket *, std::allocator&lt;cybozu::tcp_socket *&gt; &gt;" qualifier="const &amp;" />
+    </argument>
+    <argument id="yrmcds::repl_delete::key" name="key">
+      <type name="cybozu::hash_key" qualifier="const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+  </function>
+  <function id="yrmcds::repl_recv" name="repl_recv">
+    <return>
+      <type name="std::size_t" />
+    </return>
+    <argument id="yrmcds::repl_recv::p" name="p">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::repl_recv::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+    <argument id="yrmcds::repl_recv::hash" name="hash">
+      <type name="cybozu::hash_map&lt;yrmcds::object&gt;" qualifier="&amp;" />
+    </argument>
+  </function>
+</namespace>

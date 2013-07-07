@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<category id="Future Plans" name="Future Plans">
+  <brief>List of future plans.</brief>
+  <doc>Future Plans
+------------
+
+* Randomize hash seed to prevent some kind of attacks.  
+    Or should [MurmurHash][murmur] be replaced with [SipHash][siphash]?  
+    &lt;p /&gt;
+
+* Replicate CAS unique values.  
+    Currently, yrmcds does not replicate CAS values, which may lead to
+    **false-positives** as well as (harmless) false-negatives.  
+    &lt;p /&gt;
+
+* Improve <ref ref="cybozu::hash_map#cybozu::hash_map">cybozu::hash_map</ref>.  
+    Possible optimizations are:
+    - Use a simple linked-list in a bucket instead of std::vector.
+    - Require move-ability of objects to eliminate std::unique_ptr.
+    - Pass function objects by reference.  
+    &lt;p /&gt;
+
+* Allow eviction to be disabled and honor the memory limit.  
+    This is a requirement for in-memory database.  
+    &lt;p /&gt;
+
+* Save/load cached objects at program exit/startup.  
+    This is another requirement for in-memory database.  
+    &lt;p /&gt;
+
+* Save snapshots periodically.  
+    This can be done by [forking][fork] a child process periodically.  
+    To workaround multi-threading issues, we have already prepared:
+    - <ref ref="cybozu::hash_map#cybozu::hash_map">cybozu::hash_map</ref> equips no-locking member functions.
+    - New file descriptors are created with close-on-exec flag set.  
+    &lt;p /&gt;
+
+
+[murmur]: https://code.google.com/p/smhasher/wiki/MurmurHash3
+[siphash]: https://131002.net/siphash/
+[fork]: http://manpages.ubuntu.com/manpages/precise/en/man2/fork.2.html
+[keepalived]: http://www.keepalived.org/</doc>
+</category>

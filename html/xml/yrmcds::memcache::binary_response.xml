@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache::binary_response" name="binary_response">
+  <brief>Binary response sender.</brief>
+  <constructor id="yrmcds::memcache::binary_response::binary_response" name="binary_response">
+    <argument id="yrmcds::memcache::binary_response::binary_response::sock" name="sock">
+      <type name="cybozu::tcp_socket" qualifier="&amp;" ref="cybozu::tcp_socket#cybozu::tcp_socket" />
+    </argument>
+    <argument id="yrmcds::memcache::binary_response::binary_response::req" name="req">
+      <type name="binary_request" qualifier="const &amp;" ref="yrmcds::memcache::binary_request#yrmcds::memcache::binary_request" />
+    </argument>
+  </constructor>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::error" name="error">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::memcache::binary_response::error::status" name="status">
+      <type name="binary_status" ref="yrmcds::memcache#yrmcds::memcache::binary_status" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::success" name="success">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::get" name="get">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::memcache::binary_response::get::flags" name="flags">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="yrmcds::memcache::binary_response::get::data" name="data">
+      <type name="cybozu::dynbuf" qualifier="const &amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+    <argument id="yrmcds::memcache::binary_response::get::cas" name="cas">
+      <type name="uint64_t" />
+    </argument>
+    <argument id="yrmcds::memcache::binary_response::get::flush" name="flush">
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::memcache::binary_response::get::key" name="key">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::memcache::binary_response::get::key_len" name="key_len">
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::set" name="set">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::memcache::binary_response::set::cas" name="cas">
+      <type name="uint64_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::incdec" name="incdec">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::memcache::binary_response::incdec::value" name="value">
+      <type name="uint64_t" />
+    </argument>
+    <argument id="yrmcds::memcache::binary_response::incdec::cas" name="cas">
+      <type name="uint64_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::quit" name="quit">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::stats_settings" name="stats_settings">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::stats_items" name="stats_items">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::stats_sizes" name="stats_sizes">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::stats_general" name="stats_general">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::memcache::binary_response::stats_general::n_slaves" name="n_slaves">
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::binary_response::version" name="version">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+</class>

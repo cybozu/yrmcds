@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::server" name="server">
+  <brief>The yrmcds server</brief>
+  <constructor id="yrmcds::server::server" name="server" />
+  <method id="yrmcds::server::is_master" name="is_master" static="yes">
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::server::serve" name="serve">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+</class>

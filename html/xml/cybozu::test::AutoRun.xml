@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="cybozu::test::AutoRun" name="AutoRun">
+  <constructor id="cybozu::test::AutoRun::AutoRun" name="AutoRun" />
+  <method id="cybozu::test::AutoRun::setup" name="setup">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::AutoRun::setup::init" name="init">
+      <type name="Func" ref="cybozu::test::AutoRun#cybozu::test::AutoRun::Func" />
+    </argument>
+    <argument id="cybozu::test::AutoRun::setup::term" name="term">
+      <type name="Func" ref="cybozu::test::AutoRun#cybozu::test::AutoRun::Func" />
+    </argument>
+  </method>
+  <method id="cybozu::test::AutoRun::append" name="append">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::AutoRun::append::name" name="name">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::AutoRun::append::func" name="func">
+      <type name="Func" ref="cybozu::test::AutoRun#cybozu::test::AutoRun::Func" />
+    </argument>
+  </method>
+  <method id="cybozu::test::AutoRun::set" name="set">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::test::AutoRun::set::isOK" name="isOK">
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method id="cybozu::test::AutoRun::getBaseName" name="getBaseName">
+    <return>
+      <type name="std::string" />
+    </return>
+    <argument id="cybozu::test::AutoRun::getBaseName::name" name="name">
+      <type name="std::string" qualifier="const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::test::AutoRun::run" name="run">
+    <return>
+      <type name="ret_t" />
+    </return>
+    <argument id="cybozu::test::AutoRun::run::" name="">
+      <type builtin="yes" name="int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::test::AutoRun::run::argv" name="argv">
+      <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method id="cybozu::test::AutoRun::getInstance" name="getInstance" static="yes">
+    <return>
+      <type name="AutoRun" qualifier="&amp;" ref="cybozu::test::AutoRun#cybozu::test::AutoRun" />
+    </return>
+  </method>
+</class>

@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache::text_request" name="text_request">
+  <brief>Text request parser.</brief>
+  <variable id="yrmcds::memcache::text_request::eos" name="eos">
+    <brief>End of the key stream.</brief>
+    <type name="item" qualifier="const" />
+  </variable>
+  <constructor id="yrmcds::memcache::text_request::text_request" name="text_request">
+    <argument id="yrmcds::memcache::text_request::text_request::p" name="p">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::memcache::text_request::text_request::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+  </constructor>
+  <method id="yrmcds::memcache::text_request::length" name="length">
+    <brief>Return length of the request.</brief>
+    <doc>Return length of the request.
+If the request is incomplete, zero is returned.</doc>
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::command" name="command">
+    <brief>Return the command type.</brief>
+    <return>
+      <type name="text_command" ref="yrmcds::memcache#yrmcds::memcache::text_command" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::valid" name="valid">
+    <brief>Return `true` if the request can be parsed successfully.</brief>
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::no_reply" name="no_reply">
+    <brief>`true` if the command has "noreply" option.</brief>
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::key" name="key">
+    <brief>Return `key` sent with various commands.</brief>
+    <return>
+      <type name="item" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::flags" name="flags">
+    <brief>Return `flags` sent with storage commands.</brief>
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::exptime" name="exptime">
+    <brief>Return `exptime` sent with storage commands and TOUCH and FLUSH_ALL.</brief>
+    <return>
+      <type name="time_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::cas_unique" name="cas_unique">
+    <brief>Return `cas unique` sent with CAS command.</brief>
+    <return>
+      <type name="uint64_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::data" name="data">
+    <brief>Return data block sent with storage commands.</brief>
+    <return>
+      <type name="item" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::first_key" name="first_key">
+    <brief>Return `item` for the first key sent with GET or GETS.</brief>
+    <return>
+      <type name="item" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::next_key" name="next_key" static="yes">
+    <brief>Return `item` next to the `prev` key in GET or GETS commands.</brief>
+    <doc>If the item == text_request::eos, no more key is available.</doc>
+    <return>
+      <type name="item" />
+    </return>
+    <argument id="yrmcds::memcache::text_request::next_key::prev" name="prev">
+      <type name="item" qualifier="const &amp;" />
+    </argument>
+  </method>
+  <method id="yrmcds::memcache::text_request::value" name="value">
+    <brief>Return an unsigned 64bit integer value sent with INCR or DECR.</brief>
+    <return>
+      <type name="uint64_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::verbosity" name="verbosity">
+    <brief>Return the log verbosity sent with VERBOSITY.</brief>
+    <return>
+      <type name="cybozu::severity" ref="cybozu#cybozu::severity" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_request::stats" name="stats">
+    <brief>Return memcache stats category sent with STATS.</brief>
+    <return>
+      <type name="stats_t" ref="yrmcds::memcache#yrmcds::memcache::stats_t" />
+    </return>
+  </method>
+</class>

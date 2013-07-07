@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct abstract="true" id="yrmcds::statistics" name="statistics">
+  <brief>statistics counters.</brief>
+  <field id="yrmcds::statistics::objects" name="objects">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::objects_under_1k" name="objects_under_1k">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::objects_under_4k" name="objects_under_4k">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::objects_under_16k" name="objects_under_16k">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::objects_under_64k" name="objects_under_64k">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::objects_under_256k" name="objects_under_256k">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::objects_under_1m" name="objects_under_1m">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::objects_under_4m" name="objects_under_4m">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::objects_huge" name="objects_huge">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::used_memory" name="used_memory">
+    <brief> bucket statistics.  Updated at every GC. </brief>
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::statistics::conflicts" name="conflicts">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::gc_count" name="gc_count">
+    <brief> GC statistics. Updated at every GC, of course. </brief>
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::oldest_age" name="oldest_age">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::largest_object_size" name="largest_object_size">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::statistics::last_expirations" name="last_expirations">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::last_evictions" name="last_evictions">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::statistics::total_evictions" name="total_evictions">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::statistics::last_gc_elapsed" name="last_gc_elapsed">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::statistics::total_gc_elapsed" name="total_gc_elapsed">
+    <brief>micro seconds</brief>
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::statistics::total_objects" name="total_objects">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::statistics::current_time" name="current_time">
+    <type name="std::atomic&lt;long&gt;" />
+  </field>
+  <field id="yrmcds::statistics::flush_time" name="flush_time">
+    <type name="std::atomic&lt;long&gt;" />
+  </field>
+  <constructor id="yrmcds::statistics::statistics" name="statistics" />
+  <method abstract="yes" id="yrmcds::statistics::reset" name="reset">
+    <brief>Reset all counters.</brief>
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+</struct>

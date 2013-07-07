@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="cybozu::config_parser::not_found" name="not_found">
+  <brief>exception for key not found error.</brief>
+  <base access="public">
+    <type name="std::runtime_error" />
+  </base>
+  <constructor id="cybozu::config_parser::not_found::not_found" name="not_found">
+    <argument id="cybozu::config_parser::not_found::not_found::key" name="key">
+      <type name="std::string" qualifier="const &amp;" />
+    </argument>
+  </constructor>
+</struct>

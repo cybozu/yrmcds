@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache::text_response" name="text_response">
+  <brief>Text response sender.</brief>
+  <constructor id="yrmcds::memcache::text_response::text_response" name="text_response">
+    <argument id="yrmcds::memcache::text_response::text_response::sock" name="sock">
+      <type name="cybozu::tcp_socket" qualifier="&amp;" ref="cybozu::tcp_socket#cybozu::tcp_socket" />
+    </argument>
+  </constructor>
+  <method id="yrmcds::memcache::text_response::error" name="error">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_response::ok" name="ok">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_response::end" name="end">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_response::stored" name="stored">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_response::not_stored" name="not_stored">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_response::exists" name="exists">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_response::touched" name="touched">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_response::deleted" name="deleted">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::text_response::not_found" name="not_found">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::text_response::value" name="value">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::memcache::text_response::value::key" name="key">
+      <type name="cybozu::hash_key" qualifier="const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="yrmcds::memcache::text_response::value::flags" name="flags">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="yrmcds::memcache::text_response::value::data" name="data">
+      <type name="cybozu::dynbuf" qualifier="const &amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::text_response::value" name="value">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::memcache::text_response::value::key" name="key">
+      <type name="cybozu::hash_key" qualifier="const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="yrmcds::memcache::text_response::value::flags" name="flags">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="yrmcds::memcache::text_response::value::data" name="data">
+      <type name="cybozu::dynbuf" qualifier="const &amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+    <argument id="yrmcds::memcache::text_response::value::cas" name="cas">
+      <type name="uint64_t" />
+    </argument>
+  </method>
+  <method id="yrmcds::memcache::text_response::send" name="send">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::memcache::text_response::send::p" name="p">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::memcache::text_response::send::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+    <argument id="yrmcds::memcache::text_response::send::flush" name="flush">
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::text_response::stats_settings" name="stats_settings">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::text_response::stats_items" name="stats_items">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::text_response::stats_sizes" name="stats_sizes">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::text_response::stats_general" name="stats_general">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::memcache::text_response::stats_general::n_slaves" name="n_slaves">
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::text_response::version" name="version">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+</class>

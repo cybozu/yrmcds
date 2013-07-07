@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='utf-8'?>
+<namespace id="yrmcds::memcache" name="memcache">
+  <variable id="yrmcds::memcache::TEXT_ERROR" name="TEXT_ERROR">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::memcache::TEXT_OK" name="TEXT_OK">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::memcache::TEXT_STORED" name="TEXT_STORED">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::memcache::TEXT_NOT_STORED" name="TEXT_NOT_STORED">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::memcache::TEXT_EXISTS" name="TEXT_EXISTS">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::memcache::TEXT_NOT_FOUND" name="TEXT_NOT_FOUND">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::memcache::TEXT_TOUCHED" name="TEXT_TOUCHED">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::memcache::TEXT_DELETED" name="TEXT_DELETED">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::memcache::TEXT_END" name="TEXT_END">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <variable id="yrmcds::memcache::TEXT_VERSION" name="TEXT_VERSION">
+    <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+  </variable>
+  <class name="text_request" ref="yrmcds::memcache::text_request#yrmcds::memcache::text_request">
+    <brief>Text request parser.</brief>
+  </class>
+  <class name="text_response" ref="yrmcds::memcache::text_response#yrmcds::memcache::text_response">
+    <brief>Text response sender.</brief>
+  </class>
+  <class name="binary_request" ref="yrmcds::memcache::binary_request#yrmcds::memcache::binary_request">
+    <brief>Binary request parser</brief>
+  </class>
+  <class name="binary_response" ref="yrmcds::memcache::binary_response#yrmcds::memcache::binary_response">
+    <brief>Binary response sender.</brief>
+  </class>
+  <enum class="yes" id="yrmcds::memcache::stats_t" name="stats_t">
+    <brief>Possible stats categories.</brief>
+    <enumvalue id="yrmcds::memcache::stats_t::GENERAL" name="GENERAL" value="0" />
+    <enumvalue id="yrmcds::memcache::stats_t::SETTINGS" name="SETTINGS" value="1" />
+    <enumvalue id="yrmcds::memcache::stats_t::ITEMS" name="ITEMS" value="2" />
+    <enumvalue id="yrmcds::memcache::stats_t::SIZES" name="SIZES" value="3" />
+  </enum>
+  <enum class="yes" id="yrmcds::memcache::text_command" name="text_command">
+    <brief>Memcache text commands.</brief>
+    <enumvalue id="yrmcds::memcache::text_command::UNKNOWN" name="UNKNOWN" value="0" />
+    <enumvalue id="yrmcds::memcache::text_command::SET" name="SET" value="1" />
+    <enumvalue id="yrmcds::memcache::text_command::ADD" name="ADD" value="2" />
+    <enumvalue id="yrmcds::memcache::text_command::REPLACE" name="REPLACE" value="3" />
+    <enumvalue id="yrmcds::memcache::text_command::APPEND" name="APPEND" value="4" />
+    <enumvalue id="yrmcds::memcache::text_command::PREPEND" name="PREPEND" value="5" />
+    <enumvalue id="yrmcds::memcache::text_command::CAS" name="CAS" value="6" />
+    <enumvalue id="yrmcds::memcache::text_command::GET" name="GET" value="7" />
+    <enumvalue id="yrmcds::memcache::text_command::GETS" name="GETS" value="8" />
+    <enumvalue id="yrmcds::memcache::text_command::DELETE" name="DELETE" value="9" />
+    <enumvalue id="yrmcds::memcache::text_command::INCR" name="INCR" value="10" />
+    <enumvalue id="yrmcds::memcache::text_command::DECR" name="DECR" value="11" />
+    <enumvalue id="yrmcds::memcache::text_command::TOUCH" name="TOUCH" value="12" />
+    <enumvalue id="yrmcds::memcache::text_command::SLABS" name="SLABS" value="13" />
+    <enumvalue id="yrmcds::memcache::text_command::STATS" name="STATS" value="14" />
+    <enumvalue id="yrmcds::memcache::text_command::FLUSH_ALL" name="FLUSH_ALL" value="15" />
+    <enumvalue id="yrmcds::memcache::text_command::VERSION" name="VERSION" value="16" />
+    <enumvalue id="yrmcds::memcache::text_command::VERBOSITY" name="VERBOSITY" value="17" />
+    <enumvalue id="yrmcds::memcache::text_command::QUIT" name="QUIT" value="18" />
+  </enum>
+  <enum class="yes" id="yrmcds::memcache::binary_command" name="binary_command">
+    <brief>Memcache binary commands.</brief>
+    <enumvalue id="yrmcds::memcache::binary_command::Get" name="Get" value="0" />
+    <enumvalue id="yrmcds::memcache::binary_command::Set" name="Set" value="1" />
+    <enumvalue id="yrmcds::memcache::binary_command::Add" name="Add" value="2" />
+    <enumvalue id="yrmcds::memcache::binary_command::Replace" name="Replace" value="3" />
+    <enumvalue id="yrmcds::memcache::binary_command::Delete" name="Delete" value="4" />
+    <enumvalue id="yrmcds::memcache::binary_command::Increment" name="Increment" value="5" />
+    <enumvalue id="yrmcds::memcache::binary_command::Decrement" name="Decrement" value="6" />
+    <enumvalue id="yrmcds::memcache::binary_command::Quit" name="Quit" value="7" />
+    <enumvalue id="yrmcds::memcache::binary_command::Flush" name="Flush" value="8" />
+    <enumvalue id="yrmcds::memcache::binary_command::GetQ" name="GetQ" value="9" />
+    <enumvalue id="yrmcds::memcache::binary_command::Noop" name="Noop" value="10" />
+    <enumvalue id="yrmcds::memcache::binary_command::Version" name="Version" value="11" />
+    <enumvalue id="yrmcds::memcache::binary_command::GetK" name="GetK" value="12" />
+    <enumvalue id="yrmcds::memcache::binary_command::GetKQ" name="GetKQ" value="13" />
+    <enumvalue id="yrmcds::memcache::binary_command::Append" name="Append" value="14" />
+    <enumvalue id="yrmcds::memcache::binary_command::Prepend" name="Prepend" value="15" />
+    <enumvalue id="yrmcds::memcache::binary_command::Stat" name="Stat" value="16" />
+    <enumvalue id="yrmcds::memcache::binary_command::SetQ" name="SetQ" value="17" />
+    <enumvalue id="yrmcds::memcache::binary_command::AddQ" name="AddQ" value="18" />
+    <enumvalue id="yrmcds::memcache::binary_command::ReplaceQ" name="ReplaceQ" value="19" />
+    <enumvalue id="yrmcds::memcache::binary_command::DeleteQ" name="DeleteQ" value="20" />
+    <enumvalue id="yrmcds::memcache::binary_command::IncrementQ" name="IncrementQ" value="21" />
+    <enumvalue id="yrmcds::memcache::binary_command::DecrementQ" name="DecrementQ" value="22" />
+    <enumvalue id="yrmcds::memcache::binary_command::QuitQ" name="QuitQ" value="23" />
+    <enumvalue id="yrmcds::memcache::binary_command::FlushQ" name="FlushQ" value="24" />
+    <enumvalue id="yrmcds::memcache::binary_command::AppendQ" name="AppendQ" value="25" />
+    <enumvalue id="yrmcds::memcache::binary_command::PrependQ" name="PrependQ" value="26" />
+    <enumvalue id="yrmcds::memcache::binary_command::Touch" name="Touch" value="28" />
+    <enumvalue id="yrmcds::memcache::binary_command::GaT" name="GaT" value="29" />
+    <enumvalue id="yrmcds::memcache::binary_command::GaTQ" name="GaTQ" value="30" />
+    <enumvalue id="yrmcds::memcache::binary_command::GaTK" name="GaTK" value="35" />
+    <enumvalue id="yrmcds::memcache::binary_command::GaTKQ" name="GaTKQ" value="36" />
+    <enumvalue id="yrmcds::memcache::binary_command::Unknown" name="Unknown" value="37" />
+  </enum>
+  <enum class="yes" id="yrmcds::memcache::binary_status" name="binary_status">
+    <brief>Binary protocol response status</brief>
+    <enumvalue id="yrmcds::memcache::binary_status::OK" name="OK" value="0" />
+    <enumvalue id="yrmcds::memcache::binary_status::NotFound" name="NotFound" value="1" />
+    <enumvalue id="yrmcds::memcache::binary_status::Exists" name="Exists" value="2" />
+    <enumvalue id="yrmcds::memcache::binary_status::TooLargeValue" name="TooLargeValue" value="3" />
+    <enumvalue id="yrmcds::memcache::binary_status::Invalid" name="Invalid" value="4" />
+    <enumvalue id="yrmcds::memcache::binary_status::NotStored" name="NotStored" value="5" />
+    <enumvalue id="yrmcds::memcache::binary_status::NonNumeric" name="NonNumeric" value="6" />
+    <enumvalue id="yrmcds::memcache::binary_status::UnknownCommand" name="UnknownCommand" value="129" />
+    <enumvalue id="yrmcds::memcache::binary_status::OutOfMemory" name="OutOfMemory" value="130" />
+  </enum>
+  <function id="yrmcds::memcache::is_binary_request" name="is_binary_request">
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::memcache::is_binary_request::p" name="p">
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </function>
+</namespace>

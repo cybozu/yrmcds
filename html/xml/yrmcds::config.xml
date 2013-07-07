@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::config" name="config">
+  <brief>Configurations for yrmcds.</brief>
+  <doc>Configurations for yrmcds.
+Defaults are configured properly without calling config::load.</doc>
+  <struct name="bad_config" ref="yrmcds::config::bad_config#yrmcds::config::bad_config" />
+  <constructor id="yrmcds::config::config" name="config">
+    <brief>Setup default configurations.</brief>
+  </constructor>
+  <method abstract="yes" id="yrmcds::config::load" name="load">
+    <brief>Load configurations from `path`.</brief>
+    <doc>This loads configurations from a file at `path`.
+This may throw miscellaneous std::runtime_error exceptions.</doc>
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::config::load::path" name="path">
+      <type name="std::string" qualifier="const &amp;" />
+    </argument>
+  </method>
+  <method id="yrmcds::config::vip" name="vip">
+    <return>
+      <type name="cybozu::ip_address" qualifier="const &amp;" ref="cybozu::ip_address#cybozu::ip_address" />
+    </return>
+  </method>
+  <method id="yrmcds::config::port" name="port">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method id="yrmcds::config::repl_port" name="repl_port">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method id="yrmcds::config::tempdir" name="tempdir">
+    <return>
+      <type name="std::string" qualifier="const &amp;" />
+    </return>
+  </method>
+  <method id="yrmcds::config::threshold" name="threshold">
+    <return>
+      <type name="cybozu::severity" qualifier="const" ref="cybozu#cybozu::severity" />
+    </return>
+  </method>
+  <method id="yrmcds::config::logfile" name="logfile">
+    <return>
+      <type name="std::string" qualifier="const &amp;" />
+    </return>
+  </method>
+  <method id="yrmcds::config::buckets" name="buckets">
+    <return>
+      <type builtin="yes" name="unsigned int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::config::max_data_size" name="max_data_size">
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method id="yrmcds::config::heap_data_limit" name="heap_data_limit">
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method id="yrmcds::config::memory_limit" name="memory_limit">
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method id="yrmcds::config::workers" name="workers">
+    <return>
+      <type builtin="yes" name="unsigned int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::config::gc_interval" name="gc_interval">
+    <return>
+      <type builtin="yes" name="unsigned int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="yrmcds::config::set_heap_data_limit" name="set_heap_data_limit">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::config::set_heap_data_limit::new_limit" name="new_limit">
+      <type name="std::size_t" />
+    </argument>
+  </method>
+</class>

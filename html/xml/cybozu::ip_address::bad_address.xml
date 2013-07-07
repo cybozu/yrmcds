@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="cybozu::ip_address::bad_address" name="bad_address">
+  <base access="public">
+    <type name="std::runtime_error" />
+  </base>
+  <constructor id="cybozu::ip_address::bad_address::bad_address" name="bad_address">
+    <argument id="cybozu::ip_address::bad_address::bad_address::s" name="s">
+      <type name="std::string" qualifier="const &amp;" />
+    </argument>
+  </constructor>
+</struct>

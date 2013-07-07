@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::tempfile" name="tempfile">
+  <brief>A temporary file abstraction.</brief>
+  <constructor id="yrmcds::tempfile::tempfile" name="tempfile" />
+  <constructor abstract="yes" id="yrmcds::tempfile::tempfile" name="tempfile">
+    <argument id="yrmcds::tempfile::tempfile::" name="">
+      <type name="tempfile" qualifier="const &amp;" ref="yrmcds::tempfile#yrmcds::tempfile" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::tempfile::tempfile" name="tempfile">
+    <argument id="yrmcds::tempfile::tempfile::rhs" name="rhs">
+      <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </constructor>
+  <destructor id="yrmcds::tempfile::~tempfile" name="~tempfile" />
+  <method abstract="yes" id="yrmcds::tempfile::operator=" name="operator=">
+    <return>
+      <type name="tempfile" qualifier="&amp;" ref="yrmcds::tempfile#yrmcds::tempfile" />
+    </return>
+    <argument id="yrmcds::tempfile::operator=::" name="">
+      <type name="tempfile" qualifier="const &amp;" ref="yrmcds::tempfile#yrmcds::tempfile" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::tempfile::operator=" name="operator=">
+    <return>
+      <type name="tempfile" qualifier="&amp;" ref="yrmcds::tempfile#yrmcds::tempfile" />
+    </return>
+    <argument id="yrmcds::tempfile::operator=::" name="">
+      <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::tempfile::write" name="write">
+    <brief>Append data to the end of the current contents.</brief>
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::tempfile::write::p" name="p">
+      <doc>Pointer to the data.</doc>
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::tempfile::write::len" name="len">
+      <doc>Length of the data</doc>
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::tempfile::clear" name="clear">
+    <brief>Clear the current file contents.</brief>
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::tempfile::flush" name="flush">
+    <brief>Flush page cache for this temporary file.</brief>
+    <doc>This creates a background thread to synchronize file contents
+to the disk, then flush page cache for the temporary file.</doc>
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::tempfile::read_contents" name="read_contents">
+    <brief>Read the file contents.</brief>
+    <doc>Read the file contents and append them to `buf`.</doc>
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="yrmcds::tempfile::read_contents::buf" name="buf">
+      <doc>Storage for the file contents.</doc>
+      <type name="cybozu::dynbuf" qualifier="&amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+  </method>
+  <method id="yrmcds::tempfile::length" name="length">
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+</class>

@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache_socket" name="memcache_socket">
+  <base access="public">
+    <type name="cybozu::tcp_socket" ref="cybozu::tcp_socket#cybozu::tcp_socket" />
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">resource</ref> subclass for connected TCP sockets.</brief>
+  </base>
+  <constructor id="yrmcds::memcache_socket::memcache_socket" name="memcache_socket">
+    <argument id="yrmcds::memcache_socket::memcache_socket::fd" name="fd">
+      <type builtin="yes" name="int" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="yrmcds::memcache_socket::memcache_socket::finder" name="finder">
+      <type name="std::function&lt;yrmcds::worker *()&gt;" />
+    </argument>
+  </constructor>
+</class>

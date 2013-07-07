@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::dynbuf" name="dynbuf">
+  <brief>A fast, dynamic-sized char buffer.</brief>
+  <doc>There are two motivations for this class rather than using std::vector
+or std::string.  One is to provide nicer interfaces to receive data
+for system calls.  Another is to be efficient as much as possible.</doc>
+  <constructor id="cybozu::dynbuf::dynbuf" name="dynbuf">
+    <brief>Constructor.</brief>
+    <doc>The constructor pre-allocates an internal buffer if `default_capacity`
+is not 0.  Everytime <ref ref="cybozu::dynbuf#cybozu::dynbuf::reset">reset</ref> is invoked, the internal buffer will be
+shrunk to `default_capacity`.</doc>
+    <argument id="cybozu::dynbuf::dynbuf::default_capacity" name="default_capacity">
+      <doc>The default capacity of the internal buffer.</doc>
+      <type name="std::size_t" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="cybozu::dynbuf::dynbuf" name="dynbuf">
+    <argument id="cybozu::dynbuf::dynbuf::" name="">
+      <type name="dynbuf" qualifier="const &amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="cybozu::dynbuf::dynbuf" name="dynbuf">
+    <argument id="cybozu::dynbuf::dynbuf::" name="">
+      <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </constructor>
+  <destructor id="cybozu::dynbuf::~dynbuf" name="~dynbuf" />
+  <method abstract="yes" id="cybozu::dynbuf::operator=" name="operator=">
+    <return>
+      <type name="dynbuf" qualifier="&amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </return>
+    <argument id="cybozu::dynbuf::operator=::" name="">
+      <type name="dynbuf" qualifier="const &amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+  </method>
+  <method abstract="yes" id="cybozu::dynbuf::operator=" name="operator=">
+    <return>
+      <type name="dynbuf" qualifier="&amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </return>
+    <argument id="cybozu::dynbuf::operator=::" name="">
+      <type name="" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+  </method>
+  <method id="cybozu::dynbuf::swap" name="swap">
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::dynbuf::swap::other" name="other">
+      <type name="dynbuf" qualifier="&amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+  </method>
+  <method id="cybozu::dynbuf::reset" name="reset">
+    <brief>Clear the contents and reset the internal buffer.</brief>
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="cybozu::dynbuf::append" name="append">
+    <brief>Append contents.</brief>
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::dynbuf::append::p" name="p">
+      <doc>The pointer to the contents.</doc>
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::dynbuf::append::len" name="len">
+      <doc>The length of the contents.</doc>
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method id="cybozu::dynbuf::erase" name="erase">
+    <brief>Erase contents.</brief>
+    <doc>Erase contents from the head of the internal buffer.
+Remaining data will be moved to the head.</doc>
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::dynbuf::erase::len" name="len">
+      <doc>The length to be erased.</doc>
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method id="cybozu::dynbuf::prepare" name="prepare">
+    <brief>Prepare enough free space in the internal buffer.</brief>
+    <doc>This prepares at least `len` byte free space in the internal buffer.
+The caller should call <ref ref="cybozu::dynbuf#cybozu::dynbuf::consume">consume</ref> after it wrote some data to the
+free space.
+
+</doc>
+    <return>
+      <doc>The pointer to the free space.</doc>
+      <type builtin="yes" name="char" qualifier="*" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::dynbuf::prepare::len" name="len">
+      <doc>Required free space size.</doc>
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method id="cybozu::dynbuf::consume" name="consume">
+    <brief>Consume the free space.</brief>
+    <return>
+      <type builtin="yes" name="void" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+    <argument id="cybozu::dynbuf::consume::len" name="len">
+      <doc>Size of memory to be consumed.</doc>
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method id="cybozu::dynbuf::data" name="data">
+    <brief>Return the pointer to the head of the internal buffer.</brief>
+    <return>
+      <type builtin="yes" name="char" qualifier="const *" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="cybozu::dynbuf::empty" name="empty">
+    <brief>Same as STL's `empty()`.</brief>
+    <return>
+      <type builtin="yes" name="bool" ref="cybozu::hash_map::handler#cybozu::hash_map::handler" />
+    </return>
+  </method>
+  <method id="cybozu::dynbuf::size" name="size">
+    <brief>Same as STL's `size()`.</brief>
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+</class>
