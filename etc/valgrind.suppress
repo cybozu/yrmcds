@@ -1,0 +1,7 @@
+{
+   reactor::epoll_ctl
+   Memcheck:Param
+   epoll_ctl(event)
+   fun:epoll_ctl
+   fun:_ZN6cybozu7reactor12add_resourceESt10unique_ptrINS_8resourceESt14default_deleteIS2_EEi
+}

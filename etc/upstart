@@ -1,0 +1,22 @@
+# Upstart script for yrmcds
+
+description     "yrmcds"
+
+start on net-device-up
+stop on runlevel [!2345]
+
+respawn
+
+umask 077
+limit nofile 100000 100000
+
+setuid nobody
+setgid nogroup
+
+pre-start script
+    [ -d /var/tmp/yrmcds ] || mkdir /var/tmp/yrmcds
+    chmod 700 /var/tmp/yrmcds
+    rm -f /var/tmp/yrmcds/*
+end script
+
+exec /usr/local/sbin/yrmcdsd

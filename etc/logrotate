@@ -1,0 +1,13 @@
+# place this file as /etc/logrotate.d/yrmcds
+
+/var/log/yrmcds.log {
+	notifempty
+	weekly
+	rotate 4
+	compress
+	missingok
+	create 0644 nobody nogroup
+	postrotate
+		reload yrmcds >/dev/null 2>&1 || true
+	endscript
+}

@@ -1,0 +1,15 @@
+# C/C++
+*.[oa]
+
+# Editors
+*~
+.*.swp
+
+# Directories
+html
+lz4
+
+# binaries
+yrmcdsd
+yrmcdsd.map
+*.exe
