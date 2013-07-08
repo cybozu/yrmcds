@@ -161,9 +161,10 @@ bool tcp_socket::_send(const char* p, std::size_t len, lock_guard& g) {
                 if( errno == EAGAIN || errno == EWOULDBLOCK ) break;
                 if( errno == EINTR ) continue;
                 auto ecnd = std::system_category().default_error_condition(errno);
-                logger::error() << "<tcp_socket::_send>: ("
-                                << ecnd.value() << ") "
-                                << ecnd.message();
+                if( ecnd.value() != EPIPE )
+                    logger::error() << "<tcp_socket::_send>: ("
+                                    << ecnd.value() << ") "
+                                    << ecnd.message();
                 invalidate_and_close( std::move(g) );
                 return false;
             }
@@ -234,9 +235,10 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
                 if( errno == EAGAIN || errno == EWOULDBLOCK ) break;
                 if( errno == EINTR ) continue;
                 auto ecnd = std::system_category().default_error_condition(errno);
-                logger::error() << "<tcp_socket::_sendv>: ("
-                                << ecnd.value() << ") "
-                                << ecnd.message();
+                if( ecnd.value() != EPIPE )
+                    logger::error() << "<tcp_socket::_sendv>: ("
+                                    << ecnd.value() << ") "
+                                    << ecnd.message();
                 invalidate_and_close( std::move(g) );
                 return false;
             }
@@ -311,9 +313,10 @@ bool tcp_socket::on_writable() {
             if( errno == EINTR ) continue;
             if( errno == EAGAIN || errno == EWOULDBLOCK ) return false;
             auto ecnd = std::system_category().default_error_condition(errno);
-            logger::error() << "<tcp_socket::on_writable>: ("
-                            << ecnd.value() << ") "
-                            << ecnd.message();
+            if( ecnd.value() != EPIPE )
+                logger::error() << "<tcp_socket::on_writable>: ("
+                                << ecnd.value() << ") "
+                                << ecnd.message();
             m_valid = false;
             return true;
         }
