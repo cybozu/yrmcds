@@ -66,7 +66,12 @@ void gc_thread::gc() {
             g_config.memory_limit() ) {
             unsigned int oldest_age =
                 g_stats.oldest_age.load(std::memory_order_relaxed);
-            evict_age = std::max(1U, oldest_age / 2);
+            unsigned int one_hour = 3600U / g_config.gc_interval() + 1;
+            if( oldest_age < (one_hour * 2) ) {
+                evict_age = std::max(1U, oldest_age / 2);
+            } else {
+                evict_age = oldest_age - one_hour;
+            }
             cybozu::logger::warning() << "Evicting object of "
                                       << evict_age << " gc old";
         }
