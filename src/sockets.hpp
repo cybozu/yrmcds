@@ -20,16 +20,45 @@ class worker;
 
 class memcache_socket: public cybozu::tcp_socket {
 public:
-    memcache_socket(int fd, std::function<worker*()> finder):
+    memcache_socket(int fd, std::function<worker*()>& finder,
+                    std::function<void(const cybozu::hash_key&, bool)>& unlocker):
         cybozu::tcp_socket(fd), m_busy(false),
-        m_finder(finder), m_pending(0) {}
+        m_finder(finder), m_unlocker(unlocker), m_pending(0) {}
+
+    void add_lock(const cybozu::hash_key& k) {
+        m_locks.emplace_back(k);
+    }
+
+    void remove_lock(const cybozu::hash_key& k) {
+        for( auto it = m_locks.begin(); it != m_locks.end(); ++it ) {
+            if( *it == k ) {
+                m_locks.erase(it);
+                return;
+            }
+        }
+        throw std::logic_error("<memcache_socket::remove_lock> bug");
+    }
+
+    void unlock_all() {
+        for( auto& ref: m_locks )
+            m_unlocker(ref.get(), false);
+        m_locks.clear();
+    }
 
 private:
     alignas(CACHELINE_SIZE)
     std::atomic<bool> m_busy;
-    std::function<worker*()> m_finder;
+    std::function<worker*()>& m_finder;
+    std::function<void(const cybozu::hash_key&, bool)>& m_unlocker;
     cybozu::dynbuf m_pending;
+    std::vector<std::reference_wrapper<const cybozu::hash_key>> m_locks;
 
+    virtual void on_invalidate() override final {
+        for( auto& ref: m_locks )
+            m_unlocker(ref.get(), true); // force unlock
+        m_locks.clear();
+        cybozu::tcp_socket::on_invalidate();
+    }
     virtual bool on_readable() override final;
 };
 

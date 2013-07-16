@@ -22,6 +22,8 @@ std::uint64_t to_uint64(const char* p, std::size_t len) {
 
 namespace yrmcds {
 
+thread_local int g_context = -1;
+
 object::object(const char* p, std::size_t len,
                std::uint32_t flags_, std::time_t exptime):
     m_length(len), m_data(0), m_file(nullptr),

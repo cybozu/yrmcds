@@ -33,6 +33,8 @@ const char STATUS_TOO_LARGE[] = "Too large value";
 const char STATUS_INVALID[] = "Invalid request";
 const char STATUS_NOT_STORED[] = "Not stored";
 const char STATUS_NON_NUMERIC[] = "Non-numeric value";
+const char STATUS_LOCKED[] = "Locked";
+const char STATUS_NOT_LOCKED[] = "Not locked";
 const char STATUS_UNKNOWN[] = "Unknown command";
 const char STATUS_OOM[] = "Out of memory";
 
@@ -295,6 +297,36 @@ text_request::parse_touch(const char* b, const char* e) noexcept {
 }
 
 inline void
+text_request::parse_lock(const char* b, const char* e) noexcept {
+    while( *b == SP ) ++b;
+    if( b == e ) return;
+    const char* key_end = cfind(b, SP, e-b);
+    if( key_end == nullptr ) key_end = e;
+    m_key = item(b, key_end-b);
+    b = key_end;
+
+    while( *b == SP ) ++b;
+    if( b != e ) return; // garbage left
+
+    m_valid = true;
+}
+
+inline void
+text_request::parse_unlock(const char* b, const char* e) noexcept {
+    while( *b == SP ) ++b;
+    if( b == e ) return;
+    const char* key_end = cfind(b, SP, e-b);
+    if( key_end == nullptr ) key_end = e;
+    m_key = item(b, key_end-b);
+    b = key_end;
+
+    while( *b == SP ) ++b;
+    if( b != e ) return; // garbage left
+
+    m_valid = true;
+}
+
+inline void
 text_request::parse_stats(const char* b, const char* e) noexcept {
     while( *b == SP ) ++b;
     if( b == e ) {
@@ -384,6 +416,13 @@ void text_request::parse() noexcept {
     if( cmd_end == nullptr ) cmd_end = eol;
     std::size_t cmd_len = (cmd_end - cmd_start);
 
+    if( cmd_len == 10 ) {
+        if( std::memcmp(cmd_start, "unlock_all", 10) == 0 ) {
+            m_command = text_command::UNLOCK_ALL;
+            m_valid = true;
+            return;
+        }
+    }
     if( cmd_len == 9 ) {
         if( std::memcmp(cmd_start, "flush_all", 9) == 0 ) {
             m_command = text_command::FLUSH_ALL;
@@ -424,6 +463,11 @@ void text_request::parse() noexcept {
             parse_delete(cmd_end, eol);
             return;
         }
+        if( std::memcmp(cmd_start, "unlock", 6) == 0 ) {
+            m_command = text_command::UNLOCK;
+            parse_unlock(cmd_end, eol);
+            return;
+        }
     }
     if( cmd_len == 5 ) {
         if( std::memcmp(cmd_start, "touch", 5) == 0 ) {
@@ -457,6 +501,11 @@ void text_request::parse() noexcept {
         if( std::memcmp(cmd_start, "decr", 4) == 0 ) {
             m_command = text_command::DECR;
             parse_incdec(cmd_end, eol);
+            return;
+        }
+        if( std::memcmp(cmd_start, "lock", 4) == 0 ) {
+            m_command = text_command::LOCK;
+            parse_lock(cmd_end, eol);
             return;
         }
         if( std::memcmp(cmd_start, "quit", 4) == 0 ) {
@@ -635,19 +684,16 @@ void binary_request::parse() noexcept {
     m_request_len = BINARY_HEADER_SIZE + total_len;
 
     // Opcode parsing
-    binary_command opcode = (binary_command)*(unsigned char*)(m_p+1);
-    if( opcode >= binary_command::Unknown ) {
-        m_status = binary_status::UnknownCommand;
-        m_command = binary_command::Unknown;
-        return;
-    }
-    m_command = opcode;
+    m_command = (binary_command)*(unsigned char*)(m_p+1);
     m_quiet = ( m_command == binary_command::GetQ ||
                 m_command == binary_command::GetKQ ||
                 (binary_command::SetQ <= m_command &&
                  m_command <= binary_command::PrependQ) ||
                 m_command == binary_command::GaTQ ||
-                m_command == binary_command::GaTKQ );
+                m_command == binary_command::GaTKQ ||
+                (binary_command::LockQ <= m_command &&
+                 m_command <= binary_command::RaUQ &&
+                 ((unsigned char)m_command) & 1) );
 
     std::uint16_t key_len;
     cybozu::ntoh(m_p + 2, key_len);
@@ -672,7 +718,7 @@ void binary_request::parse() noexcept {
 
     const char* const p_extra = m_p + BINARY_HEADER_SIZE;
 
-    switch( opcode ) {
+    switch( m_command ) {
     case binary_command::Get:
     case binary_command::GetQ:
     case binary_command::GetK:
@@ -681,6 +727,10 @@ void binary_request::parse() noexcept {
     case binary_command::GaTQ:
     case binary_command::GaTK:
     case binary_command::GaTKQ:
+    case binary_command::LaG:
+    case binary_command::LaGQ:
+    case binary_command::LaGK:
+    case binary_command::LaGKQ:
         if( extras_len != 0 && extras_len != 4 )
             return; // invalid
         if( key_len == 0 || data_len > 0 )
@@ -697,6 +747,8 @@ void binary_request::parse() noexcept {
     case binary_command::AddQ:
     case binary_command::Replace:
     case binary_command::ReplaceQ:
+    case binary_command::RaU:
+    case binary_command::RaUQ:
         if( extras_len != 8 || key_len == 0 || data_len == 0 )
             return; // invalid
         cybozu::ntoh(p_extra, m_flags);
@@ -741,6 +793,13 @@ void binary_request::parse() noexcept {
         if( extras_len != 0 || key_len == 0 || data_len == 0 )
             return; // invalid
         break;
+    case binary_command::Lock:
+    case binary_command::LockQ:
+    case binary_command::Unlock:
+    case binary_command::UnlockQ:
+        if( extras_len != 0 || key_len == 0 || data_len > 0 )
+            return; // invalid
+        break;
     case binary_command::Stat:
         if( extras_len != 0 || data_len != 0 )
             return; // invalid
@@ -759,12 +818,15 @@ void binary_request::parse() noexcept {
     case binary_command::QuitQ:
     case binary_command::Version:
     case binary_command::Noop:
+    case binary_command::UnlockAll:
+    case binary_command::UnlockAllQ:
         // no validation.
         // this is intentional violation against the protocol definition.
         break;
     default:
-        // binary_command::Unknown
-        break;
+        m_command = binary_command::Unknown;
+        m_status = binary_status::UnknownCommand;
+        return;
     }
 
     m_status = binary_status::OK;
@@ -801,6 +863,12 @@ binary_response::error(binary_status status) {
         break;
     case binary_status::NonNumeric:
         send_error(status, STATUS_NON_NUMERIC, sizeof(STATUS_NON_NUMERIC) - 1);
+        break;
+    case binary_status::Locked:
+        send_error(status, STATUS_LOCKED, sizeof(STATUS_LOCKED) - 1);
+        break;
+    case binary_status::NotLocked:
+        send_error(status, STATUS_NOT_LOCKED, sizeof(STATUS_NOT_LOCKED) - 1);
         break;
     case binary_status::UnknownCommand:
         send_error(status, STATUS_UNKNOWN, sizeof(STATUS_UNKNOWN) - 1);

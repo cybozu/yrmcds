@@ -162,6 +162,12 @@ public:
         return true;
     }
 
+protected:
+    virtual void on_invalidate() override {
+        ::shutdown(m_fd, SHUT_RDWR);
+        free_buffers();
+    }
+
 private:
     std::vector<char*> m_free_buffers;
     // tuple of <pointer, data written, data sent>
@@ -194,10 +200,6 @@ private:
     }
     void free_buffers();
 
-    virtual void on_invalidate() override final {
-        ::shutdown(m_fd, SHUT_RDWR);
-        free_buffers();
-    }
     virtual bool on_writable() override final;
 };
 

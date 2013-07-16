@@ -328,6 +328,36 @@ AUTOTEST(decr) {
     cybozu_assert( t1.no_reply() );
 }
 
+AUTOTEST(lock) {
+    MEMCACHE_TEST(1, "lock hoge \r\n");
+    cybozu_assert( t1.valid() );
+    cybozu_assert( t1.command() == text_command::LOCK );
+    cybozu_assert( std::get<1>(t1.key()) == 4 );
+    VERIFY(1, "hoge", key);
+
+    MEMCACHE_TEST(2, "lock hoge leftover\r\n");
+    cybozu_assert( ! t2.valid() );
+    cybozu_assert( t2.length() == 20 );
+}
+
+AUTOTEST(unlock) {
+    MEMCACHE_TEST(1, "unlock hoge \r\n");
+    cybozu_assert( t1.valid() );
+    cybozu_assert( t1.command() == text_command::UNLOCK );
+    cybozu_assert( std::get<1>(t1.key()) == 4 );
+    VERIFY(1, "hoge", key);
+
+    MEMCACHE_TEST(2, "unlock hoge leftover\r\n");
+    cybozu_assert( ! t2.valid() );
+    cybozu_assert( t2.length() == 22 );
+}
+
+AUTOTEST(unlockall) {
+    MEMCACHE_TEST(1, "unlock_all \r\n");
+    cybozu_assert( t1.valid() );
+    cybozu_assert( t1.command() == text_command::UNLOCK_ALL );
+}
+
 AUTOTEST(get) {
     MEMCACHE_TEST(1, "get  \r\nabc");
     cybozu_assert( ! t1.valid() );
