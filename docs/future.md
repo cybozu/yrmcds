@@ -30,11 +30,8 @@ Future Plans
     <p />
 
 * Save snapshots periodically.  
-    This can be done by [forking][fork] a child process periodically.  
-    To workaround multi-threading issues, we have already prepared:
-    - <cybozu::hash_map> equips no-locking member functions.
-    - New file descriptors are created with close-on-exec flag set.  
-    <p />
+    This can be done by [forking][fork] a child process at slaves.
+    Since slaves are single-threaded, fork will do no harm.
 
 
 [murmur]: https://code.google.com/p/smhasher/wiki/MurmurHash3

@@ -28,7 +28,6 @@ public:
         , okCount_(0)
         , ngCount_(0)
         , exceptionCount_(0)
-        , elapsed_(0)
     {
     }
     void setup(Func init, Func term)
@@ -61,10 +60,11 @@ public:
         return ret.substr(0, pos);
     }
     using ret_t = std::tuple<int, std::uint64_t>;
-    ret_t run(int, char *argv[])
+    ret_t run(const char* arg0)
     {
         using namespace std::chrono;
         std::string msg;
+        steady_clock::duration elapsed;
         try {
             if (init_) init_();
             for (UnitTestList::const_iterator i = list_.begin(), ie = list_.end(); i != ie; ++i) {
@@ -73,7 +73,7 @@ public:
                     auto t1 = steady_clock::now();
                     (i->second)();
                     auto t2 = steady_clock::now();
-                    elapsed_ += duration_cast<microseconds>(t2-t1).count();
+                    elapsed += t2 - t1;
                 } catch (std::exception& e) {
                     exceptionCount_++;
                     std::cout << "ctest:  " << i->first << " is stopped by std::exception " << e.what() << std::endl;
@@ -87,17 +87,18 @@ public:
             msg = "ctest:err: catch unexpected exception";
         }
         fflush(stdout);
+        std::uint64_t elapsed_us = duration_cast<microseconds>(elapsed).count();
         if (msg.empty()) {
-            std::cout << "ctest:name=" << getBaseName(*argv)
+            std::cout << "ctest:name=" << getBaseName(arg0)
                       << ", module=" << list_.size()
                       << ", total=" << (okCount_ + ngCount_ + exceptionCount_)
                       << ", ok=" << okCount_
                       << ", ng=" << ngCount_
                       << ", exception=" << exceptionCount_ << std::endl;
-            return (ngCount_>0) ? ret_t(1, elapsed_) : ret_t(0, elapsed_);
+            return (ngCount_>0) ? ret_t(1, elapsed_us) : ret_t(0, elapsed_us);
         } else {
             std::cout << msg << std::endl;
-            return ret_t(1, elapsed_);
+            return ret_t(1, elapsed_us);
         }
     }
     static inline AutoRun& getInstance()
@@ -173,15 +174,20 @@ inline bool isEqual(double lhs, double rhs)
 
 } } // cybozu::test
 
-#ifndef CYBOZU_TEST_DISABLE_AUTO_RUN
-int main(int argc, char *argv[])
-{
-    int r;
-    std::uint64_t elapsed;
-    std::tie(r, elapsed) = cybozu::test::autoRun.run(argc, argv);
-    std::cerr << "ctest:elapsed=" << elapsed << "us" << std::endl;
-    return r;
-}
+#define TEST_MAIN(arg_parser)                                          \
+    int main(int argc, char** argv) {                                  \
+        if( ! arg_parser(argc, argv) )                                 \
+            return 0;                                                  \
+        int r;                                                         \
+        std::uint64_t elapsed;                                         \
+        std::tie(r, elapsed) = cybozu::test::autoRun.run(argv[0]);     \
+        std::cerr << "ctest:elapsed=" << elapsed << "us" << std::endl; \
+        return r;                                                      \
+    }
+
+#ifndef TEST_DISABLE_AUTO_RUN
+bool null_parser(int argc, char** argv) { return true; }
+TEST_MAIN(null_parser);
 #endif
 
 /**

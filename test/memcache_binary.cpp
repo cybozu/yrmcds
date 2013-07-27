@@ -153,6 +153,52 @@ AUTOTEST(get) {
     cybozu_assert( r13.status() == binary_status::OK );
     cybozu_assert( r13.command() == binary_command::GaTKQ );
     cybozu_assert( r13.quiet() );
+    REQ(14, "\x80\x46\x00\x05\x04\x00\x00\x00"
+        "\x00\x00\x00\x09" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x01" // CAS
+        "\x00\x00\x01\x00" // extra (exptime)
+        "Hello" // key
+        );
+    cybozu_assert( r14.length() == 24 + 9 );
+    cybozu_assert( r14.status() == binary_status::OK );
+    cybozu_assert( r14.command() == binary_command::LaG );
+    cybozu_assert( r14.cas_unique() == 1UL );
+    cybozu_assert( ! r14.quiet() );
+    cybozu_assert( r14.exptime() != binary_request::EXPTIME_NONE );
+    REQ(15, "\x80\x47\x00\x05\x00\x00\x00\x00"
+        "\x00\x00\x00\x05" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x01" // CAS
+        "Hello" // key
+        );
+    cybozu_assert( r15.length() != 0 );
+    cybozu_assert( r15.status() == binary_status::OK );
+    cybozu_assert( r15.command() == binary_command::LaGQ );
+    cybozu_assert( r15.quiet() );
+    cybozu_assert( r15.exptime() == binary_request::EXPTIME_NONE );
+    REQ(16, "\x80\x48\x00\x05\x04\x00\x00\x00"
+        "\x00\x00\x00\x09" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x01" // CAS
+        "\x00\x00\x01\x00" // extra (exptime)
+        "Hello" // key
+        );
+    cybozu_assert( r16.length() != 0 );
+    cybozu_assert( r16.status() == binary_status::OK );
+    cybozu_assert( r16.command() == binary_command::LaGK );
+    cybozu_assert( ! r16.quiet() );
+    REQ(17, "\x80\x49\x00\x05\x04\x00\x00\x00"
+        "\x00\x00\x00\x09" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x01" // CAS
+        "\x00\x00\x01\x00" // extra (exptime)
+        "Hello" // key
+        );
+    cybozu_assert( r17.length() != 0 );
+    cybozu_assert( r17.status() == binary_status::OK );
+    cybozu_assert( r17.command() == binary_command::LaGKQ );
+    cybozu_assert( r17.quiet() );
 }
 
 AUTOTEST(set_add_replace) {
@@ -273,6 +319,36 @@ AUTOTEST(set_add_replace) {
         );
     cybozu_assert( r9.length() != 0 );
     cybozu_assert( r9.status() == binary_status::Invalid );
+    REQ(10, "\x80\x4a\x00\x06\x08\x00\x00\x00"
+        "\x00\x00\x00\x13" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x10" // CAS
+        "\x00\x00\x00\x20" // flags
+        "\x11\x11\x22\x33" // extra (exptime)
+        "Hello " // key
+        "World" // body
+        "\x80 "
+        );
+    cybozu_assert( r10.length() == (24 + 19) );
+    cybozu_assert( r10.status() == binary_status::OK );
+    cybozu_assert( r10.command() == binary_command::RaU );
+    cybozu_assert( ! r10.quiet() );
+    ITEMCMP(r10.key(), "Hello ");
+    ITEMCMP(r10.data(), "World");
+    REQ(11, "\x80\x4b\x00\x06\x08\x00\x00\x00"
+        "\x00\x00\x00\x13" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x10" // CAS
+        "\x00\x00\x00\x20" // flags
+        "\x11\x11\x22\x33" // extra (exptime)
+        "Hello " // key
+        "World" // body
+        "\x80 "
+        );
+    cybozu_assert( r11.length() != 0 );
+    cybozu_assert( r11.status() == binary_status::OK );
+    cybozu_assert( r11.command() == binary_command::RaUQ );
+    cybozu_assert( r11.quiet() );
 }
 
 AUTOTEST(delete) {
@@ -459,6 +535,68 @@ AUTOTEST(append_prepend) {
     cybozu_assert( r4.quiet() );
 }
 
+AUTOTEST(lock) {
+    REQ(1, "\x80\x40\x00\x05\x00\x00\x00\x00"
+        "\x00\x00\x00\x05" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x00" // CAS
+        "Hello" // key
+        );
+    cybozu_assert( r1.length() == 24 + 5 );
+    cybozu_assert( r1.status() == binary_status::OK );
+    cybozu_assert( r1.command() == binary_command::Lock );
+    cybozu_assert( ! r1.quiet() );
+    ITEMCMP(r1.key(), "Hello");
+    REQ(2, "\x80\x40\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x00" // CAS
+        );
+    cybozu_assert( r2.length() == 24 );
+    cybozu_assert( r2.status() == binary_status::Invalid );
+    REQ(3, "\x80\x41\x00\x05\x00\x00\x00\x00"
+        "\x00\x00\x00\x05" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x00" // CAS
+        "Hello" // key
+        );
+    cybozu_assert( r3.length() != 0 );
+    cybozu_assert( r3.status() == binary_status::OK );
+    cybozu_assert( r3.command() == binary_command::LockQ );
+    cybozu_assert( r3.quiet() );
+}
+
+AUTOTEST(unlock) {
+    REQ(1, "\x80\x42\x00\x05\x00\x00\x00\x00"
+        "\x00\x00\x00\x05" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x00" // CAS
+        "Hello" // key
+        );
+    cybozu_assert( r1.length() == 24 + 5 );
+    cybozu_assert( r1.status() == binary_status::OK );
+    cybozu_assert( r1.command() == binary_command::Unlock );
+    cybozu_assert( ! r1.quiet() );
+    ITEMCMP(r1.key(), "Hello");
+    REQ(2, "\x80\x42\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x00" // CAS
+        );
+    cybozu_assert( r2.length() == 24 );
+    cybozu_assert( r2.status() == binary_status::Invalid );
+    REQ(3, "\x80\x43\x00\x05\x00\x00\x00\x00"
+        "\x00\x00\x00\x05" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x00" // CAS
+        "Hello" // key
+        );
+    cybozu_assert( r3.length() != 0 );
+    cybozu_assert( r3.status() == binary_status::OK );
+    cybozu_assert( r3.command() == binary_command::UnlockQ );
+    cybozu_assert( r3.quiet() );
+}
+
 AUTOTEST(stat) {
     REQ(1, "\x80\x10\x00\x03\x00\x00\x00\x00"
         "\x00\x00\x00\x03" // total body
@@ -567,4 +705,22 @@ AUTOTEST(misc) {
     cybozu_assert( r4.length() != 0 );
     cybozu_assert( r4.status() == binary_status::OK );
     cybozu_assert( r4.command() == binary_command::Version );
+    REQ(5, "\x80\x44\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x10" // CAS
+        );
+    cybozu_assert( r5.length() != 0 );
+    cybozu_assert( r5.status() == binary_status::OK );
+    cybozu_assert( r5.command() == binary_command::UnlockAll );
+    cybozu_assert( ! r5.quiet() );
+    REQ(6, "\x80\x45\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x10" // CAS
+        );
+    cybozu_assert( r6.length() != 0 );
+    cybozu_assert( r6.status() == binary_status::OK );
+    cybozu_assert( r6.command() == binary_command::UnlockAllQ );
+    cybozu_assert( r6.quiet() );
 }

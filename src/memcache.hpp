@@ -35,7 +35,8 @@ using item = std::tuple<const char*, std::size_t>;
 // Memcache text commands.
 enum class text_command {
     UNKNOWN, SET, ADD, REPLACE, APPEND, PREPEND, CAS, GET, GETS, DELETE,
-    INCR, DECR, TOUCH, SLABS, STATS, FLUSH_ALL, VERSION, VERBOSITY, QUIT
+    INCR, DECR, TOUCH, LOCK, UNLOCK, UNLOCK_ALL, SLABS, STATS, FLUSH_ALL,
+    VERSION, VERBOSITY, QUIT
 };
 
 
@@ -43,7 +44,8 @@ enum class text_command {
 class text_request final {
 public:
     text_request(const char* p, std::size_t len):
-        m_p(p), m_len(len) {
+        m_p(p), m_len(len)
+    {
         if( len == 0 || p == nullptr )
             throw std::logic_error("<text_request> bad ctor arguments");
         parse();
@@ -133,6 +135,8 @@ private:
     void parse_storage(const char* b, const char* e, bool is_cas) noexcept;
     void parse_delete(const char* b, const char* e) noexcept;
     void parse_touch(const char* b, const char* e) noexcept;
+    void parse_lock(const char* b, const char* e) noexcept;
+    void parse_unlock(const char* b, const char* e) noexcept;
     void parse_stats(const char* b, const char* e) noexcept;
     void parse_incdec(const char* b, const char* e) noexcept;
     void parse_get(const char* b, const char* e) noexcept;
@@ -148,6 +152,7 @@ const char TEXT_NOT_FOUND[] = "NOT_FOUND\x0d\x0a";
 const char TEXT_TOUCHED[] = "TOUCHED\x0d\x0a";
 const char TEXT_DELETED[] = "DELETED\x0d\x0a";
 const char TEXT_END[] = "END\x0d\x0a";
+const char TEXT_LOCKED[] = "LOCKED\x0d\x0a";
 const char TEXT_VERSION[] = "VERSION ";
 
 // Text response sender.
@@ -182,6 +187,9 @@ public:
     }
     void not_found() {
         m_socket.send(TEXT_NOT_FOUND, sizeof(TEXT_NOT_FOUND) - 1, true);
+    }
+    void locked() {
+        m_socket.send(TEXT_LOCKED, sizeof(TEXT_LOCKED) - 1, true);
     }
 
     void value(const cybozu::hash_key& key, std::uint32_t flags,
@@ -240,6 +248,19 @@ enum class binary_command: unsigned char {
     GaTK       = '\x23',
     GaTKQ      = '\x24',
 
+    Lock       = '\x40',
+    LockQ      = '\x41',
+    Unlock     = '\x42',
+    UnlockQ    = '\x43',
+    UnlockAll  = '\x44',
+    UnlockAllQ = '\x45',
+    LaG        = '\x46',
+    LaGQ       = '\x47',
+    LaGK       = '\x48',
+    LaGKQ      = '\x49',
+    RaU        = '\x4a',
+    RaUQ       = '\x4b',
+
     Unknown // must be defined the last
 };
 
@@ -253,6 +274,8 @@ enum class binary_status: std::uint16_t {
     Invalid = 0x0004,
     NotStored = 0x0005,
     NonNumeric = 0x0006,
+    Locked = 0x0010,
+    NotLocked = 0x0011,
     UnknownCommand = 0x0081,
     OutOfMemory = 0x0082
 };
@@ -262,7 +285,8 @@ enum class binary_status: std::uint16_t {
 class binary_request final {
 public:
     binary_request(const char* p, std::size_t len):
-        m_p(p), m_len(len) {
+        m_p(p), m_len(len)
+    {
         if( len == 0 || p == nullptr )
             throw std::logic_error("<binary_request> bad ctor arguments");
         parse();
@@ -286,7 +310,7 @@ public:
     // Return `key`.
     item key() const noexcept { return m_key; }
 
-    // Return `opaque` send with the request.
+    // Return `opaque` sent with the request.
     const char* opaque() const noexcept { return m_p + 12; }
 
     // Return `cas unique` sent with CAS command.

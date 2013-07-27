@@ -16,6 +16,12 @@
 
 namespace yrmcds {
 
+// Context for object locking.
+//
+// The context is in fact the file descriptor of a client connection.
+extern thread_local int g_context;
+
+
 // Object in the hash table.
 //
 // This class represents an object in the hash table.
@@ -68,6 +74,7 @@ public:
     }
 
     bool expired() const noexcept {
+        if( locked() ) return false;
         std::time_t t = g_stats.flush_time.load(std::memory_order_relaxed);
         std::time_t now = g_stats.current_time.load(std::memory_order_relaxed);
         if( t != 0 && t <= now ) return true;
@@ -77,10 +84,37 @@ public:
 
     unsigned int age() const noexcept { return m_gc_old; }
 
-    void survive() {
+    void survive() const {
         ++ m_gc_old;
         if( m_gc_old == FLUSH_AGE && m_file.get() != nullptr )
             m_file->flush();
+    }
+
+    void lock() {
+        if( locked() )
+            throw std::logic_error("object::lock bug");
+        m_lock = g_context;
+    }
+
+    void unlock(bool force = false) {
+        if( ! force && ! locked_by_self() )
+            throw std::logic_error("object::unlock bug");
+        m_lock = -1;
+    }
+
+    // Return `true` if this object is locked.
+    bool locked() const noexcept {
+        return m_lock != -1;
+    }
+
+    // Return `true` if this object is locked by the current context.
+    bool locked_by_self() const noexcept {
+        return m_lock == g_context;
+    }
+
+    // Return `true` if this object is locked by another context.
+    bool locked_by_other() const noexcept {
+        return locked() && (! locked_by_self());
     }
 
 private:
@@ -91,6 +125,7 @@ private:
     std::time_t m_exptime;
     std::uint64_t m_cas = 1;
     mutable unsigned int m_gc_old = 0;
+    int m_lock = -1;
 };
 
 } // namespace yrmcds

@@ -21,6 +21,7 @@ Features
 * Memcached text and binary protocols.  
     Almost all commands are implemented including undocumented `Touch`,
     `GaT`, and `GaTK` binary commands.
+* [Server-side locking](docs/locking.md).
 * Large objects can be stored in temporary files, not in memory.
 * Virtual-IP based master-slave replication.
 * Automatic fail-over.

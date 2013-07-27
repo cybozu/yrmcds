@@ -23,12 +23,7 @@ namespace yrmcds {
 // The yrmcds server
 class server {
 public:
-    server():
-        m_is_slave( ! is_master()), m_hash(g_config.buckets()),
-        m_syncer(m_workers) {
-        m_slaves.reserve(MAX_SLAVES);
-        m_new_slaves.reserve(MAX_SLAVES);
-    }
+    server();
 
     static bool is_master() {
         return cybozu::has_ip_address( g_config.vip() );
@@ -48,6 +43,8 @@ private:
     std::vector<cybozu::tcp_socket*> m_slaves;
     std::vector<cybozu::tcp_socket*> m_new_slaves;
     syncer m_syncer;
+    std::function<worker*()> m_finder;
+    std::function<void(const cybozu::hash_key&, bool)> m_unlocker;
 
     bool gc_ready();
     bool reactor_gc_ready();

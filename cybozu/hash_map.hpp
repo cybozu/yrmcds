@@ -128,9 +128,10 @@ public:
                           std::function<bool(const hash_key&, T&)> handler,
                           std::function<std::unique_ptr<T>(const hash_key&)> creator) {
             for( item& t: m_objects ) {
-                if( std::get<0>(t) == key ) {
+                const hash_key& t_key = std::get<0>(t);
+                if( t_key == key ) {
                     if( ! handler ) return false;
-                    return handler(key, *std::get<1>(t));
+                    return handler(t_key, *std::get<1>(t));
                 }
             }
             if( ! creator ) return false;
@@ -172,6 +173,27 @@ public:
                     std::function<void(const hash_key&)> callback) {
             lock_guard g(m_lock);
             return remove_nolock(key, callback);
+        }
+
+        // Remove an object for `key` if `pred` returns `true`.
+        // @key   The object's key.
+        // @pred  A predicate function.
+        //
+        // This function removes an object assiciated with `key` if a
+        // predicate function returns `true`.  This function is thread-safe.
+        //
+        // @return `true` if object existed, `false` otherwise.
+        bool remove_if(const hash_key& key,
+                       std::function<bool(const hash_key&, T&)> pred) {
+            lock_guard g(m_lock);
+            for( auto it = m_objects.begin(); it != m_objects.end(); ++it) {
+                if( std::get<0>(*it) == key ) {
+                    if( pred(key, *std::get<1>(*it)) )
+                        m_objects.erase(it);
+                    return true;
+                }
+            }
+            return false;
         }
 
         // Collect garbage objects.
@@ -250,6 +272,19 @@ public:
     bool remove(const hash_key& key,
                 std::function<void(const hash_key&)> callback) {
         return get_bucket(key).remove(key, callback);
+    }
+
+    // Remove an object for `key` if `pred` returns `true`.
+    // @key   The object's key.
+    // @pred  A predicate function.
+    //
+    // This function removes an object assiciated with `key` if a
+    // predicate function returns `true`.  This function is thread-safe.
+    //
+    // @return `true` if object existed, `false` otherwise.
+    bool remove_if(const hash_key& key,
+                   std::function<bool(const hash_key&, T&)> pred) {
+        return get_bucket(key).remove_if(key, pred);
     }
 
     /* Bucket interfaces */

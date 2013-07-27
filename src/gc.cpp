@@ -53,74 +53,74 @@ void gc_thread::run() {
 
 void gc_thread::gc() {
     std::time_t t = g_stats.flush_time.load();
-    std::function<bool(const cybozu::hash_key&, object&)> pred;
-    if( t != 0 && std::time(nullptr) >= t ) {
-        pred = [this](const cybozu::hash_key& k, object&) ->bool {
+    bool flush = (t != 0) && (std::time(nullptr) >= t);
+    unsigned int evict_age = 0;
+    if( (! flush) &&
+        (g_stats.used_memory.load(std::memory_order_relaxed) >
+         g_config.memory_limit()) ) {
+        unsigned int oldest_age =
+            g_stats.oldest_age.load(std::memory_order_relaxed);
+        unsigned int one_hour = 3600U / g_config.gc_interval() + 1;
+        if( oldest_age < (one_hour * 2) ) {
+            evict_age = std::max(1U, oldest_age / 2);
+        } else {
+            evict_age = oldest_age - one_hour;
+        }
+        cybozu::logger::warning() << "Evicting object of "
+                                  << evict_age << " gc old";
+    }
+
+    auto pred =
+        [this,flush,evict_age](const cybozu::hash_key& k, object& obj) ->bool {
+        if( flush && (! obj.locked()) ) {
             if( ! m_slaves.empty() )
                 repl_delete(m_slaves, k);
             return true;
-        };
-    } else {
-        unsigned int evict_age = 0;
-        if( g_stats.used_memory.load(std::memory_order_relaxed) >
-            g_config.memory_limit() ) {
-            unsigned int oldest_age =
-                g_stats.oldest_age.load(std::memory_order_relaxed);
-            unsigned int one_hour = 3600U / g_config.gc_interval() + 1;
-            if( oldest_age < (one_hour * 2) ) {
-                evict_age = std::max(1U, oldest_age / 2);
-            } else {
-                evict_age = oldest_age - one_hour;
-            }
-            cybozu::logger::warning() << "Evicting object of "
-                                      << evict_age << " gc old";
         }
-        pred = [this,evict_age](const cybozu::hash_key& key, object& obj) ->bool {
-            if( evict_age > 0 && obj.age() >= evict_age ) {
-                ++ m_last_evictions;
-                if( ! m_slaves.empty() )
-                    repl_delete(m_slaves, key);
-                return true;
-            }
-            if( obj.expired() ) {
-                ++ m_last_expirations;
-                if( ! m_slaves.empty() )
-                    repl_delete(m_slaves, key);
-                return true;
-            }
+        if( evict_age > 0 && obj.age() >= evict_age && (! obj.locked()) ) {
+            ++ m_last_evictions;
+            if( ! m_slaves.empty() )
+                repl_delete(m_slaves, k);
+            return true;
+        }
+        if( obj.expired() ) {
+            ++ m_last_expirations;
+            if( ! m_slaves.empty() )
+                repl_delete(m_slaves, k);
+            return true;
+        }
 
-            obj.survive();
-            if( ++m_objects_in_bucket == 2 )
-                ++ m_conflicts;
-            ++ m_objects;
-            std::size_t size = obj.size();
-            if( size < 1024 ) {
-                ++ m_objects_under_1k;
-            } else if( size < 4096 ) {
-                ++ m_objects_under_4k;
-            } else if( size < (16 <<10) ) {
-                ++ m_objects_under_16k;
-            } else if( size < (64 <<10) ) {
-                ++ m_objects_under_64k;
-            } else if( size < (256 <<10) ) {
-                ++ m_objects_under_256k;
-            } else if( size < (1 <<20) ) {
-                ++ m_objects_under_1m;
-            } else if( size < (4 <<20) ) {
-                ++ m_objects_under_4m;
-            } else {
-                ++ m_objects_huge;
-            }
-            m_used_memory += sizeof(cybozu::hash_key) + key.length() + sizeof(object);
-            if( g_config.heap_data_limit() >= obj.size() )
-                m_used_memory += obj.size();
-            m_oldest_age = std::max(m_oldest_age, obj.age());
-            m_largest_object_size = std::max(m_largest_object_size, obj.size());
-            if( ! m_new_slaves.empty() )
-                repl_object(m_new_slaves, key, obj, false);
-            return false;
-        };
-    }
+        obj.survive();
+        if( ++m_objects_in_bucket == 2 )
+            ++ m_conflicts;
+        ++ m_objects;
+        std::size_t size = obj.size();
+        if( size < 1024 ) {
+            ++ m_objects_under_1k;
+        } else if( size < 4096 ) {
+            ++ m_objects_under_4k;
+        } else if( size < (16 <<10) ) {
+            ++ m_objects_under_16k;
+        } else if( size < (64 <<10) ) {
+            ++ m_objects_under_64k;
+        } else if( size < (256 <<10) ) {
+            ++ m_objects_under_256k;
+        } else if( size < (1 <<20) ) {
+            ++ m_objects_under_1m;
+        } else if( size < (4 <<20) ) {
+            ++ m_objects_under_4m;
+        } else {
+            ++ m_objects_huge;
+        }
+        m_used_memory += sizeof(cybozu::hash_key) + k.length() + sizeof(object);
+        if( g_config.heap_data_limit() >= obj.size() )
+            m_used_memory += obj.size();
+        m_oldest_age = std::max(m_oldest_age, obj.age());
+        m_largest_object_size = std::max(m_largest_object_size, obj.size());
+        if( ! m_new_slaves.empty() )
+            repl_object(m_new_slaves, k, obj, false);
+        return false;
+    };
 
     for( auto it = m_hash.begin(); it != m_hash.end(); ++it ) {
         m_objects_in_bucket = 0;

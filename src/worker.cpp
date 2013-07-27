@@ -2,6 +2,7 @@
 
 #include "constants.hpp"
 #include "replication.hpp"
+#include "sockets.hpp"
 #include "worker.hpp"
 
 #include <cybozu/logger.hpp>
@@ -19,6 +20,7 @@ namespace {
 
 using hash_map = cybozu::hash_map<yrmcds::object>;
 const char NON_NUMERIC[] = "CLIENT_ERROR cannot increment or decrement non-numeric value\x0d\x0a";
+const char NOT_LOCKED[] = "CLIENT_ERROR object is not locked or not found\x0d\x0a";
 
 } // anonymous namespace
 
@@ -50,6 +52,7 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
     hash_map::handler h = nullptr;
     hash_map::creator c = nullptr;
     std::function<void(const cybozu::hash_key&)> repl = nullptr;
+    std::function<bool(const cybozu::hash_key&, object&)> pred;
 
     switch( cmd.command() ) {
     case binary_command::Get:
@@ -60,14 +63,31 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
     case binary_command::GaTQ:
     case binary_command::GaTK:
     case binary_command::GaTKQ:
-        h = [&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+    case binary_command::LaG:
+    case binary_command::LaGQ:
+    case binary_command::LaGK:
+    case binary_command::LaGKQ:
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( (binary_command::LaG <= cmd.command()) &&
+                (cmd.command() <= binary_command::LaGKQ) ) {
+                if( obj.locked() ) {
+                    r.error( binary_status::Locked );
+                    return true;
+                }
+                obj.lock();
+                ((memcache_socket*)m_socket)->add_lock(k);
+            }
             if( obj.expired() ) return false;
             if( cmd.exptime() != binary_request::EXPTIME_NONE )
                 obj.touch( cmd.exptime() );
             cybozu::dynbuf buf(0);
             const cybozu::dynbuf& data = obj.data(buf);
             if( cmd.command() == binary_command::Get ||
-                cmd.command() == binary_command::GetQ ) {
+                cmd.command() == binary_command::GetQ ||
+                cmd.command() == binary_command::GaT ||
+                cmd.command() == binary_command::GaTQ ||
+                cmd.command() == binary_command::LaG ||
+                cmd.command() == binary_command::LaGQ ) {
                 r.get(obj.flags(), data, obj.cas_unique(), ! cmd.quiet());
             } else {
                 r.get(obj.flags(), data, obj.cas_unique(), ! cmd.quiet(),
@@ -76,9 +96,10 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
             return true;
         };
         std::tie(p, len) = cmd.key();
-        if( ! m_hash.apply(cybozu::hash_key(p, len), h, nullptr) &&
-            ! cmd.quiet() )
-            r.error( binary_status::NotFound );
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
+            if( ! cmd.quiet() || cmd.command() == binary_command::LaGQ )
+                r.error( binary_status::NotFound );
+        }
         break;
     case binary_command::Set:
     case binary_command::SetQ:
@@ -96,6 +117,10 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
             return;
         }
         h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                r.error( binary_status::Locked );
+                return true;
+            }
             if( obj.expired() ) {
                 if( cmd.cas_unique() != 0 ||
                     cmd.command() == binary_command::Replace ||
@@ -144,65 +169,119 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
             }
         }
         break;
+    case binary_command::RaU:
+    case binary_command::RaUQ:
+        std::tie(p, len) = cmd.key();
+        if( len > MAX_KEY_LENGTH ) {
+            r.error( binary_status::Invalid );
+            return;
+        }
+        if( std::get<1>(cmd.data()) > g_config.max_data_size() ) {
+            r.error( binary_status::TooLargeValue );
+            return;
+        }
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( ! obj.locked_by_self() ) {
+                r.error( binary_status::NotLocked );
+                return true;
+            }
+            if( cmd.cas_unique() != 0 &&
+                cmd.cas_unique() != obj.cas_unique() ) {
+                r.error( binary_status::Exists );
+                return true;
+            }
+            const char* p2;
+            std::size_t len2;
+            std::tie(p2, len2) = cmd.data();
+            obj.set(p2, len2, cmd.flags(), cmd.exptime());
+            obj.unlock();
+            ((memcache_socket*)m_socket)->remove_lock(k);
+            if( ! cmd.quiet() )
+                r.set( obj.cas_unique() );
+            if( ! m_slaves.empty() )
+                repl_object(m_slaves, k, obj);
+            return true;
+        };
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
+            if( cmd.cas_unique() != 0 ) {
+                r.error( binary_status::NotFound );
+            } else {
+                r.error( binary_status::NotStored );
+            }
+        }
+        break;
     case binary_command::Append:
     case binary_command::AppendQ:
         std::tie(p, len) = cmd.key();
-        h = [this,&cmd](const cybozu::hash_key& k, object& obj) -> bool {
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                r.error( binary_status::Locked );
+                return true;
+            }
             if( obj.expired() ) return false;
             const char* p2;
             std::size_t len2;
             std::tie(p2, len2) = cmd.data();
             obj.append(p2, len2);
+            if( ! cmd.quiet() )
+                r.success();
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj);
             return true;
         };
-        if( m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
-            if( ! cmd.quiet() )
-                r.success();
-        } else {
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
             r.error( binary_status::NotFound );
-        }
         break;
     case binary_command::Prepend:
     case binary_command::PrependQ:
         std::tie(p, len) = cmd.key();
-        h = [this,&cmd](const cybozu::hash_key& k, object& obj) -> bool {
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                r.error( binary_status::Locked );
+                return true;
+            }
             if( obj.expired() ) return false;
             const char* p2;
             std::size_t len2;
             std::tie(p2, len2) = cmd.data();
             obj.prepend(p2, len2);
+            if( ! cmd.quiet() )
+                r.success();
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj);
             return true;
         };
-        if( m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
-            if( ! cmd.quiet() )
-                r.success();
-        } else {
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
             r.error( binary_status::NotFound );
-        }
         break;
     case binary_command::Delete:
     case binary_command::DeleteQ:
         std::tie(p, len) = cmd.key();
-        if( ! m_slaves.empty() )
-            repl = [this](const cybozu::hash_key& k) {
-                repl_delete(m_slaves, k);
-            };
-        if( m_hash.remove(cybozu::hash_key(p, len), repl) ) {
+        pred = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                r.error( binary_status::Locked );
+                return false;
+            }
+            if( obj.locked_by_self() )
+                ((memcache_socket*)m_socket)->remove_lock(k);
             if( ! cmd.quiet() )
                 r.success();
-        } else {
-            if( ! cmd.quiet() )
-                r.error( binary_status::NotFound );
-        }
+            if( ! m_slaves.empty() )
+                repl_delete(m_slaves, k);
+            return true;
+        };
+        if( ! m_hash.remove_if(cybozu::hash_key(p, len), pred) &&
+            ! cmd.quiet() )
+            r.error( binary_status::NotFound );
         break;
     case binary_command::Increment:
     case binary_command::IncrementQ:
         std::tie(p, len) = cmd.key();
         h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                r.error( binary_status::Locked );
+                return true;
+            }
             if( obj.expired() ) return false;
             try {
                 std::uint64_t n = obj.incr( cmd.value() );
@@ -233,6 +312,10 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
     case binary_command::DecrementQ:
         std::tie(p, len) = cmd.key();
         h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                r.error( binary_status::Locked );
+                return true;
+            }
             if( obj.expired() ) return false;
             try {
                 std::uint64_t n = obj.decr( cmd.value() );
@@ -273,6 +356,47 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
         } else {
             r.error( binary_status::NotFound );
         }
+        break;
+    case binary_command::Lock:
+    case binary_command::LockQ:
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.expired() ) return false;
+            if( obj.locked() ) {
+                r.error( binary_status::Locked );
+                return true;
+            }
+            obj.lock();
+            ((memcache_socket*)m_socket)->add_lock(k);
+            if( ! cmd.quiet() )
+                r.success();
+            return true;
+        };
+        std::tie(p, len) = cmd.key();
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
+            r.error( binary_status::NotFound );
+        break;
+    case binary_command::Unlock:
+    case binary_command::UnlockQ:
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( ! obj.locked_by_self() ) {
+                r.error( binary_status::NotLocked );
+                return true;
+            }
+            obj.unlock();
+            ((memcache_socket*)m_socket)->remove_lock(k);
+            if( ! cmd.quiet() )
+                r.success();
+            return true;
+        };
+        std::tie(p, len) = cmd.key();
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
+            r.error( binary_status::NotFound );
+        break;
+    case binary_command::UnlockAll:
+    case binary_command::UnlockAllQ:
+        ((memcache_socket*)m_socket)->unlock_all();
+        if( ! cmd.quiet() )
+            r.success();
         break;
     case binary_command::Quit:
     case binary_command::QuitQ:
@@ -327,8 +451,7 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
     std::size_t len;
     hash_map::handler h = nullptr;
     hash_map::creator c = nullptr;
-    std::function<void(const cybozu::hash_key&)> repl = nullptr;
-    bool cas_result = false;
+    std::function<bool(const cybozu::hash_key&, object&)> pred;
 
     switch( cmd.command() ) {
     case text_command::SET:
@@ -343,7 +466,12 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
             r.error();
             return;
         }
-        h = [this,&cmd](const cybozu::hash_key& k, object& obj) -> bool {
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                if( ! cmd.no_reply() )
+                    r.locked();
+                return true;
+            }
             if( obj.expired() ) {
                 if( cmd.command() == text_command::REPLACE )
                     return false;
@@ -354,100 +482,109 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
             std::size_t len2;
             std::tie(p2, len2) = cmd.data();
             obj.set(p2, len2, cmd.flags(), cmd.exptime());
+            if( ! cmd.no_reply() )
+                r.stored();
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj);
             return true;
         };
         if( cmd.command() != text_command::REPLACE ) {
-            c = [this,&cmd](const cybozu::hash_key& k) -> std::unique_ptr<object> {
+            c = [this,&cmd,&r](const cybozu::hash_key& k)
+                -> std::unique_ptr<object> {
                 const char* p2;
                 std::size_t len2;
                 std::tie(p2, len2) = cmd.data();
                 auto t = std::unique_ptr<object>(
                     new object(p2, len2, cmd.flags(), cmd.exptime()) );
+                if( ! cmd.no_reply() )
+                    r.stored();
                 if( ! m_slaves.empty() )
                     repl_object(m_slaves, k, *t);
                 return std::move(t);
             };
         }
-        if( m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
-            if( ! cmd.no_reply() )
-                r.stored();
-        } else {
-            if( ! cmd.no_reply() )
-                r.not_stored();
-        }
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) && ! cmd.no_reply() )
+            r.not_stored();
         break;
     case text_command::APPEND:
         std::tie(p, len) = cmd.key();
-        h = [this,&cmd](const cybozu::hash_key& k, object& obj) -> bool {
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                if( ! cmd.no_reply() )
+                    r.locked();
+                return true;
+            }
             if( obj.expired() ) return false;
             const char* p2;
             std::size_t len2;
             std::tie(p2, len2) = cmd.data();
             obj.append(p2, len2);
+            if( ! cmd.no_reply() )
+                r.stored();
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj);
             return true;
         };
-        if( m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
-            if( ! cmd.no_reply() )
-                r.stored();
-        } else {
-            if( ! cmd.no_reply() )
-                r.not_stored();
-        }
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) && ! cmd.no_reply() )
+            r.not_stored();
         break;
     case text_command::PREPEND:
         std::tie(p, len) = cmd.key();
-        h = [this,&cmd](const cybozu::hash_key& k, object& obj) -> bool {
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                if( ! cmd.no_reply() )
+                    r.locked();
+                return true;
+            }
             if( obj.expired() ) return false;
             const char* p2;
             std::size_t len2;
             std::tie(p2, len2) = cmd.data();
             obj.prepend(p2, len2);
+            if( ! cmd.no_reply() )
+                r.stored();
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj);
             return true;
         };
-        if( m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
-            if( ! cmd.no_reply() )
-                r.stored();
-        } else {
-            if( ! cmd.no_reply() )
-                r.not_stored();
-        }
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) && ! cmd.no_reply() )
+            r.not_stored();
         break;
     case text_command::CAS:
         std::tie(p, len) = cmd.key();
-        h = [this,&cmd,&cas_result](const cybozu::hash_key& k, object& obj) -> bool {
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                if( ! cmd.no_reply() )
+                    r.locked();
+                return true;
+            }
             if( obj.expired() ) return false;
-            if( obj.cas_unique() != cmd.cas_unique() ) return true;
-            cas_result = true;
+            if( obj.cas_unique() != cmd.cas_unique() ) {
+                if( ! cmd.no_reply() )
+                    r.exists();
+                return true;
+            }
             const char* p2;
             std::size_t len2;
             std::tie(p2, len2) = cmd.data();
             obj.set(p2, len2, cmd.flags(), cmd.exptime());
+            if( ! cmd.no_reply() )
+                r.stored();
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj);
             return true;
         };
-        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
-            if( ! cmd.no_reply() )
-                r.not_found();
-        } else {
-            if( ! cmd.no_reply() ) {
-                if( cas_result ) {
-                    r.stored();
-                } else {
-                    r.exists();
-                }
-            }
-        }
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) && ! cmd.no_reply() )
+            r.not_found();
         break;
     case text_command::INCR:
         std::tie(p, len) = cmd.key();
         h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                if( ! cmd.no_reply() )
+                    r.locked();
+                return true;
+            }
             if( obj.expired() ) return false;
             try {
                 std::uint64_t n = obj.incr( cmd.value() );
@@ -465,14 +602,17 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
             }
             return true;
         };
-        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) &&
-            ! cmd.no_reply() ) {
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) && ! cmd.no_reply() )
             r.not_found();
-        }
         break;
     case text_command::DECR:
         std::tie(p, len) = cmd.key();
         h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                if( ! cmd.no_reply() )
+                    r.locked();
+                return true;
+            }
             if( obj.expired() ) return false;
             try {
                 std::uint64_t n = obj.decr( cmd.value() );
@@ -490,10 +630,8 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
             }
             return true;
         };
-        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) &&
-            ! cmd.no_reply() ) {
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) && ! cmd.no_reply() )
             r.not_found();
-        }
         break;
     case text_command::TOUCH:
         std::tie(p, len) = cmd.key();
@@ -514,17 +652,55 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
         break;
     case text_command::DELETE:
         std::tie(p, len) = cmd.key();
-        if( ! m_slaves.empty() )
-            repl = [this](const cybozu::hash_key& k) {
-                repl_delete(m_slaves, k);
-            };
-        if( m_hash.remove(cybozu::hash_key(p, len), repl) ) {
+        pred = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.locked_by_other() ) {
+                if( ! cmd.no_reply() )
+                    r.locked();
+                return false;
+            }
+            if( obj.locked_by_self() )
+                ((memcache_socket*)m_socket)->remove_lock(k);
             if( ! cmd.no_reply() )
                 r.deleted();
-        } else {
-            if( ! cmd.no_reply() )
-                r.not_found();
-        }
+            if( ! m_slaves.empty() )
+                repl_delete(m_slaves, k);
+            return true;
+        };
+        if( ! m_hash.remove_if(cybozu::hash_key(p, len), pred) &&
+            ! cmd.no_reply() )
+            r.not_found();
+        break;
+    case text_command::LOCK:
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( obj.expired() ) return false;
+            if( obj.locked() ) {
+                r.locked();
+                return true;
+            }
+            obj.lock();
+            ((memcache_socket*)m_socket)->add_lock(k);
+            r.ok();
+            return true;
+        };
+        std::tie(p, len) = cmd.key();
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
+            r.not_found();
+        break;
+    case text_command::UNLOCK:
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
+            if( ! obj.locked_by_self() ) return false;
+            obj.unlock();
+            ((memcache_socket*)m_socket)->remove_lock(k);
+            r.ok();
+            return true;
+        };
+        std::tie(p, len) = cmd.key();
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
+            r.send(NOT_LOCKED, sizeof(NOT_LOCKED) - 1, true);
+        break;
+    case text_command::UNLOCK_ALL:
+        ((memcache_socket*)m_socket)->unlock_all();
+        r.ok();
         break;
     case text_command::GET:
     case text_command::GETS:
@@ -592,6 +768,9 @@ void worker::run() {
         wait();
         if( m_exit.load(std::memory_order_relaxed) )
             return;
+
+        // set lock context for objects.
+        g_context = m_socket->fileno();
 
         const char* p = m_buffer.data();
         std::size_t len = m_buffer.size();
