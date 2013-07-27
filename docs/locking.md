@@ -93,7 +93,7 @@ Request:
     - MUST have key.
     - MUST NOT have value.
 
-Lock a object.  The response-packet contains no extra data, and the result
+Lock an object.  The response-packet contains no extra data, and the result
 of the operation is signaled through the status code.  Specifically,
 0x0001 (not found) is returned when the object does not exist, and 0x0010
 (locked) is returned when the object has been locked by another client.
@@ -137,12 +137,15 @@ Response (if found):
     - MAY have key.
     - MAY have value.
 
+Lock an object and get the data atomically.
+
 Optional extra data for Lock and Get request is 4 byte expiration time.
 If extra data exists, the object's expiration time will be renewed.
 
 The response is the same as that of `Get` or `GetK` command.  Specifically,
-if the object is locked by another client, the response with status code
-= 0x0010 (locked) will be returned.
+if the object is locked, the response with status code = 0x0010 (locked)
+will be returned.  `LaGQ` and `LaGKQ` will return the response with status
+code = 0x0001 (not found) if the object is not found.
 
 ### Replace and Unlock, Replace and Unlock Quietly
 
@@ -151,6 +154,9 @@ Request:
     - MUST have extras.
     - MUST have key.
     - MUST have value.
+
+Replace a locked object then unlock it atomically.  The client need to
+lock the object in advance.
 
 The extra data are the same as that of `Replace` binary command, i.e.,
 4 byte flags and 4 byte expiration time.

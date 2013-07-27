@@ -44,7 +44,8 @@ enum class text_command {
 class text_request final {
 public:
     text_request(const char* p, std::size_t len):
-        m_p(p), m_len(len) {
+        m_p(p), m_len(len)
+    {
         if( len == 0 || p == nullptr )
             throw std::logic_error("<text_request> bad ctor arguments");
         parse();
@@ -284,7 +285,8 @@ enum class binary_status: std::uint16_t {
 class binary_request final {
 public:
     binary_request(const char* p, std::size_t len):
-        m_p(p), m_len(len) {
+        m_p(p), m_len(len)
+    {
         if( len == 0 || p == nullptr )
             throw std::logic_error("<binary_request> bad ctor arguments");
         parse();

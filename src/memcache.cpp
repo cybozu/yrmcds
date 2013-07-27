@@ -583,6 +583,7 @@ void text_response::stats_settings() {
     os << "STAT virtual_ip " << g_config.vip().str() << CRLF;
     os << "STAT evictions on" << CRLF;
     os << "STAT cas_enabled on" << CRLF;
+    os << "STAT locking on" << CRLF;
     os << "STAT tmp_dir " << g_config.tempdir() << CRLF;
     os << "STAT buckets " << g_config.buckets() << CRLF;
     os << "STAT item_size_max " << g_config.max_data_size() << CRLF;
@@ -948,11 +949,13 @@ binary_response::stats_settings() {
     send_stat("virtual_ip", g_config.vip().str());
     send_stat("evictions", "on");
     send_stat("cas_enabled", "on");
+    send_stat("locking", "on");
     send_stat("tmp_dir", g_config.tempdir());
     send_stat("buckets", std::to_string(g_config.buckets()));
     send_stat("item_size_max", std::to_string(g_config.max_data_size()));
     send_stat("num_threads", std::to_string(g_config.workers()));
     send_stat("gc_interval", std::to_string(g_config.gc_interval()));
+    success();
 }
 
 void
@@ -967,6 +970,7 @@ binary_response::stats_items() {
               std::to_string(g_stats.conflicts.load(relaxed)));
     send_stat("items:1:largest",
               std::to_string(g_stats.largest_object_size.load(relaxed)));
+    success();
 }
 
 void
@@ -987,6 +991,7 @@ binary_response::stats_sizes() {
               std::to_string(g_stats.objects_under_4m.load(relaxed)));
     send_stat("huge",
               std::to_string(g_stats.objects_huge.load(relaxed)));
+    success();
 }
 
 void
@@ -1023,6 +1028,7 @@ binary_response::stats_general(std::size_t n_slaves) {
               std::to_string(g_stats.last_gc_elapsed.load(relaxed)));
     send_stat("total_gc_elapsed",
               std::to_string(g_stats.total_gc_elapsed.load(relaxed)));
+    success();
 }
 
 void

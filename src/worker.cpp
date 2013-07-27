@@ -96,8 +96,10 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
             return true;
         };
         std::tie(p, len) = cmd.key();
-        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) && ! cmd.quiet() )
-            r.error( binary_status::NotFound );
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
+            if( ! cmd.quiet() || cmd.command() == binary_command::LaGQ )
+                r.error( binary_status::NotFound );
+        }
         break;
     case binary_command::Set:
     case binary_command::SetQ:
