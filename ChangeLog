@@ -1,0 +1,11 @@
+version 0.9.1
+
+	* implements the server-side locking mechanism.
+	* new command line option "-v" shows the version and copyrights.
+	* fixed bugs: #2
+
+version 0.9.0
+
+	* The first public release.
+	* implements memcached ASCII and binary protocols.
+	* implements master-slave replication.
