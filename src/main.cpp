@@ -2,6 +2,7 @@
 // (C) 2013 Cybozu.
 
 #include "config.hpp"
+#include "constants.hpp"
 #include "server.hpp"
 
 #include <cybozu/filesystem.hpp>
@@ -18,8 +19,14 @@
 
 namespace {
 
+#include "../COPYING.hpp"
+
 void print_help() {
-    std::cout << "Usage: yrmcdsd [-h] [-f FILE]" << std::endl; 
+    std::cout << "Usage: yrmcdsd [-v] [-h] [-f FILE]" << std::endl; 
+}
+
+void print_version() {
+    std::cout << yrmcds::VERSION << std::endl << std::endl << COPYING;
 }
 
 bool load_config(const std::vector<std::string>& args) {
@@ -49,6 +56,11 @@ int main(int argc, char** argv) {
 
     if( std::find(args.begin(), args.end(), "-h") != args.end() ) {
         print_help();
+        return 0;
+    }
+
+    if( std::find(args.begin(), args.end(), "-v") != args.end() ) {
+        print_version();
         return 0;
     }
 

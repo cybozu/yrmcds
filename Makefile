@@ -25,7 +25,7 @@ EXE = yrmcdsd
 TESTS = $(patsubst %.cpp,%,$(wildcard test/*.cpp))
 LIB = libyrmcds.a
 LIB_OBJECTS = $(filter-out src/main.o,$(OBJECTS))
-PACKAGES = build-essential libgoogle-perftools-dev python-pip libmemcached-tools
+PACKAGES = build-essential libgoogle-perftools-dev python-pip
 
 all: $(EXE)
 lib: $(LIB)
@@ -41,6 +41,12 @@ install: $(EXE)
 	cp etc/yrmcds.conf $(DEFAULT_CONFIG)
 	cp $(EXE) $(PREFIX)/sbin/yrmcds
 	install -o nobody -g nogroup -m 644 /dev/null /var/log/yrmcds.log
+
+COPYING.hpp: COPYING
+	echo -n 'static char COPYING[] = R"(' > $@
+	cat $< >>$@
+	echo ')";' >>$@
+src/main.o: COPYING.hpp
 
 #lz4/lz4.c:
 #	svn checkout http://lz4.googlecode.com/svn/trunk/ lz4
@@ -72,7 +78,7 @@ serve: html
 	@cd html; python -m SimpleHTTPServer 8888 || true
 
 clean:
-	rm -f src/*.o cybozu/*.o test/*.o test/*.exe $(EXE) $(EXE).map $(LIB)
+	rm -f src/*.o cybozu/*.o test/*.o test/*.exe COPYING.hpp $(EXE) $(EXE).map $(LIB)
 
 setup:
 	sudo apt-get install -y --install-recommends $(PACKAGES)

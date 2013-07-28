@@ -13,3 +13,6 @@ lz4
 yrmcdsd
 yrmcdsd.map
 *.exe
+
+# misc.
+COPYING.hpp
