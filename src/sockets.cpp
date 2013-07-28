@@ -35,6 +35,7 @@ bool memcache_socket::on_readable() {
 
     std::size_t to_receive = MAX_RECVSIZE;
     char* p = buf.prepare(MAX_RECVSIZE);
+    bool ret = true;
     while( to_receive > 0 ) {
         ssize_t n = ::recv(m_fd, p, to_receive, 0);
         if( n == -1 ) {
@@ -44,18 +45,17 @@ bool memcache_socket::on_readable() {
                 continue;
             cybozu::throw_unix_error(errno, "recv");
         }
-        if( n == 0 )
-            return invalidate();
+        if( n == 0 ) {
+            ret = invalidate();
+            break;
+        }
         to_receive -= n;
         p += n;
     }
     if( to_receive == 0 )
         m_reactor->add_readable(*this);
-    if( to_receive == MAX_RECVSIZE ) {
-        // unlikely
-        m_reactor->add_readable(*this);
-        return true;
-    }
+    if( to_receive == MAX_RECVSIZE )
+        return ret;
     buf.consume(MAX_RECVSIZE - to_receive);
 
     m_busy.store(true, std::memory_order_relaxed);
@@ -64,7 +64,7 @@ bool memcache_socket::on_readable() {
                 m_pending.append(p, len);
             m_busy.store(false, std::memory_order_release);
         });
-    return true;
+    return ret;
 }
 
 bool repl_socket::on_readable() {
