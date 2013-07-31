@@ -127,7 +127,8 @@ void gc_thread::gc() {
         it->gc(pred);
     }
 
-    g_stats.flush_time.store(0);
+    if( flush )
+        g_stats.flush_time.store(0);
 }
 
 
