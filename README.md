@@ -10,22 +10,20 @@ The master server is elected dynamically from a group of servers, which
 eliminates static master/slave configurations.  By adopting virtual-IP
 based replication, no modifications to applications are required.
 
-Unlike [repcached][], yrmcds is not a patch for memcached.  No piece of
-code are shared between yrmcds and memcached.  yrmcds is developed for
+Unlike [repcached][], yrmcds is not a patch for memcached.  No code is
+shared between yrmcds and memcached.  yrmcds is developed for
 [cybozu.com][cybozu], a B2B cloud service widely adopted by companies in
 Japan.
 
 Features
 --------
 
-* Memcached text and binary protocols.  
-    Almost all commands are implemented including undocumented `Touch`,
-    `GaT`, and `GaTK` binary commands.
+* Memcached text and binary protocols.
 * [Server-side locking](docs/locking.md).
 * Large objects can be stored in temporary files, not in memory.
 * Virtual-IP based master-slave replication.
-* Automatic fail-over.
-* Automatic recovery of redundancy.
+    * Automatic fail-over.
+    * Automatic recovery of redundancy.
 
 See also [usage guide](docs/usage.md), [future plans](docs/future.md),
 [differences from memcached](docs/diffs.md), [design notes](docs/design.md)
