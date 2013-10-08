@@ -43,6 +43,10 @@ bool memcache_socket::on_readable() {
                 break;
             if( errno == EINTR )
                 continue;
+            if( errno == ECONNRESET ) {
+                ret = invalidate();
+                break;
+            }
             cybozu::throw_unix_error(errno, "recv");
         }
         if( n == 0 ) {
@@ -76,6 +80,8 @@ bool repl_socket::on_readable() {
                 break;
             if( errno == EINTR )
                 continue;
+            if( errno == ECONNRESET )
+                return invalidate();
             cybozu::throw_unix_error(errno, "recv");
         }
         if( n == 0 )
@@ -93,6 +99,10 @@ bool repl_client_socket::on_readable() {
                 break;
             if( errno == EINTR )
                 continue;
+            if( errno == ECONNRESET ) {
+                m_reactor->quit();
+                return invalidate();
+            }
             cybozu::throw_unix_error(errno, "recv");
         }
         if( n == 0 ) {
