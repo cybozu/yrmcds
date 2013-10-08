@@ -1,3 +1,7 @@
+version 0.9.2
+
+	* fixed bugs: #4, #6
+
 version 0.9.1
 
 	* implements the server-side locking mechanism.

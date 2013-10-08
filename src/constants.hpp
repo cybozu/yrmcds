@@ -28,7 +28,7 @@ const int           MAX_WORKERS        = 64;
 const std::size_t   MAX_REQUEST_LENGTH = 30 << 20; // 30 MiB
 const int           MAX_SLAVES         = 5;
 
-const char          VERSION[] = "yrmcds version 0.9.1";
+const char          VERSION[] = "yrmcds version 0.9.2";
 
 } // namespace yrmcds
 
