@@ -40,6 +40,7 @@ private:
     int m_worker_index = 0;
     std::time_t m_last_gc = 0;
     std::unique_ptr<gc_thread> m_gc_thread = nullptr;
+    int m_consecutive_gcs = 0;
     std::vector<cybozu::tcp_socket*> m_slaves;
     std::vector<cybozu::tcp_socket*> m_new_slaves;
     syncer m_syncer;

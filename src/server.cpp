@@ -54,12 +54,20 @@ inline bool server::gc_ready() {
     if( g_stats.used_memory.load(std::memory_order_relaxed) >
         g_config.memory_limit() ) return true;
 
-    // Do not run GC immediately when m_new_slaves is not empty.
-    // This is because if there are unstable slaves that try to connect
-    // to the master too frequently and if GC run immediately for
-    // each connection attempt, the system might be too loaded.
+    // Run GC when there are new slaves.
+    // In case there are unstable slaves that try to connect to
+    // the master too frequently, the number of consecutive GCs is limited.
+    if( ! m_new_slaves.empty() && m_consecutive_gcs < MAX_CONSECUTIVE_GCS ) {
+        ++m_consecutive_gcs;
+        return true;
+    }
 
-    return (now > (m_last_gc + g_config.gc_interval()));
+    if( now > (m_last_gc + g_config.gc_interval()) ) {
+        m_consecutive_gcs = 0;
+        return true;
+    }
+
+    return false;
 }
 
 inline bool server::reactor_gc_ready() {
