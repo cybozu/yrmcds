@@ -51,6 +51,9 @@ struct statistics {
     std::atomic<std::time_t> current_time;
     alignas(CACHELINE_SIZE)
     std::atomic<std::time_t> flush_time; // abused by "flush_all"
+    alignas(CACHELINE_SIZE)
+    std::atomic<std::uint64_t> curr_connections;
+    std::atomic<std::uint64_t> total_connections;
 };
 
 extern statistics g_stats;
