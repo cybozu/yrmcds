@@ -24,8 +24,8 @@ public:
                     std::function<void(const cybozu::hash_key&, bool)>& unlocker):
         cybozu::tcp_socket(fd), m_busy(false),
         m_finder(finder), m_unlocker(unlocker), m_pending(0) {
-        g_stats.curr_connections.fetch_add(1, std::memory_order_acq_rel);
-        g_stats.total_connections.fetch_add(1, std::memory_order_relaxed);
+        g_stats.curr_connections.fetch_add(1);
+        g_stats.total_connections.fetch_add(1);
     }
 
     void add_lock(const cybozu::hash_key& k) {
@@ -60,7 +60,7 @@ private:
         for( auto& ref: m_locks )
             m_unlocker(ref.get(), true); // force unlock
         m_locks.clear();
-        g_stats.curr_connections.fetch_sub(1, std::memory_order_acq_rel);
+        g_stats.curr_connections.fetch_sub(1);
         cybozu::tcp_socket::on_invalidate();
     }
     virtual bool on_readable() override final;
