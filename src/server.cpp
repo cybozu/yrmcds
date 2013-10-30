@@ -220,6 +220,7 @@ void server::serve_master() {
 
     try {
         m_reactor.run(callback);
+        cybozu::logger::info() << "Exiting";
 
     } catch( ... ) {
         stop();
