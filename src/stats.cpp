@@ -35,6 +35,8 @@ void statistics::reset() noexcept {
     total_objects = 0;
     current_time = std::time(nullptr);
     flush_time = 0;
+    curr_connections = 0;
+    total_connections = 0;
 }
 
 } // namespace yrmcds

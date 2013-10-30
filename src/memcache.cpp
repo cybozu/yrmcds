@@ -645,6 +645,8 @@ void text_response::stats_general(std::size_t n_slaves) {
        << ru.ru_utime.tv_usec << CRLF;
     os << "STAT rusage_system " << ru.ru_stime.tv_sec << ":"
        << ru.ru_stime.tv_usec << CRLF;
+    os << "STAT curr_connections " << g_stats.curr_connections.load(relaxed) << CRLF;
+    os << "STAT total_connections " << g_stats.total_connections.load(relaxed) << CRLF;
     os << "STAT curr_items " << g_stats.objects.load(relaxed) << CRLF;
     os << "STAT total_items " << g_stats.total_objects.load(relaxed) << CRLF;
     os << "STAT bytes " << g_stats.used_memory.load(relaxed) << CRLF;
@@ -1010,6 +1012,10 @@ binary_response::stats_general(std::size_t n_slaves) {
     send_stat("rusage_system",
               std::to_string(ru.ru_stime.tv_sec) + ":" +
               std::to_string(ru.ru_stime.tv_usec));
+    send_stat("curr_connections",
+              std::to_string(g_stats.curr_connections.load(relaxed)));
+    send_stat("total_connections",
+              std::to_string(g_stats.total_connections.load(relaxed)));
     send_stat("curr_items", std::to_string(g_stats.objects.load(relaxed)));
     send_stat("total_items",
               std::to_string(g_stats.total_objects.load(relaxed)));
