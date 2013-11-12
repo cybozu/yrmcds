@@ -1,3 +1,10 @@
+version 0.9.3
+
+	* enhances STATS to include the number of connections.
+	* replication starts quickly by eliminating wasteful wait.
+	* moves recv(2) from the reactor to workers, reducing the reactor load.
+	* fixed bugs: #10
+
 version 0.9.2
 
 	* fixed bugs: #4, #6
