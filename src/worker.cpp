@@ -75,7 +75,7 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
                     return true;
                 }
                 obj.lock();
-                ((memcache_socket*)m_socket)->add_lock(k);
+                m_socket->add_lock(k);
             }
             if( obj.expired() ) return false;
             if( cmd.exptime() != binary_request::EXPTIME_NONE )
@@ -195,7 +195,7 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
             std::tie(p2, len2) = cmd.data();
             obj.set(p2, len2, cmd.flags(), cmd.exptime());
             obj.unlock();
-            ((memcache_socket*)m_socket)->remove_lock(k);
+            m_socket->remove_lock(k);
             if( ! cmd.quiet() )
                 r.set( obj.cas_unique() );
             if( ! m_slaves.empty() )
@@ -263,7 +263,7 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
                 return false;
             }
             if( obj.locked_by_self() )
-                ((memcache_socket*)m_socket)->remove_lock(k);
+                m_socket->remove_lock(k);
             if( ! cmd.quiet() )
                 r.success();
             if( ! m_slaves.empty() )
@@ -366,7 +366,7 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
                 return true;
             }
             obj.lock();
-            ((memcache_socket*)m_socket)->add_lock(k);
+            m_socket->add_lock(k);
             if( ! cmd.quiet() )
                 r.success();
             return true;
@@ -383,7 +383,7 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
                 return true;
             }
             obj.unlock();
-            ((memcache_socket*)m_socket)->remove_lock(k);
+            m_socket->remove_lock(k);
             if( ! cmd.quiet() )
                 r.success();
             return true;
@@ -394,12 +394,13 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
         break;
     case binary_command::UnlockAll:
     case binary_command::UnlockAllQ:
-        ((memcache_socket*)m_socket)->unlock_all();
+        m_socket->unlock_all();
         if( ! cmd.quiet() )
             r.success();
         break;
     case binary_command::Quit:
     case binary_command::QuitQ:
+        m_socket->unlock_all();
         if( cmd.quiet() ) {
             m_socket->invalidate_and_close();
         } else {
@@ -659,7 +660,7 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
                 return false;
             }
             if( obj.locked_by_self() )
-                ((memcache_socket*)m_socket)->remove_lock(k);
+                m_socket->remove_lock(k);
             if( ! cmd.no_reply() )
                 r.deleted();
             if( ! m_slaves.empty() )
@@ -678,7 +679,7 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
                 return true;
             }
             obj.lock();
-            ((memcache_socket*)m_socket)->add_lock(k);
+            m_socket->add_lock(k);
             r.ok();
             return true;
         };
@@ -690,7 +691,7 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
         h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
             if( ! obj.locked_by_self() ) return false;
             obj.unlock();
-            ((memcache_socket*)m_socket)->remove_lock(k);
+            m_socket->remove_lock(k);
             r.ok();
             return true;
         };
@@ -699,7 +700,7 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
             r.send(NOT_LOCKED, sizeof(NOT_LOCKED) - 1, true);
         break;
     case text_command::UNLOCK_ALL:
-        ((memcache_socket*)m_socket)->unlock_all();
+        m_socket->unlock_all();
         r.ok();
         break;
     case text_command::GET:
@@ -755,6 +756,7 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
             r.ok();
         break;
     case text_command::QUIT:
+        m_socket->unlock_all();
         m_socket->invalidate_and_close();
         break;
     default:

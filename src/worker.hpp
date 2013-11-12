@@ -6,6 +6,7 @@
 
 #include "memcache.hpp"
 #include "object.hpp"
+#include "sockets.hpp"
 
 #include <cybozu/dynbuf.hpp>
 #include <cybozu/hash_map.hpp>
@@ -57,7 +58,7 @@ public:
         return m_buffer;
     }
 
-    void post_job(cybozu::tcp_socket* s,
+    void post_job(memcache_socket* s,
                   std::function<void(const char*, std::size_t)> saver) {
         m_running.store(true, std::memory_order_relaxed);
         m_socket = s;
@@ -80,7 +81,7 @@ private:
     slave_copier m_get_slaves;
     const int m_event;
     cybozu::dynbuf m_buffer;
-    cybozu::tcp_socket* m_socket = nullptr;
+    memcache_socket* m_socket = nullptr;
     std::function<void(const char*, std::size_t)> m_saver;
     std::vector<cybozu::tcp_socket*> m_slaves;
 
