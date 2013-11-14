@@ -774,33 +774,73 @@ void worker::run() {
         // set lock context for objects.
         g_context = m_socket->fileno();
 
-        const char* p = m_buffer.data();
-        std::size_t len = m_buffer.size();
-        while( len > 0 ) {
-            if( mc::is_binary_request(p) ) {
-                binary_request parser(p, len);
-                std::size_t c = parser.length();
-                if( c == 0 ) break;
-                p += c;
-                len -= c;
-                exec_cmd_bin(parser);
-            } else {
-                mc::text_request parser(p, len);
-                std::size_t c = parser.length();
-                if( c == 0 ) break;
-                p += c;
-                len -= c;
-                exec_cmd_txt(parser);
+        // load pending data
+        m_buffer.reset();
+        cybozu::dynbuf& pending = m_socket->get_buffer();
+        if( ! pending.empty() ) {
+            m_buffer.append(pending.data(), pending.size());
+            pending.reset();
+        }
+
+        while( true ) {
+            char* p = m_buffer.prepare(MAX_RECVSIZE);
+            ssize_t n = ::recv(m_socket->fileno(), p, MAX_RECVSIZE, 0);
+            if( n == -1 ) {
+                if( errno == EAGAIN || errno == EWOULDBLOCK )
+                    break;
+                if( errno == EINTR )
+                    continue;
+                if( errno == ECONNRESET ) {
+                    m_buffer.reset();
+                    m_socket->unlock_all();
+                    m_socket->invalidate_and_close();
+                    break;
+                }
+                cybozu::throw_unix_error(errno, "recv");
             }
+            if( n == 0 ) {
+                m_buffer.reset();
+                m_socket->unlock_all();
+                m_socket->invalidate_and_close();
+                break;
+            }
+            // if (n != -1) && (n != 0)
+            m_buffer.consume(n);
+
+            const char* head = m_buffer.data();
+            std::size_t len = m_buffer.size();
+            while( len > 0 ) {
+                if( mc::is_binary_request(head) ) {
+                    binary_request parser(head, len);
+                    std::size_t c = parser.length();
+                    if( c == 0 ) break;
+                    head += c;
+                    len -= c;
+                    exec_cmd_bin(parser);
+                } else {
+                    mc::text_request parser(head, len);
+                    std::size_t c = parser.length();
+                    if( c == 0 ) break;
+                    head += c;
+                    len -= c;
+                    exec_cmd_txt(parser);
+                }
+            }
+            if( len > MAX_REQUEST_LENGTH ) {
+                cybozu::logger::warning() << "denied too large request of "
+                                          << len << " bytes.";
+                m_buffer.reset();
+                m_socket->unlock_all();
+                m_socket->invalidate_and_close();
+                break;
+            }
+            m_buffer.erase(head - m_buffer.data());
         }
-        if( len > MAX_REQUEST_LENGTH ) {
-            cybozu::logger::warning() << "denied too large request of "
-                                      << len << " bytes.";
-            m_socket->invalidate_and_close();
-            m_saver(p, 0);
-        } else {
-            m_saver(p, len);
-        }
+
+        // recv returns EAGAIN, or some error happens.
+        if( m_buffer.size() > 0 )
+            pending.append(m_buffer.data(), m_buffer.size());
+        m_socket->release();
     }
 }
 

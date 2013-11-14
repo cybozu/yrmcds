@@ -43,10 +43,7 @@ public:
     }
 
     void wait() {
-        // to synchronize all read/write from/to m_buffer.
-        std::atomic_thread_fence(std::memory_order_seq_cst);
-
-        m_running.store(false, std::memory_order_relaxed);
+        m_running = false;
         std::uint64_t i;
         ssize_t n = ::read(m_event, &i, sizeof(i));
         if( n == -1 )
@@ -54,15 +51,9 @@ public:
         std::atomic_thread_fence(std::memory_order_acquire);
     }
 
-    cybozu::dynbuf& get_buffer() {
-        return m_buffer;
-    }
-
-    void post_job(memcache_socket* s,
-                  std::function<void(const char*, std::size_t)> saver) {
+    void post_job(memcache_socket* s) {
         m_running.store(true, std::memory_order_relaxed);
         m_socket = s;
-        m_saver = saver;
         m_slaves = m_get_slaves();
         notify();
     }
@@ -82,7 +73,6 @@ private:
     const int m_event;
     cybozu::dynbuf m_buffer;
     memcache_socket* m_socket = nullptr;
-    std::function<void(const char*, std::size_t)> m_saver;
     std::vector<cybozu::tcp_socket*> m_slaves;
 
     void notify() {

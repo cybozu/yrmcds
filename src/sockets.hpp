@@ -59,6 +59,16 @@ public:
         m_locks.clear();
     }
 
+    // Obtain the internal pending data buffer.
+    cybozu::dynbuf& get_buffer() {
+        return m_pending;
+    }
+
+    // Clear busy flag.
+    void release() {
+        m_busy = false;
+    }
+
 private:
     alignas(CACHELINE_SIZE)
     std::atomic<bool> m_busy;

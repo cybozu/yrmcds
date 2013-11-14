@@ -26,49 +26,9 @@ bool memcache_socket::on_readable() {
         return true;
     }
 
-    cybozu::dynbuf& buf = w->get_buffer();
-    buf.reset();
-    if( ! m_pending.empty() ) {
-        buf.append(m_pending.data(), m_pending.size());
-        m_pending.reset();
-    }
-
-    std::size_t to_receive = MAX_RECVSIZE;
-    char* p = buf.prepare(MAX_RECVSIZE);
-    bool ret = true;
-    while( to_receive > 0 ) {
-        ssize_t n = ::recv(m_fd, p, to_receive, 0);
-        if( n == -1 ) {
-            if( errno == EAGAIN || errno == EWOULDBLOCK )
-                break;
-            if( errno == EINTR )
-                continue;
-            if( errno == ECONNRESET ) {
-                ret = invalidate();
-                break;
-            }
-            cybozu::throw_unix_error(errno, "recv");
-        }
-        if( n == 0 ) {
-            ret = invalidate();
-            break;
-        }
-        to_receive -= n;
-        p += n;
-    }
-    if( to_receive == 0 )
-        m_reactor->add_readable(*this);
-    if( to_receive == MAX_RECVSIZE )
-        return ret;
-    buf.consume(MAX_RECVSIZE - to_receive);
-
-    m_busy.store(true, std::memory_order_relaxed);
-    w->post_job(this, [this](const char* p, std::size_t len) ->void {
-            if( len > 0 )
-                m_pending.append(p, len);
-            m_busy.store(false, std::memory_order_release);
-        });
-    return ret;
+    m_busy = true;
+    w->post_job(this);
+    return true;
 }
 
 bool repl_socket::on_readable() {

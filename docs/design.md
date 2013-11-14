@@ -52,58 +52,43 @@ So we adopt [the reactor pattern with a thread-pool][3] for the best
 performance.
 
 The reactor is implemented with asynchronous sockets and [epoll][] in
-edge-triggered mode.  The reactor thread receives data up to a certain
-limit for a thread to keep fairness between clients.
+edge-triggered mode.  Basically, with edge-triggered mode, a socket need
+to be read until [recv][] returns an `EWOULDBLOCK` error.  If, for some
+reason like fairness, not all available data are received from a socket,
+the reactor need to remember that socket to manually handle it later.
 
-Basically, with edge-triggered mode, a socket need to be read until
-[recv][] returns an `EWOULDBLOCK` error.  If the reactor stops receiving
-data before `EWOULDBLOCK`, the reactor need to remember that socket and
-receive data from the socket separately from epoll.
-To remember such sockets, a list of _readable_ socket is used.
+To remember such sockets, the reactor manages a list of _readable_ socket
+internally.
 
-Once some data received for a socket, the socket is dispatched to a worker
-thread.  The reactor will *not* receive data from the socket while the
-worker is processing data.  This is necessary to keep the order of
-received data.  Again, the list of readable socket is used to remember
-such sockets.  To indicate a socket being in use, each socket has an
-atomic flag that is set by the reactor thread and will be cleared by
-a worker thread.
+When the reactor detects some data are available for a socket, it
+dispatches the socket to an **idle** _worker_ thread.  The worker then
+receives and processes the data.  While a worker is handling a socket,
+that socket must not be passed to another worker to keep the protocol
+semantics.
 
-Every worker thread has a fairly large buffer to receive data, an atomic
-flag to indicate whether the worker is busy or idle, and an [eventfd][]
-file descriptor.
+To implement these, following properties are required:
 
-When the reactor finds some sockets are readable, it first tries to find
-an idle worker.  If there is no idle worker, the reactor gives up receiving
-by adding the readable sockets to the readable socket list.
-This is because the reactor thread must not be blocked; otherwise, deadlocks
-may happen when all the worker threads are blocking to send large data.
+* Every worker thread has an **idle** flag.
+* Every socket has a **busy** (in-use) flag.
 
-If the reactor finds an idle worker, it receives data from a socket into
-the buffer of the idle worker, set the busy flag of the worker and the
-socket, then finally notify the worker thread of new data by writing to
-the eventfd descriptor of the worker.
+Both flags are set by the reactor thread, and cleared by a worker thread.
 
-Once the worker finished to consume the data, the worker issues a full
-memory barrier, clears the socket's busy flag, clears the busy flag of
-the worker itself, then read from the eventfd descriptor to wait for
-the next job.
+If the reactor finds a socket is readable but the socket is busy or there
+are no idle workers, the socket is remembered in the previously stated
+readable socket list.  This keeps the reactor thread from being blocked.
 
-BTW, why does the reactor rather than a worker receive data?
-There are two reasons.  One is to eliminate a lock to protect a list of
-readable sockets.  Another is that it is difficult to keep the order
-of received data between worker threads.
-
-And why is eventfd rather than condition variables used?  This is because,
-unlike condition variables, eventfd remembers events so that workers
-never fail to catch events.
-
-Efficient allocation of readable lists
---------------------------------------
+### Efficient allocation of readable lists
 
 Readable lists used in the reactor can be implemented with very rare
 memory allocations by preparing two lists that pre-allocate a certain
 amount of memory.  Swap the list with another for each epoll loop.
+
+### Use of eventfd to dispatch jobs
+
+To notify an idle worker a new job (or to wait a new job), we use
+Linux-specific [eventfd][] rather than pipes or pthread's condition
+variables.  eventfd is lighter than pipe.  Unlike condition variables,
+eventfd remembers events so that workers never fail to catch events.
 
 The hash
 --------
@@ -225,7 +210,7 @@ descriptors and resource objects including sockets.  If another thread
 closes a file descriptor of a resource, the same file descriptor number
 may be reused by the operating system, which would break the mapping.
 
-### Strategy to destruct shared sockets
+### Strategy to reclaim shared sockets
 
 1. Sockets can be invalidated by any thread.  
     Invalidated sockets refuse further access to them.
