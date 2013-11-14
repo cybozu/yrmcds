@@ -840,6 +840,8 @@ void worker::run() {
         // recv returns EAGAIN, or some error happens.
         if( m_buffer.size() > 0 )
             pending.append(m_buffer.data(), m_buffer.size());
+
+        std::atomic_thread_fence(std::memory_order_release);
         m_socket->release();
     }
 }

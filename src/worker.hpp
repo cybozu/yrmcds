@@ -43,6 +43,7 @@ public:
     }
 
     void wait() {
+        std::atomic_thread_fence(std::memory_order_release);
         m_running = false;
         std::uint64_t i;
         ssize_t n = ::read(m_event, &i, sizeof(i));
@@ -76,7 +77,6 @@ private:
     std::vector<cybozu::tcp_socket*> m_slaves;
 
     void notify() {
-        std::atomic_thread_fence(std::memory_order_release);
         std::uint64_t i = 1;
         ssize_t n = ::write(m_event, &i, sizeof(i));
         if( n == -1 )
