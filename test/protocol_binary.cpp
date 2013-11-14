@@ -866,9 +866,6 @@ AUTOTEST(lock) {
     cybozu_assert( c.get_response(r) );
     ASSERT_COMMAND(r, Lock);
     ASSERT_OK(r);
-
-    c.quit(false);
-    cybozu_assert( c.get_response(r) );
 }
 
 AUTOTEST(unlock) {
@@ -915,9 +912,6 @@ AUTOTEST(unlock) {
     cybozu_assert( c2.get_response(r) );
     ASSERT_COMMAND(r, Lock);
     ASSERT_OK(r);
-
-    c2.quit(false);
-    cybozu_assert( c2.get_response(r) );
 }
 
 AUTOTEST(unlock_all) {
@@ -952,9 +946,6 @@ AUTOTEST(unlock_all) {
     c2.lock("def", false);
     cybozu_assert( c2.get_response(r) );
     ASSERT_OK(r);
-
-    c2.quit(false);
-    cybozu_assert( c2.get_response(r) );
 }
 
 AUTOTEST(lock_and_get) {
@@ -1002,9 +993,6 @@ AUTOTEST(lock_and_get) {
     ASSERT_OK(r);
     cybozu_assert( itemcmp(r.key(), "abc") );
     cybozu_assert( itemcmp(r.data(), "ghi") );
-
-    c2.quit(false);
-    cybozu_assert( c2.get_response(r) );
 }
 
 AUTOTEST(flush) {
