@@ -29,7 +29,7 @@ const std::size_t   MAX_REQUEST_LENGTH  = 30 << 20; // 30 MiB
 const int           MAX_SLAVES          = 5;
 const int           MAX_CONSECUTIVE_GCS = 3;
 
-const char          VERSION[] = "yrmcds version 0.9.3";
+const char          VERSION[] = "yrmcds version 0.9.4";
 
 } // namespace yrmcds
 

@@ -1,3 +1,7 @@
+version 0.9.4
+
+	* add proper memory fences.
+
 version 0.9.3
 
 	* enhances STATS to include the number of connections.
