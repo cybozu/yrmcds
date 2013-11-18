@@ -7,11 +7,14 @@
 #include "stats.hpp"
 #include "tempfile.hpp"
 
+#include <cybozu/util.hpp>
+
 #include <cstddef>
 #include <cstdint>
 #include <ctime>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 namespace yrmcds {
@@ -97,8 +100,13 @@ public:
     }
 
     void unlock(bool force = false) {
-        if( ! force && ! locked_by_self() )
-            throw std::logic_error("object::unlock bug");
+        if( ! force && ! locked_by_self() ) {
+            cybozu::dump_stack();
+            throw std::logic_error("object::unlock bug (m_lock=" +
+                                   std::to_string(m_lock) +
+                                   ", g_context=" +
+                                   std::to_string(g_context) + ")");
+        }
         m_lock = -1;
     }
 
