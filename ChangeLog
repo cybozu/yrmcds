@@ -1,3 +1,9 @@
+version 0.9.5
+
+	* change UID if "user" is defined in the configuration file.
+	* change GID if "group" is defined in the configuration file.
+	* fixed a memory synchronization bug.
+
 version 0.9.4
 
 	* add proper memory fences.
