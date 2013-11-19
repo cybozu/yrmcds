@@ -768,8 +768,7 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
 void worker::run() {
     while ( true ) {
         wait();
-        if( m_exit.load(std::memory_order_relaxed) )
-            return;
+        if( m_exit ) return;
 
         // set lock context for objects.
         g_context = m_socket->fileno();
@@ -841,7 +840,6 @@ void worker::run() {
         if( m_buffer.size() > 0 )
             pending.append(m_buffer.data(), m_buffer.size());
 
-        std::atomic_thread_fence(std::memory_order_release);
         m_socket->release();
     }
 }

@@ -39,28 +39,28 @@ public:
     void run();
 
     bool is_running() const noexcept {
-        return m_running.load(std::memory_order_relaxed);
+        return m_running.load(std::memory_order_acquire);
     }
 
     void wait() {
-        std::atomic_thread_fence(std::memory_order_release);
-        m_running = false;
+        m_running.store(false, std::memory_order_release);
         std::uint64_t i;
         ssize_t n = ::read(m_event, &i, sizeof(i));
         if( n == -1 )
             cybozu::throw_unix_error(errno, "read(eventfd)");
-        std::atomic_thread_fence(std::memory_order_acquire);
+        while( ! m_running.load(std::memory_order_acquire) );
     }
 
     void post_job(memcache_socket* s) {
-        m_running.store(true, std::memory_order_relaxed);
         m_socket = s;
         m_slaves = m_get_slaves();
+        m_running.store(true, std::memory_order_release);
         notify();
     }
 
     void stop() {
-        m_exit.store(true, std::memory_order_relaxed);
+        m_exit = true;
+        m_running.store(true, std::memory_order_release);
         notify();
         m_thread.join();
     }
@@ -68,7 +68,7 @@ public:
 private:
     alignas(CACHELINE_SIZE)
     std::atomic<bool> m_running;
-    std::atomic<bool> m_exit;
+    bool m_exit;
     cybozu::hash_map<object>& m_hash;
     slave_copier m_get_slaves;
     const int m_event;

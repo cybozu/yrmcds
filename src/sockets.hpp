@@ -66,7 +66,7 @@ public:
 
     // Clear busy flag.
     void release() {
-        m_busy = false;
+        m_busy.store(false, std::memory_order_release);
     }
 
 private:

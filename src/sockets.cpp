@@ -26,7 +26,7 @@ bool memcache_socket::on_readable() {
         return true;
     }
 
-    m_busy = true;
+    m_busy.store(true, std::memory_order_release);
     w->post_job(this);
     return true;
 }
