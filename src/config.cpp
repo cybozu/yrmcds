@@ -13,6 +13,8 @@ const char VIRTUAL_IP[] = "virtual_ip";
 const char PORT[] = "port";
 const char REPL_PORT[] = "repl_port";
 const char TEMP_DIR[] = "temp_dir";
+const char USER[] = "user";
+const char GROUP[] = "group";
 const char LOG_THRESHOLD[] = "log.threshold";
 const char LOG_FILE[] = "log.file";
 const char BUCKETS[] = "buckets";
@@ -83,6 +85,14 @@ void config::load(const std::string& path) {
             throw bad_config("Not a directory: " + m_tempdir);
         if( ! cybozu::is_writable(m_tempdir) )
             throw bad_config("Directory not writable: " + m_tempdir);
+    }
+
+    if( cp.exists(USER) ) {
+        m_user = cp.get(USER);
+    }
+
+    if( cp.exists(GROUP) ) {
+        m_group = cp.get(GROUP);
     }
 
     if( cp.exists(LOG_THRESHOLD) ) {

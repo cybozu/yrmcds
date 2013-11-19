@@ -9,9 +9,14 @@
 #include <cybozu/util.hpp>
 
 #include <algorithm>
+#include <grp.h>
 #include <iostream>
+#include <pwd.h>
 #include <string>
+#include <sys/prctl.h>
+#include <sys/types.h>
 #include <typeinfo>
+#include <unistd.h>
 #include <vector>
 
 #define QUOTE(str) #str
@@ -22,7 +27,7 @@ namespace {
 #include "../COPYING.hpp"
 
 void print_help() {
-    std::cout << "Usage: yrmcdsd [-v] [-h] [-f FILE]" << std::endl; 
+    std::cout << "Usage: yrmcdsd [-v] [-h] [-f FILE]" << std::endl;
 }
 
 void print_version() {
@@ -69,6 +74,46 @@ int main(int argc, char** argv) {
     try {
         if( ! load_config(args) )
             return 1;
+
+        // first, set group id (as root)
+        const std::string& g = yrmcds::g_config.group();
+        if( ! g.empty() ) {
+            if( getuid() != 0 ) {
+                std::cerr << "Ignored group configuration." << std::endl;
+            } else {
+                struct group* grp = getgrnam(g.c_str());
+                if( grp == nullptr ) {
+                    std::cerr << "No such group: " << g << std::endl;
+                    return 1;
+                }
+                if( setgid(grp->gr_gid) == -1 ) {
+                    std::cerr << "Failed to set group id!" << std::endl;
+                    return 1;
+                }
+            }
+        }
+
+        const std::string& u = yrmcds::g_config.user();
+        if( ! u.empty() ) {
+            if( getuid() != 0 ) {
+                std::cerr << "Ignored user configuration." << std::endl;
+            } else {
+                struct passwd* p = getpwnam(u.c_str());
+                if( p == nullptr ) {
+                    std::cerr << "No such user: " << u << std::endl;
+                    return 1;
+                }
+                if( setuid(p->pw_uid) == -1 ) {
+                    std::cerr << "Failed to set user id!" << std::endl;
+                    return 1;
+                }
+            }
+        }
+
+        // make it core dumpable
+        if( prctl(PR_SET_DUMPABLE, 1) == -1 ) {
+            std::cerr << "WARNING: failed to enable core dump!" << std::endl;
+        }
 
         // setup logger
         logger::set_threshold(yrmcds::g_config.threshold());

@@ -47,6 +47,12 @@ public:
     const std::string& tempdir() const noexcept {
         return m_tempdir;
     }
+    const std::string& user() const noexcept {
+        return m_user;
+    }
+    const std::string& group() const noexcept {
+        return m_group;
+    }
     const cybozu::severity threshold() const noexcept {
         return m_threshold;
     }
@@ -82,6 +88,8 @@ private:
     std::uint16_t m_port = DEFAULT_MEMCACHE_PORT;
     std::uint16_t m_repl_port = DEFAULT_REPL_PORT;
     std::string m_tempdir;
+    std::string m_user;
+    std::string m_group;
     cybozu::severity m_threshold = cybozu::severity::info;
     std::string m_logfile;
     unsigned int m_buckets = DEFAULT_BUCKETS;

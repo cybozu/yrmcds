@@ -23,6 +23,10 @@ Configuration
 You can change any of these configuration options through the
 configuration file:
 
+* `user` (Default: none)  
+    If set, the program will try to `setuid` to the given user.
+* `group` (Default: none)  
+    If set, the program will try to `setgid` to the given group.
 * `virtual_ip` (Default: 127.0.0.1)  
     The master's virtual IP address.
     Both IPv4 and IPv6 addresses are supported.
@@ -94,4 +98,3 @@ Since the master node is elected dynamically by [keepalived][], each
 [pacemaker]: http://clusterlabs.org/wiki/Main_Page
 [upstart]: http://upstart.ubuntu.com/
 [systemd]: http://www.freedesktop.org/wiki/Software/systemd/
-

@@ -9,14 +9,21 @@ respawn
 
 umask 077
 limit nofile 100000 100000
-
-setuid nobody
-setgid nogroup
+chdir /tmp
 
 pre-start script
     [ -d /var/tmp/yrmcds ] || mkdir /var/tmp/yrmcds
     chmod 700 /var/tmp/yrmcds
+    chown nobody:nogroup /var/tmp/yrmcds
     rm -f /var/tmp/yrmcds/*
+
+    # make sure keepalived init script was disabled with:
+    #update-rc.d keepalived disable
+    /etc/init.d/keepalived start
+end script
+
+post-stop script
+    /etc/init.d/keepalived stop
 end script
 
 exec /usr/local/sbin/yrmcdsd
