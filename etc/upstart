@@ -17,13 +17,17 @@ pre-start script
     chown nobody:nogroup /var/tmp/yrmcds
     rm -f /var/tmp/yrmcds/*
 
-    # make sure keepalived init script was disabled with:
-    #update-rc.d keepalived disable
+    # make sure keepalived init script was disabled.
+    # ex) sudo update-rc.d keepalived disable
     /etc/init.d/keepalived start
+    sleep 5
 end script
 
 post-stop script
     /etc/init.d/keepalived stop
+
+    # sleep a while to hand-off VIP
+    sleep 5
 end script
 
 exec /usr/local/sbin/yrmcdsd
