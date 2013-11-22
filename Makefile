@@ -8,10 +8,11 @@ CC = gcc
 CXX = g++
 CPPFLAGS = -I. -DCACHELINE_SIZE=$(shell getconf LEVEL1_DCACHE_LINESIZE)
 CPPFLAGS += -DDEFAULT_CONFIG=$(DEFAULT_CONFIG) -DUSE_TCMALLOC
-OPTFLAGS = -gdwarf-3 -O2 #-flto
+OPTFLAGS = -O2 #-flto
+DEBUGFLAGS = -gdwarf-3 #-fsanitize=address
 WARNFLAGS = -Wall -Wnon-virtual-dtor -Woverloaded-virtual
 CPUFLAGS = -march=core2 -mtune=corei7
-CXXFLAGS = -std=gnu++11 $(OPTFLAGS) $(shell getconf LFS_CFLAGS) $(WARNFLAGS) $(CPUFLAGS)
+CXXFLAGS = -std=gnu++11 $(OPTFLAGS) $(DEBUGFLAGS) $(shell getconf LFS_CFLAGS) $(WARNFLAGS) $(CPUFLAGS)
 LDFLAGS = -L. $(shell getconf LFS_LDFLAGS)
 LIBTCMALLOC = -ltcmalloc_minimal
 LDLIBS = $(shell getconf LFS_LIBS) -lyrmcds $(LIBTCMALLOC) -lpthread
@@ -48,14 +49,9 @@ COPYING.hpp: COPYING
 	echo ')";' >>$@
 src/main.o: COPYING.hpp
 
-#lz4/lz4.c:
-#	svn checkout http://lz4.googlecode.com/svn/trunk/ lz4
-#lz4/lz4.o: lz4/lz4.c
-#	$(CC) -std=c99 -O3 $(CPUFLAGS) -Ilz4 -c -o $@ $<
-
 $(OBJECTS): $(HEADERS)
 
-$(LIB): $(LIB_OBJECTS) #lz4/lz4.o
+$(LIB): $(LIB_OBJECTS)
 	$(AR) rcus $@ $^
 
 $(EXE): src/main.o $(LIB)
