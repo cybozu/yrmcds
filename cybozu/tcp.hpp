@@ -215,14 +215,6 @@ private:
 int setup_server_socket(const char* bind_addr, std::uint16_t port);
 
 
-// A helper function to accept connectins.
-// @fd   File descriptor of the listening socket.
-// @func Callback function for a new connection.
-//
-// This is a helper function for <tcp_server_socket> template.
-void accept_all(int fd, std::function<void(int, const ip_address&)> func);
-
-
 // A <cybozu::resource> subclass to accept new TCP connections.
 class tcp_server_socket: public resource {
 public:

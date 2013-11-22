@@ -411,47 +411,18 @@ int setup_server_socket(const char* bind_addr, std::uint16_t port) {
     return s;
 }
 
-void accept_all(int fd, std::function<void(int, const ip_address&)> func) {
-    while( true ) {
-        struct sockaddr addr;
-        socklen_t addrlen = sizeof(addr);
-#ifdef _GNU_SOURCE
-        int s = ::accept4(fd, &addr, &addrlen, SOCK_NONBLOCK|SOCK_CLOEXEC);
-#else
-        int s = ::accept(fd, &addr, &addrlen);
-        if( s != -1 ) {
-            int fl = fcntl(s, F_GETFL, 0);
-            if( fl == -1 ) fl = 0;
-            if( fcntl(s, F_SETFL, fl | O_NONBLOCK) == -1 )
-                throw_unix_error(errno, "fcntl(F_SETFL)");
-            fl = fcntl(s, F_GETFD, 0);
-            if( fl == -1 ) fl = 0;
-            if( fcntl(s, F_SETFD, fl | FD_CLOEXEC) == -1 )
-                throw_unix_error(errno, "fcntl(F_SETFD)");
-        }
-#endif
-        if( s == -1 ) {
-            if( errno == EINTR || errno == ECONNABORTED ) continue;
-            if( errno == EMFILE || errno == ENFILE ) {
-                logger::error() << "<tcp_server_socket::on_readable> Too many open files.";
-                continue;
-            }
-            if( errno == EAGAIN || errno == EWOULDBLOCK ) return;
-            throw_unix_error(errno, "accept");
-        }
-
-        func(s, ip_address(&addr));
-    }
-}
-
 bool tcp_server_socket::on_readable() {
     while( true ) {
-        struct sockaddr addr;
+        union {
+            struct sockaddr sa;
+            struct sockaddr_storage ss;
+        } addr;
         socklen_t addrlen = sizeof(addr);
 #ifdef _GNU_SOURCE
-        int s = ::accept4(m_fd, &addr, &addrlen, SOCK_NONBLOCK|SOCK_CLOEXEC);
+        int s = ::accept4(m_fd, &(addr.sa), &addrlen,
+                          SOCK_NONBLOCK|SOCK_CLOEXEC);
 #else
-        int s = ::accept(m_fd, &addr, &addrlen);
+        int s = ::accept(m_fd, &(addr.sa), &addrlen);
         if( s != -1 ) {
             int fl = fcntl(s, F_GETFL, 0);
             if( fl == -1 ) fl = 0;
@@ -480,7 +451,7 @@ bool tcp_server_socket::on_readable() {
         }
 
         try {
-            std::unique_ptr<tcp_socket> t = m_wrapper(s, ip_address(&addr));
+            std::unique_ptr<tcp_socket> t = m_wrapper(s, ip_address(&(addr.sa)));
             if( t.get() == nullptr ) {
                 ::close(s);
             } else {
