@@ -269,8 +269,8 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
         m_tmpbuf.resize(total);
         char* p = m_tmpbuf.data();
         for( int i = ind; i < iovcnt; ++i ) {
-            std::memcpy(p, v[ind].iov_base, v[ind].iov_len);
-            p += v[ind].iov_len;
+            std::memcpy(p, v[i].iov_base, v[i].iov_len);
+            p += v[i].iov_len;
         }
         return true;
     }
