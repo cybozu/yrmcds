@@ -10,6 +10,7 @@
 #include <cybozu/tcp.hpp>
 
 #include <signal.h>
+#include <thread>
 
 namespace yrmcds {
 
@@ -219,6 +220,8 @@ void server::serve_master() {
     };
 
     try {
+        cybozu::logger::info() << "Reactor thread id="
+                               << std::this_thread::get_id();
         m_reactor.run(callback);
         cybozu::logger::info() << "Exiting";
 

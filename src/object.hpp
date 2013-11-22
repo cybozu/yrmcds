@@ -13,8 +13,9 @@
 #include <cstdint>
 #include <ctime>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
-#include <string>
+#include <thread>
 #include <vector>
 
 namespace yrmcds {
@@ -102,14 +103,14 @@ public:
     void unlock(bool force = false) {
         if( ! force && ! locked_by_self() ) {
             cybozu::dump_stack();
-            throw std::logic_error("object::unlock bug (m_lock=" +
-                                   std::to_string(m_lock) +
-                                   ", m_unlocker=" +
-                                   std::to_string(m_unlocker) +
-                                   ", g_context=" +
-                                   std::to_string(g_context) + ")");
+            std::ostringstream os;
+            os << "object::unlock bug (m_lock=" << m_lock
+               << ", g_context=" << g_context
+               << ", unlocked thread=" << m_unlocker
+               << ", this thread=" << std::this_thread::get_id();
+            throw std::logic_error(os.str());
         }
-        m_unlocker = g_context;
+        m_unlocker = std::this_thread::get_id();
         m_lock = -1;
     }
 
@@ -137,7 +138,7 @@ private:
     std::uint64_t m_cas = 1;
     mutable unsigned int m_gc_old = 0;
     int m_lock = -1;
-    int m_unlocker = -2;
+    std::thread::id m_unlocker;
 };
 
 } // namespace yrmcds
