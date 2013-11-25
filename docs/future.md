@@ -14,13 +14,6 @@ Future Plans
     **false-positives** as well as (harmless) false-negatives.  
     <p />
 
-* Improve <cybozu::hash_map>.  
-    Possible optimizations are:
-    - Use a simple linked-list in a bucket instead of <std::vector>.
-    - Require move-ability of objects to eliminate <std::unique_ptr>.
-    - Pass function objects by reference.  
-    <p />
-
 * Allow eviction to be disabled and honor the memory limit.  
     This is a requirement for in-memory database.  
     <p />
