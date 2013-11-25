@@ -148,17 +148,16 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
         if( cmd.command() != binary_command::Replace &&
             cmd.command() != binary_command::ReplaceQ &&
             cmd.cas_unique() == 0 ) {
-            c = [this,&cmd,&r](const cybozu::hash_key& k) -> std::unique_ptr<object> {
+            c = [this,&cmd,&r](const cybozu::hash_key& k) -> object {
                 const char* p2;
                 std::size_t len2;
                 std::tie(p2, len2) = cmd.data();
-                auto t = std::unique_ptr<object>(
-                    new object(p2, len2, cmd.flags(), cmd.exptime()) );
+                object o(p2, len2, cmd.flags(), cmd.exptime());
                 if( ! cmd.quiet() )
-                    r.set( t->cas_unique() );
+                    r.set( o.cas_unique() );
                 if( ! m_slaves.empty() )
-                    repl_object(m_slaves, k, *t);
-                return std::move(t);
+                    repl_object(m_slaves, k, o);
+                return std::move(o);
             };
         }
         if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
@@ -295,14 +294,13 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
             return true;
         };
         if( cmd.exptime() != binary_request::EXPTIME_NONE ) {
-            c = [this,&cmd,&r](const cybozu::hash_key& k) -> std::unique_ptr<object> {
-                auto t = std::unique_ptr<object>(
-                    new object(cmd.initial(), cmd.exptime()) );
+            c = [this,&cmd,&r](const cybozu::hash_key& k) -> object {
+                object o(cmd.initial(), cmd.exptime());
                 if( ! cmd.quiet() )
-                    r.incdec( cmd.initial(), t->cas_unique() );
+                    r.incdec( cmd.initial(), o.cas_unique() );
                 if( ! m_slaves.empty() )
-                    repl_object(m_slaves, k, *t);
-                return std::move(t);
+                    repl_object(m_slaves, k, o);
+                return std::move(o);
             };
         }
         if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
@@ -329,14 +327,13 @@ inline void worker::exec_cmd_bin(const binary_request& cmd) {
             return true;
         };
         if( cmd.exptime() != binary_request::EXPTIME_NONE ) {
-            c = [this,&cmd,&r](const cybozu::hash_key& k) -> std::unique_ptr<object> {
-                auto t = std::unique_ptr<object>(
-                    new object(cmd.initial(), cmd.exptime()) );
+            c = [this,&cmd,&r](const cybozu::hash_key& k) -> object {
+                object o(cmd.initial(), cmd.exptime());
                 if( ! cmd.quiet() )
-                    r.incdec( cmd.initial(), t->cas_unique() );
+                    r.incdec( cmd.initial(), o.cas_unique() );
                 if( ! m_slaves.empty() )
-                    repl_object(m_slaves, k, *t);
-                return std::move(t);
+                    repl_object(m_slaves, k, o);
+                return std::move(o);
             };
         }
         if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
@@ -490,18 +487,16 @@ inline void worker::exec_cmd_txt(const mc::text_request& cmd) {
             return true;
         };
         if( cmd.command() != text_command::REPLACE ) {
-            c = [this,&cmd,&r](const cybozu::hash_key& k)
-                -> std::unique_ptr<object> {
+            c = [this,&cmd,&r](const cybozu::hash_key& k) -> object {
                 const char* p2;
                 std::size_t len2;
                 std::tie(p2, len2) = cmd.data();
-                auto t = std::unique_ptr<object>(
-                    new object(p2, len2, cmd.flags(), cmd.exptime()) );
+                object o(p2, len2, cmd.flags(), cmd.exptime());
                 if( ! cmd.no_reply() )
                     r.stored();
                 if( ! m_slaves.empty() )
-                    repl_object(m_slaves, k, *t);
-                return std::move(t);
+                    repl_object(m_slaves, k, o);
+                return std::move(o);
             };
         }
         if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) && ! cmd.no_reply() )

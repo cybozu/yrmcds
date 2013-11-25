@@ -30,11 +30,18 @@ extern thread_local int g_context;
 //
 // This class represents an object in the hash table.
 // Large objects are stored in temporary files.
-class object {
+class object final {
 public:
     object(const char* p, std::size_t len,
            std::uint32_t flags_, std::time_t exptime);
     object(std::uint64_t initial, std::time_t exptime);
+    object(const object&) = delete;
+    object(object&& rhs) noexcept:
+        m_length(rhs.m_length), m_data(std::move(rhs.m_data)),
+        m_file(std::move(rhs.m_file)), m_flags(rhs.m_flags),
+        m_exptime(rhs.m_exptime), m_cas(rhs.m_cas) {}
+    object& operator=(const object&) = delete;
+    object& operator=(object&&) = delete;
 
     // Exception thrown by <incr> or <decr>.
     struct not_a_number: public std::runtime_error {

@@ -95,12 +95,11 @@ std::size_t repl_recv(const char* p, std::size_t len,
                 obj.set(p2, len2, parser.flags(), parser.exptime());
                 return true;
             };
-            c = [&parser](const cybozu::hash_key&) -> std::unique_ptr<object> {
+            c = [&parser](const cybozu::hash_key&) -> object {
                 const char* p2;
                 std::size_t len2;
                 std::tie(p2, len2) = parser.data();
-                return std::unique_ptr<object>(
-                    new object(p2, len2, parser.flags(), parser.exptime()) );
+                return object(p2, len2, parser.flags(), parser.exptime());
             };
             std::tie(key_data, key_len) = parser.key();
             cybozu::logger::debug() << "repl: set "

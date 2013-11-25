@@ -39,8 +39,13 @@ public:
             _free(m_p);
     }
     dynbuf(const dynbuf&) = delete;
+    dynbuf(dynbuf&& rhs) noexcept:
+        m_p(nullptr), m_default_capacity(rhs.m_default_capacity),
+        m_capacity(rhs.m_capacity), m_used(rhs.m_used)
+    {
+        std::swap(m_p, rhs.m_p);
+    }
     dynbuf& operator=(const dynbuf&) = delete;
-    dynbuf(dynbuf&&) noexcept = delete;
     dynbuf& operator=(dynbuf&&) = delete;
 
     void swap(dynbuf& other) noexcept {
