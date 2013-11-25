@@ -20,8 +20,8 @@ bool reader(const cybozu::hash_key&, std::string& s) {
     return true;
 }
 
-std::unique_ptr<std::string> creator(const cybozu::hash_key& k) {
-    return std::unique_ptr<std::string>( new std::string("hoge") );
+std::string creator(const cybozu::hash_key& k) {
+    return std::string("hoge");
 }
 
 const char key1[] = "abc";
@@ -49,5 +49,7 @@ int main(int argc, char** argv) {
                 std::cout << "collecting " << s << std::endl;
                 return s.size() == 4; });
     }
+    std::cerr << m.apply(hkey1, reader, nullptr) << std::endl;
+    std::cerr << m.apply(hkey2, reader, nullptr) << std::endl;
     return 0;
 }

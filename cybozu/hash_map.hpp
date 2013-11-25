@@ -11,6 +11,8 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace cybozu {
@@ -91,60 +93,74 @@ unsigned int nearest_prime(unsigned int n) noexcept;
 // Highly concurrent object hash map.
 //
 // Keys for this hash map are <hash_key> whereas objects are of type `T`.
+// `T` must be either move-constructible or copyable.
 //
 // Each bucket in the hash map has its unique mutex to guard itself.
 // This design reduces contensions between threads drastically in exchange
 // for some functions such as dynamic resizing of the number of buckets.
 template<typename T>
 class hash_map {
+    static_assert( std::is_move_constructible<T>::value ||
+                   std::is_copy_constructible<T>::value,
+                   "T must be move- or copy- constructible." );
+
 public:
+    typedef std::function<bool(const hash_key&, T&)> handler;
+    typedef std::function<T(const hash_key&)> creator;
+
     // Hash map bucket.
     //
     // Each hash value corresponds to a bucket.
     // Member functions whose names end with `_nolock` are not thread-safe.
     class bucket {
+
+        struct item {
+            const hash_key key;
+            T object;
+            item* next;
+
+            // perfect forwarding
+            template<typename X>
+            item(const hash_key& k, X&& o, item* n):
+                key(k), object(std::forward<X>(o)), next(n) {}
+        };
+
     public:
-        bucket() {
-            m_objects.reserve(2);
-        }
+        bucket(): m_objects(nullptr) {}
 
         // Handle or insert an object.
-        // @key      The object's key.
-        // @handler  A function to handle an existing object.
-        // @creator  A function to create a new object.
+        // @key  The object's key.
+        // @h    A function to handle an existing object.
+        // @c    A function to create a new object.
         //
         // This function can be used to handle an existing object, or
         // to insert a new object when such an object does not exist.
         //
-        // If `handler` is not `nullptr` and there is no existing object
-        // for `key`, `false` is returned.  If `creator` is not `nullptr`
-        // and an object for `key` exists, `false` is returned.
+        // If `h` is not `nullptr` and there is no existing object for
+        // `key`, `false` is returned.  If `c` is not `nullptr` and an
+        // object for `key` exists, `false` is returned.
         //
-        // `handler` can return `false` if it failed to handle the object.
-        // Otherwise, `handler` should return `true`.
+        // `h` can return `false` if it failed to handle the object.
+        // Otherwise, `h` should return `true`.
         //
         // @return `true` if succeeded, `false` otherwise.
         bool apply_nolock(const hash_key& key,
-                          std::function<bool(const hash_key&, T&)> handler,
-                          std::function<std::unique_ptr<T>(const hash_key&)> creator) {
-            for( item& t: m_objects ) {
-                const hash_key& t_key = std::get<0>(t);
-                if( t_key == key ) {
-                    if( ! handler ) return false;
-                    return handler(t_key, *std::get<1>(t));
+                          const handler& h, const creator& c) {
+            for( item* p = m_objects; p != nullptr; p = p->next ) {
+                if( p->key == key ) {
+                    if( ! h ) return false;
+                    return h(p->key, p->object);
                 }
             }
-            if( ! creator ) return false;
-            m_objects.emplace_back(key, creator(key));
+            if( ! c ) return false;
+            m_objects = new item(key, c(key), m_objects);
             return true;
         }
 
         // Thread-safe <apply_nolock>.
-        bool apply(const hash_key& key,
-                   std::function<bool(const hash_key&, T&)> handler,
-                   std::function<std::unique_ptr<T>(const hash_key&)> creator) {
+        bool apply(const hash_key& key, const handler& h, const creator& c) {
             lock_guard g(m_lock);
-            return apply_nolock(key, handler, creator);
+            return apply_nolock(key, h, c);
         }
 
         // Remove an object for `key`.
@@ -157,10 +173,12 @@ public:
         //
         // @return `true` if successfully removed, `false` otherwise.
         bool remove_nolock(const hash_key& key,
-                           std::function<void(const hash_key&)> callback) {
-            for( auto it = m_objects.begin(); it != m_objects.end(); ++it) {
-                if( std::get<0>(*it) == key ) {
-                    m_objects.erase(it);
+                           const std::function<void(const hash_key&)>& callback) {
+            for( item** p = &m_objects; *p != nullptr; p = &((*p)->next) ) {
+                if( (*p)->key == key ) {
+                    item* to_delete = *p;
+                    *p = to_delete->next;
+                    delete to_delete;
                     if( callback ) callback(key);
                     return true;
                 }
@@ -170,7 +188,7 @@ public:
 
         // Thread-safe <remove_nolock>.
         bool remove(const hash_key& key,
-                    std::function<void(const hash_key&)> callback) {
+                    const std::function<void(const hash_key&)>& callback) {
             lock_guard g(m_lock);
             return remove_nolock(key, callback);
         }
@@ -184,12 +202,15 @@ public:
         //
         // @return `true` if object existed, `false` otherwise.
         bool remove_if(const hash_key& key,
-                       std::function<bool(const hash_key&, T&)> pred) {
+                       const std::function<bool(const hash_key&, T&)>& pred) {
             lock_guard g(m_lock);
-            for( auto it = m_objects.begin(); it != m_objects.end(); ++it) {
-                if( std::get<0>(*it) == key ) {
-                    if( pred(key, *std::get<1>(*it)) )
-                        m_objects.erase(it);
+            for( item** p = &m_objects; *p != nullptr; p = &((*p)->next) ) {
+                item* to_delete = *p;
+                if( to_delete->key == key ) {
+                    if( pred(key, to_delete->object) ) {
+                        *p = to_delete->next;
+                        delete to_delete;
+                    }
                     return true;
                 }
             }
@@ -201,33 +222,36 @@ public:
         //
         // This function collects garbage objects.
         // Objects for which `pred` returns `true` will be removed.
-        void gc(std::function<bool(const hash_key&, T&)> pred) {
+        void gc(const std::function<bool(const hash_key&, T&)>& pred) {
             lock_guard g(m_lock);
-            for( auto it = m_objects.begin(); it != m_objects.end(); ) {
-                if( pred(std::get<0>(*it), *std::get<1>(*it)) ) {
-                    it = m_objects.erase(it);
+            for( item** p = &m_objects; *p != nullptr; ) {
+                item* to_delete = *p;
+                if( pred(to_delete->key, to_delete->object) ) {
+                    *p = to_delete->next;
+                    delete to_delete;
                 } else {
-                    ++it;
+                    p = &(to_delete->next);
                 }
             }
         }
 
         // Clear objects in this bucket.
         void clear_nolock() {
-            m_objects.clear();
+            while( m_objects ) {
+                item* next = m_objects->next;
+                delete m_objects;
+                m_objects = next;
+            }
         }
     private:
-        using item = std::tuple<hash_key, std::unique_ptr<T>>;
         using lock_guard = std::lock_guard<std::mutex>;
-        alignas(CACHELINE_SIZE) mutable std::mutex m_lock;
-        std::vector<item> m_objects;
+        alignas(CACHELINE_SIZE)
+        mutable std::mutex m_lock;
+        item* m_objects;
     };
 
     hash_map(unsigned int buckets):
         m_size(nearest_prime(buckets)), m_buckets(m_size) {}
-
-    typedef std::function<bool(const hash_key&, T&)> handler;
-    typedef std::function<std::unique_ptr<T>(const hash_key&)> creator;
 
     // Handle or insert an object.
     // @key      The object's key.
@@ -237,20 +261,21 @@ public:
     // This function can be used to handle an existing object, or
     // to insert a new object when such an object does not exist.
     //
-    // If `handler` is not `nullptr` and there is no existing object
-    // for `key`, `false` is returned.  If `creator` is not `nullptr`
-    // and an object for `key` exists, `false` is returned.
+    // If `h` is not `nullptr` and there is no existing object for
+    // `key`, `false` is returned.  If `c` is not `nullptr` and an
+    // object for `key` exists, `false` is returned.
     //
-    // `handler` can return `false` if it failed to handle the object.
-    // Otherwise, `handler` should return `true`.
+    // `h` can return `false` if it failed to handle the object.
+    // Otherwise, `h` should return `true`.
     //
     // @return `true` if succeeded, `false` otherwise.
-    bool apply_nolock(const hash_key& key, handler h, creator c) {
+    bool apply_nolock(const hash_key& key,
+                      const handler& h, const creator& c) {
         return get_bucket(key).apply_nolock(key, h, c);
     }
 
     // Thread-safe <apply_nolock>.
-    bool apply(const hash_key& key, handler h, creator c) {
+    bool apply(const hash_key& key, const handler& h, const creator& c) {
         return get_bucket(key).apply(key, h, c);
     }
 
@@ -264,13 +289,13 @@ public:
     //
     // @return `true` if successfully removed, `false` otherwise.
     bool remove_nolock(const hash_key& key,
-                       std::function<void(const hash_key&)> callback) {
+                       const std::function<void(const hash_key&)>& callback) {
         return get_bucket(key).remove_nolock(key, callback);
     }
 
     // Thread-safe <remove_nolock>.
     bool remove(const hash_key& key,
-                std::function<void(const hash_key&)> callback) {
+                const std::function<void(const hash_key&)>& callback) {
         return get_bucket(key).remove(key, callback);
     }
 
@@ -283,7 +308,7 @@ public:
     //
     // @return `true` if object existed, `false` otherwise.
     bool remove_if(const hash_key& key,
-                   std::function<bool(const hash_key&, T&)> pred) {
+                   const std::function<bool(const hash_key&, T&)>& pred) {
         return get_bucket(key).remove_if(key, pred);
     }
 
