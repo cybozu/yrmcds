@@ -8,11 +8,11 @@
 #include "gc.hpp"
 #include "object.hpp"
 #include "sync.hpp"
-#include "worker.hpp"
 
 #include <cybozu/hash_map.hpp>
 #include <cybozu/ip_address.hpp>
 #include <cybozu/reactor.hpp>
+#include <cybozu/worker.hpp>
 
 #include <ctime>
 #include <functional>
@@ -36,7 +36,7 @@ private:
     bool m_signaled = false;
     cybozu::hash_map<object> m_hash;
     cybozu::reactor m_reactor;
-    std::vector<std::unique_ptr<worker>> m_workers;
+    std::vector<std::unique_ptr<cybozu::worker>> m_workers;
     int m_worker_index = 0;
     std::time_t m_last_gc = 0;
     std::unique_ptr<gc_thread> m_gc_thread = nullptr;
@@ -44,8 +44,7 @@ private:
     std::vector<cybozu::tcp_socket*> m_slaves;
     std::vector<cybozu::tcp_socket*> m_new_slaves;
     syncer m_syncer;
-    std::function<worker*()> m_finder;
-    std::function<void(const cybozu::hash_key&, bool)> m_unlocker;
+    std::function<cybozu::worker*()> m_finder;
 
     bool gc_ready();
     bool reactor_gc_ready();
