@@ -73,6 +73,7 @@ private:
     const std::vector<cybozu::tcp_socket*>& m_slaves_origin;
     std::vector<cybozu::tcp_socket*> m_slaves;
     cybozu::worker::job m_recvjob;
+    cybozu::worker::job m_sendjob;
     std::vector<std::reference_wrapper<const cybozu::hash_key>> m_locks;
 
     virtual void on_invalidate() override final {
@@ -83,6 +84,7 @@ private:
         cybozu::tcp_socket::on_invalidate();
     }
     virtual bool on_readable() override final;
+    virtual bool on_writable() override final;
 };
 
 

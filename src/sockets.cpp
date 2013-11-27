@@ -111,6 +111,11 @@ memcache_socket::memcache_socket(int fd,
 
         m_busy.store(false, std::memory_order_release);
     };
+
+    m_sendjob = [this](cybozu::dynbuf&) {
+        if( ! write_pending_data() )
+            invalidate_and_close();
+    };
 }
 
 memcache_socket::~memcache_socket() {
@@ -142,6 +147,17 @@ bool memcache_socket::on_readable() {
 
     m_busy.store(true, std::memory_order_release);
     w->post_job(m_recvjob);
+    return true;
+}
+
+bool memcache_socket::on_writable() {
+    cybozu::worker* w = m_finder();
+    if( w == nullptr ) {
+        // if there is no idle worker, fallback to the default.
+        return cybozu::tcp_socket::on_writable();
+    }
+
+    w->post_job(m_sendjob);
     return true;
 }
 
