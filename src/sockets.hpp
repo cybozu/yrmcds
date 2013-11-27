@@ -92,13 +92,24 @@ class object;
 
 class repl_socket: public cybozu::tcp_socket {
 public:
-    repl_socket(int fd):
-        cybozu::tcp_socket(fd, 30), m_recvbuf(MAX_RECVSIZE) {}
+    repl_socket(int fd, const std::function<cybozu::worker*()>& finder)
+        : cybozu::tcp_socket(fd, 30),
+          m_finder(finder),
+          m_recvbuf(MAX_RECVSIZE)
+    {
+        m_sendjob = [this](cybozu::dynbuf&) {
+            if( ! write_pending_data() )
+                invalidate_and_close();
+        };
+    }
 
 private:
+    const std::function<cybozu::worker*()>& m_finder;
     std::vector<char> m_recvbuf;
+    cybozu::worker::job m_sendjob;
 
     virtual bool on_readable() override final;
+    virtual bool on_writable() override final;
 };
 
 

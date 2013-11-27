@@ -901,6 +901,17 @@ bool repl_socket::on_readable() {
     return true;
 }
 
+bool repl_socket::on_writable() {
+    cybozu::worker* w = m_finder();
+    if( w == nullptr ) {
+        // if there is no idle worker, fallback to the default.
+        return cybozu::tcp_socket::on_writable();
+    }
+
+    w->post_job(m_sendjob);
+    return true;
+}
+
 bool repl_client_socket::on_readable() {
     while( true ) {
         char* p = m_recvbuf.prepare(MAX_RECVSIZE);
