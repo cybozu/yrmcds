@@ -5,7 +5,8 @@
 #define YRMCDS_SYNC_HPP
 
 #include "constants.hpp"
-#include "worker.hpp"
+
+#include <cybozu/worker.hpp>
 
 #include <bitset>
 #include <functional>
@@ -35,7 +36,7 @@ private:
 
 class syncer {
 public:
-    explicit syncer(const std::vector<std::unique_ptr<worker>>& workers):
+    explicit syncer(const std::vector<std::unique_ptr<cybozu::worker>>& workers):
         m_workers(workers) {}
 
     bool empty() const noexcept {
@@ -72,7 +73,7 @@ public:
     }
 
 private:
-    const std::vector<std::unique_ptr<worker>>& m_workers;
+    const std::vector<std::unique_ptr<cybozu::worker>>& m_workers;
     std::vector<std::unique_ptr<sync_request>> m_requests;
 };
 

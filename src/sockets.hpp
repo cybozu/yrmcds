@@ -5,36 +5,28 @@
 #define YRMCDS_SOCKETS_HPP
 
 #include "constants.hpp"
+#include "memcache.hpp"
+#include "object.hpp"
 #include "stats.hpp"
 
 #include <cybozu/dynbuf.hpp>
 #include <cybozu/hash_map.hpp>
 #include <cybozu/tcp.hpp>
 #include <cybozu/util.hpp>
+#include <cybozu/worker.hpp>
 
 #include <functional>
 #include <vector>
 
 namespace yrmcds {
 
-class worker;
-
 class memcache_socket: public cybozu::tcp_socket {
 public:
-    memcache_socket(int fd, std::function<worker*()>& finder,
-                    std::function<void(const cybozu::hash_key&, bool)>& unlocker):
-        cybozu::tcp_socket(fd), m_busy(false),
-        m_finder(finder), m_unlocker(unlocker), m_pending(0) {
-        g_stats.curr_connections.fetch_add(1);
-        g_stats.total_connections.fetch_add(1);
-    }
-
-    virtual ~memcache_socket() {
-        // the destructor is the safe place to release remaining locks.
-        for( auto& ref: m_locks )
-            m_unlocker(ref.get(), true); // force unlock
-        m_locks.clear();
-    }
+    memcache_socket(int fd,
+                    const std::function<cybozu::worker*()>& finder,
+                    cybozu::hash_map<object>& hash,
+                    const std::vector<cybozu::tcp_socket*>& slaves);
+    virtual ~memcache_socket();
 
     void add_lock(const cybozu::hash_key& k) {
         // m_locks are accessed by at most one worker thread, hence
@@ -54,27 +46,33 @@ public:
     }
 
     void unlock_all() {
-        for( auto& ref: m_locks )
-            m_unlocker(ref.get(), false);
+        for( auto& ref: m_locks ) {
+            m_hash.apply(ref.get(),
+                         [](const cybozu::hash_key&, object& obj) -> bool {
+                             obj.unlock(false);
+                             return true;
+                         }, nullptr);
+        }
         m_locks.clear();
     }
 
-    // Obtain the internal pending data buffer.
-    cybozu::dynbuf& get_buffer() {
-        return m_pending;
-    }
+    // Process a binary request command.
+    // @cmd     A binary request.
+    void cmd_bin(const memcache::binary_request& cmd);
 
-    // Clear busy flag.
-    void release() {
-        m_busy.store(false, std::memory_order_release);
-    }
+    // Process a test request command.
+    // @cmd     A binary request.
+    void cmd_text(const memcache::text_request& cmd);
 
 private:
     alignas(CACHELINE_SIZE)
     std::atomic<bool> m_busy;
-    std::function<worker*()>& m_finder;
-    std::function<void(const cybozu::hash_key&, bool)>& m_unlocker;
+    const std::function<cybozu::worker*()>& m_finder;
+    cybozu::hash_map<object>& m_hash;
     cybozu::dynbuf m_pending;
+    const std::vector<cybozu::tcp_socket*>& m_slaves_origin;
+    std::vector<cybozu::tcp_socket*> m_slaves;
+    cybozu::worker::job m_recvjob;
     std::vector<std::reference_wrapper<const cybozu::hash_key>> m_locks;
 
     virtual void on_invalidate() override final {
