@@ -9,10 +9,12 @@
 #include "util.hpp"
 
 #include <cerrno>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <stdexcept>
@@ -128,7 +130,8 @@ public:
         m_shutdown = true;
         if( empty() ) {
             _flush();
-            invalidate_and_close( std::move(g) );
+            g.unlock();
+            invalidate_and_close();
             return true;
         }
         g.unlock();
@@ -154,7 +157,8 @@ public:
         m_shutdown = true;
         if( empty() ) {
             _flush();
-            invalidate_and_close( std::move(g) );
+            g.unlock();
+            invalidate_and_close();
             return true;
         }
         g.unlock();
@@ -163,9 +167,27 @@ public:
     }
 
 protected:
+    // Write out pending data.
+    //
+    // This method tries to send pending data as much as possible.
+    //
+    // @return `false` if some error happened, `true` otherwise.
+    bool write_pending_data();
+
+    // Just call <write_pending_data>.
+    //
+    // The default implementation just invoke <write_pending_data>.
+    // You may override this to dispatch the job to another thread.
+    virtual bool on_writable() override {
+        if( write_pending_data() )
+            return true;
+        return invalidate();
+    }
+
     virtual void on_invalidate() override {
         ::shutdown(m_fd, SHUT_RDWR);
         free_buffers();
+        m_cond_write.notify_all();
     }
 
 private:
@@ -174,6 +196,9 @@ private:
     std::vector<std::tuple<char*, std::size_t, std::size_t>> m_pending;
     std::vector<char> m_tmpbuf;
     bool m_shutdown = false;
+    typedef std::unique_lock<std::mutex> lock_guard;
+    mutable std::mutex m_lock;
+    mutable std::condition_variable m_cond_write;
 
     std::size_t capacity() const {
         std::size_t c = m_free_buffers.size() * SENDBUF_SIZE;
@@ -181,7 +206,7 @@ private:
         return c + SENDBUF_SIZE - std::get<1>(m_pending.back());
     }
     bool can_send(std::size_t len) const {
-        if( ! m_valid || m_shutdown ) return true; // in fact, fail
+        if( m_shutdown ) return true; // in fact, fail
         if( ! m_tmpbuf.empty() ) return false;
         if( m_pending.empty() ) return true;
         return capacity() >= len;
@@ -199,8 +224,6 @@ private:
             throw_unix_error(errno, "setsockopt(TCP_NODELAY)");
     }
     void free_buffers();
-
-    virtual bool on_writable() override final;
 };
 
 
@@ -244,7 +267,7 @@ private:
     wrapper m_wrapper;
 
     virtual bool on_readable() override final;
-    virtual bool on_writable() override final { return false; }
+    virtual bool on_writable() override final { return true; }
 };
 
 

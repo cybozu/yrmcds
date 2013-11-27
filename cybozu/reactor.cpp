@@ -16,23 +16,6 @@ const int POLLING_TIMEOUT = 100; // milli seconds
 
 namespace cybozu {
 
-bool resource::write_pending_data() {
-    bool notify, ret;
-    {
-        lock_guard g(m_lock);
-        if( ! m_valid ) return true;
-        notify = on_writable();
-        ret = m_valid;
-        if( ! ret ) {
-            on_invalidate();
-            notify = true;
-        }
-    }
-    if( notify )
-        m_cond_write.notify_all();
-    return ret;
-}
-
 reactor::reactor():
     m_fd( epoll_create1(EPOLL_CLOEXEC) ), m_running(true)
 {
@@ -153,7 +136,7 @@ void reactor::poll() {
             }
         }
         if( ev.events & EPOLLOUT ) {
-            if( ! r.write_pending_data() )
+            if( ! r.on_writable() )
                 remove_resource(fd);
         }
     }

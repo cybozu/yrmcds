@@ -136,6 +136,7 @@ tcp_socket::tcp_socket(int fd, unsigned int bufcnt):
 }
 
 void tcp_socket::free_buffers() {
+    lock_guard g(m_lock);
     for( auto& t: m_pending ) {
         char* p;
         std::tie(p, std::ignore, std::ignore) = t;
@@ -148,11 +149,12 @@ void tcp_socket::free_buffers() {
     m_free_buffers.clear();
     m_tmpbuf.clear();
     m_tmpbuf.shrink_to_fit();
+    m_shutdown = true;
 }
 
 bool tcp_socket::_send(const char* p, std::size_t len, lock_guard& g) {
     while( ! can_send(len) ) m_cond_write.wait(g);
-    if( ! m_valid || m_shutdown ) return false;
+    if( m_shutdown ) return false;
 
     if( m_pending.empty() ) {
         while( len > 0 ) {
@@ -165,7 +167,8 @@ bool tcp_socket::_send(const char* p, std::size_t len, lock_guard& g) {
                     logger::error() << "<tcp_socket::_send>: ("
                                     << ecnd.value() << ") "
                                     << ecnd.message();
-                invalidate_and_close( std::move(g) );
+                g.unlock();
+                invalidate_and_close();
                 return false;
             }
             p += n;
@@ -219,7 +222,7 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
     }
 
     while( ! can_send(total) ) m_cond_write.wait(g);
-    if( ! m_valid || m_shutdown ) return false;
+    if( m_shutdown ) return false;
 
     ::iovec v[MAX_IOVCNT];
     for( int i = 0; i < iovcnt; ++i ) {
@@ -239,7 +242,8 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
                     logger::error() << "<tcp_socket::_sendv>: ("
                                     << ecnd.value() << ") "
                                     << ecnd.message();
-                invalidate_and_close( std::move(g) );
+                g.unlock();
+                invalidate_and_close();
                 return false;
             }
             while( n > 0 ) {
@@ -305,20 +309,20 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
     return true;
 }
 
-bool tcp_socket::on_writable() {
-    // "m_valid == true" holds at this point.
+bool tcp_socket::write_pending_data() {
+    lock_guard g(m_lock);
+
     while( ! m_tmpbuf.empty() ) {
         ssize_t n = ::send(m_fd, m_tmpbuf.data(), m_tmpbuf.size(), 0);
         if( n == -1 ) {
             if( errno == EINTR ) continue;
-            if( errno == EAGAIN || errno == EWOULDBLOCK ) return false;
+            if( errno == EAGAIN || errno == EWOULDBLOCK ) return true;
             auto ecnd = std::system_category().default_error_condition(errno);
             if( ecnd.value() != EPIPE )
-                logger::error() << "<tcp_socket::on_writable>: ("
+                logger::error() << "<tcp_socket::write_pending_data>: ("
                                 << ecnd.value() << ") "
                                 << ecnd.message();
-            m_valid = false;
-            return true;
+            return false;
         }
         m_tmpbuf.erase(m_tmpbuf.begin(), m_tmpbuf.begin() + n);
     }
@@ -337,11 +341,10 @@ bool tcp_socket::on_writable() {
                 if( errno == EINTR ) continue;
                 if( errno == EAGAIN || errno == EWOULDBLOCK ) break;
                 auto ecnd = std::system_category().default_error_condition(errno);
-                logger::error() << "<tcp_socket::on_writable>: ("
+                logger::error() << "<tcp_socket::write_pending_data>: ("
                                 << ecnd.value() << ") "
                                 << ecnd.message();
-                m_valid = false;
-                return true;
+                return false;
             }
             sent += n;
         }
@@ -350,19 +353,24 @@ bool tcp_socket::on_writable() {
             m_free_buffers.push_back(p);
         } else {
             std::get<2>(t) = sent;
+            g.unlock();
+            // notify other threads of the new free space
+            m_cond_write.notify_all();
             return true;
         }
     }
 
     // all data have been sent.
     _flush();
-    if( m_shutdown ) {
-        // invalidating this resource will effectively removes itself
-        // from the reactor.
-        m_valid = false;
+
+    if( ! m_shutdown ) {
+        g.unlock();
+        m_cond_write.notify_all();
+        return true;
     }
 
-    return true;
+    // invalidate and close this socket when m_shutdown==true.
+    return false;
 }
 
 int setup_server_socket(const char* bind_addr, std::uint16_t port) {
