@@ -66,7 +66,7 @@ private:
             if( m_callback ) m_callback(si, *m_reactor);
         }
     }
-    virtual bool on_writable() override final { return false; }
+    virtual bool on_writable() override final { return true; }
 };
 
 

@@ -8,15 +8,13 @@
 #include "spinlock.hpp"
 #include "util.hpp"
 
-#include <unistd.h>
-#include <sys/epoll.h>
-#include <mutex>
-#include <condition_variable>
-#include <vector>
-#include <unordered_map>
-#include <memory>
 #include <functional>
+#include <memory>
 #include <stdexcept>
+#include <sys/epoll.h>
+#include <unistd.h>
+#include <unordered_map>
+#include <vector>
 
 namespace cybozu {
 
@@ -27,9 +25,8 @@ class reactor;
 // An abstraction of a file descriptor for use with <reactor>.
 // The file descriptor should be set non-blocking.
 //
-// All member functions except for `invalidate_and_close` are for the
+// All member functions except for <invalidate_and_close> are for the
 // reactor thread.  Sub classes can add methods for the other threads.
-// Such methods should acquire `m_lock` to avoid races.
 class resource {
 public:
     // Constructor.
@@ -52,7 +49,10 @@ public:
         return m_valid;
     }
 
-    // @return `false` when this thread invalidated the socket.
+    // Invalidate this resource.
+    //
+    // This is for the reactor thread only.
+    // You may call this from within <on_readable> or <on_writable>.
     bool invalidate() {
         lock_guard g(m_lock);
         if( ! m_valid ) return true;
@@ -60,12 +60,13 @@ public:
         return false;
     }
 
-    // Invalidate and request the reactor to close this socket.
+    // Invalidate this resource then request the reactor to remove this.
     //
-    // This is not for the reactor thread, but for others.
-    void invalidate_and_close() {
-        invalidate_and_close(lock_guard(m_lock));
-    }
+    // This method invalidates this resource then requests the reactor
+    // thread to remove this resource from the reactor.
+    //
+    // **Do not use this in the reactor thread**.
+    void invalidate_and_close();
 
     // A template method called from within invalidate.
     //
@@ -91,23 +92,15 @@ public:
     // @return `true` or return value of <invalidate>.
     virtual bool on_readable() = 0;
 
-    // Acquire the lock and call <on_writable> to write pending data.
-    //
-    // This is for the reactor only.
-    bool write_pending_data();
-
     // Called when the reactor finds this resource is writable.
     //
     // This method is called when the reactor finds this resource gets
     // writable.  Unlike <on_readable>, `on_writable` must try to write
     // all pending data until it encounters `EAGAIN` or `EWOULDBLOCK`.
     //
-    // At the entry, `m_valid` is guaranteed `true`.  If some error
-    // happens during execution, set `m_valid` to `false`.
+    // If some error happened, execute `return invalidate();`.
     //
-    // This method need to return `true` when writing to this resource
-    // may not be blocked on `m_cond_write`.  If it must block,
-    // return `false`.
+    // @return `true` or return value of <invalidate>.
     virtual bool on_writable() = 0;
 
     // Called when the reactor finds this resource has hanged up.
@@ -126,25 +119,19 @@ public:
 
 protected:
     const int m_fd;
-    bool m_valid = true;
     reactor* m_reactor = nullptr;
-    mutable std::mutex m_lock;
-    typedef std::unique_lock<std::mutex> lock_guard;
-    mutable std::condition_variable m_cond_write;
-
-    // Use this while holding m_lock.
-    //
-    // This is not for the reactor thread, but for others.
-    void invalidate_and_close(lock_guard g);
 
     friend class reactor;
 
 private:
+    bool m_valid = true;
+    mutable spinlock m_lock;
+    typedef std::unique_lock<spinlock> lock_guard;
+
     void invalidate_(lock_guard g) {
         m_valid = false;
-        on_invalidate();
         g.unlock();
-        m_cond_write.notify_all();
+        on_invalidate();
     }
 };
 
@@ -277,9 +264,8 @@ private:
 };
 
 
-inline void resource::invalidate_and_close(resource::lock_guard g) {
-    if( ! g.owns_lock() )
-        throw std::logic_error("<reactor::invalidate_and_close> bug.");
+inline void resource::invalidate_and_close() {
+    lock_guard g(m_lock);
     if( ! m_valid ) return;
     invalidate_( std::move(g) );
     m_reactor->request_removal(*this);
