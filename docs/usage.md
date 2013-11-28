@@ -34,6 +34,8 @@ configuration file:
     memcache protocol port number.
 * `repl_port` (Default: 11213)  
     The replication protocol port number.
+* `max_connections` (Default: 0)  
+    Maximum number of client connections.  0 means unlimited.
 * `temp_dir` (Default: /var/tmp)  
     Directory to store temporary files for large objects.
 * `log.threshold` (Default: info)  
@@ -48,7 +50,7 @@ configuration file:
     Objects larger than this will be stored in temporary files.
 * `memory_limit` (Default: 1024M)  
     The amount of memory allowed for yrmcdsd.
-* `workers` (Default: 3)  
+* `workers` (Default: 8)  
     The number of worker threads.
 * `gc_interval` (Default: 10)  
     The interval between garbage collections in seconds.
