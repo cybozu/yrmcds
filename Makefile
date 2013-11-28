@@ -68,7 +68,7 @@ $(TESTS): $(LIB)
 html:
 	@clang++ -v 2>/dev/null || (echo "No clang++ in PATH." && false)
 	rm -rf html
-	$(CLDOC) $(CPPFLAGS) $(CXXFLAGS) -w -D__STRICT_ANSI__ -- --output html --merge docs $(HEADERS)
+	$(CLDOC) generate $(CPPFLAGS) $(CXXFLAGS) -w -D__STRICT_ANSI__ -- --output html --merge docs $(HEADERS)
 
 serve: html
 	@cd html; python -m SimpleHTTPServer 8888 || true
