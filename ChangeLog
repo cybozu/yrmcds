@@ -1,3 +1,9 @@
+version 0.9.6
+
+	* improve scalability by reducing the reactor thread's load.
+	* add "max_connections" config option.
+	* fixed some memory corruption bugs.
+
 version 0.9.5
 
 	* change UID if "user" is defined in the configuration file.
