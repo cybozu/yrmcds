@@ -8,6 +8,8 @@ AUTOTEST(config) {
     using yrmcds::g_config;
     g_config.load(TEST_CONF);
     cybozu_assert(g_config.port() == 1121);
+    cybozu_assert(g_config.repl_port() == 1122);
+    cybozu_assert(g_config.max_connections() == 10000);
     cybozu_assert(g_config.user() == "nobody");
     cybozu_assert(g_config.group() == "nogroup");
     cybozu_assert(g_config.memory_limit() == (1024 << 20));

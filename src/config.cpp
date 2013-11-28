@@ -12,6 +12,7 @@ namespace {
 const char VIRTUAL_IP[] = "virtual_ip";
 const char PORT[] = "port";
 const char REPL_PORT[] = "repl_port";
+const char MAX_CONNECTIONS[] = "max_connections";
 const char TEMP_DIR[] = "temp_dir";
 const char USER[] = "user";
 const char GROUP[] = "group";
@@ -77,6 +78,13 @@ void config::load(const std::string& path) {
         if( n < 1 || n > 65535 )
             throw bad_config("Bad repl port: " + cp.get(REPL_PORT));
         m_repl_port = static_cast<std::uint16_t>(n);
+    }
+
+    if( cp.exists(MAX_CONNECTIONS) ) {
+        int conns = cp.get_as_int(MAX_CONNECTIONS);
+        if( conns < 0 )
+            throw bad_config("max_connections must be >= 0");
+        m_max_connections = conns;
     }
 
     if( cp.exists(TEMP_DIR) ) {

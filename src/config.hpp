@@ -44,6 +44,9 @@ public:
     std::uint16_t repl_port() const noexcept {
         return m_repl_port;
     }
+    unsigned int max_connections() const noexcept {
+        return m_max_connections;
+    }
     const std::string& tempdir() const noexcept {
         return m_tempdir;
     }
@@ -87,6 +90,7 @@ private:
     cybozu::ip_address m_vip;
     std::uint16_t m_port = DEFAULT_MEMCACHE_PORT;
     std::uint16_t m_repl_port = DEFAULT_REPL_PORT;
+    unsigned int m_max_connections = 0;
     std::string m_tempdir;
     std::string m_user;
     std::string m_group;

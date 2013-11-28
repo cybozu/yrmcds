@@ -229,6 +229,11 @@ std::unique_ptr<cybozu::tcp_socket> server::make_memcache_socket(int s) {
     if( m_is_slave )
         return nullptr;
 
+    unsigned int mc = g_config.max_connections();
+    if( mc != 0 &&
+        (g_stats.curr_connections.load(std::memory_order_relaxed) >= mc) )
+        return nullptr;
+
     return std::unique_ptr<cybozu::tcp_socket>(
         new memcache_socket(s, m_finder, m_hash, m_slaves) );
 }
