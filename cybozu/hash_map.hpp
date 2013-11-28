@@ -127,6 +127,9 @@ public:
 
     public:
         bucket(): m_objects(nullptr) {}
+        ~bucket() {
+            clear_nolock();
+        }
 
         // Handle or insert an object.
         // @key  The object's key.
@@ -245,7 +248,6 @@ public:
         }
     private:
         using lock_guard = std::lock_guard<std::mutex>;
-        alignas(CACHELINE_SIZE)
         mutable std::mutex m_lock;
         item* m_objects;
     };
