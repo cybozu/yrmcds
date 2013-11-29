@@ -3,7 +3,8 @@ yrmcds
 
 yrmcds is a memory object caching system with master/slave replication.
 Since its protocol is perfectly compatible with that of [memcached][],
-yrmcds can be used as a drop-in replacement for [memcached][].
+yrmcds can be used as a drop-in replacement for [memcached][].  In fact,
+yrmcds is [faster][bench] than memcached!
 
 The biggest benefit of yrmcds is its amazingly low cost replication system.
 The master server is elected dynamically from a group of servers, which
@@ -74,6 +75,7 @@ On Ubuntu, `sudo make install` installs yrmcds under `/usr/local`.
 An upstart script and a logrotate configuration file are installed too.
 
 [memcached]: http://memcached.org/
+[bench]: https://github.com/cybozu/yrmcds/blob/master/docs/bench.md#results
 [repcached]: http://repcached.lab.klab.org/
 [libyrmcds]: /libyrmcds/
 [php-yrmcds]: /php-yrmcds/

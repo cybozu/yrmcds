@@ -31,7 +31,7 @@ Versions
 --------
 
 * memcached 1.4.13
-* yrmcds 0.9.0
+* yrmcds 0.9.7
 
 Results
 -------
@@ -39,12 +39,12 @@ Results
 * memcached  
     Ops: 71584331 TPS: 119298 Net_rate: 126.6M/s
 * yrmcds (0 slave)  
-    Ops: 67408111 TPS: 112337 Net_rate: 110.7M/s
+    Ops: 81028171 TPS: 135037 Net_rate: 119.2M/s
 * yrmcds (1 slave)  
-    Ops: 60793090 TPS: 101313 Net_rate: 96.2M/s
+    Ops: 69657147 TPS: 116086 Net_rate: 113.4M/s
 * yrmcds (2 slaves)  
-    Ops: 50795409 TPS: 84651 Net_rate: 81.3M/s
+    Ops: 63479541 TPS: 105791 Net_rate: 101.2M/s
 
 
-[memslap]: http://docs.libmemcached.org/bin/memaslap.html
+[memslap]: http://docs.libmemcached.org/bin/memslap.html
 [libmemcached]: http://libmemcached.org/libMemcached.html
