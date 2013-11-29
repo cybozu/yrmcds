@@ -1,3 +1,8 @@
+version 0.9.7
+
+	* add a new statistics option "stats ops" to report the total count
+	  of command executions for each command.
+
 version 0.9.6
 
 	* improve scalability by reducing the reactor thread's load.
