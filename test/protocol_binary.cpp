@@ -1113,6 +1113,25 @@ AUTOTEST(stat_items) {
     }
 }
 
+AUTOTEST(stat_ops) {
+    client c;
+    response r;
+
+    c.stat("ops");
+    while( true ) {
+        cybozu_assert( c.get_response(r) );
+        ASSERT_COMMAND(r, Stat);
+        ASSERT_OK(r);
+        if( std::get<1>(r.key()) == 0 )
+            break;
+        continue;
+        std::cout << std::string(std::get<0>(r.key()), std::get<1>(r.key()))
+                  << ": "
+                  << std::string(std::get<0>(r.data()), std::get<1>(r.data()))
+                  << std::endl;
+    }
+}
+
 
 // main
 bool optparse(int argc, char** argv) {

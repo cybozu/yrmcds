@@ -10,6 +10,7 @@ Differences from memcached 1.4.15
   only when the command is attended with an expiration time.
 * `stats` returns different items.  
   `stats slabs` is not implemented.
+  `stats ops` returns ops counts for each text/binary command.
 * `slabs automove` and `slabs reassign` are not implemented.  
   These always return "OK".
 * `verbosity` takes a string argument rather than an integer.  

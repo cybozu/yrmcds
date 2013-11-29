@@ -338,6 +338,11 @@ text_request::parse_stats(const char* b, const char* e) noexcept {
     if( value_end == nullptr ) value_end = e;
     std::size_t value_len = value_end - b;
 
+    if( value_len == 3 && std::memcmp(b, "ops", 3) == 0 ) {
+        m_stats = stats_t::OPS;
+        m_valid = true;
+        return;
+    }
     if( value_len == 5 ) {
         if( std::memcmp(b, "items", 5) == 0 ) {
             m_stats = stats_t::ITEMS;
@@ -631,6 +636,87 @@ void text_response::stats_sizes() {
     m_socket.send(s.data(), s.size());
 }
 
+void text_response::stats_ops() {
+    std::ostringstream os;
+#define SEND_TEXT_OPS(n,i)                                              \
+    os << "STAT text:" n " "                                            \
+       << g_stats.text_ops[(std::size_t)text_command::i].load(relaxed) << CRLF;
+    SEND_TEXT_OPS("set", SET);
+    SEND_TEXT_OPS("add", ADD);
+    SEND_TEXT_OPS("replace", REPLACE);
+    SEND_TEXT_OPS("append", APPEND);
+    SEND_TEXT_OPS("prepend", PREPEND);
+    SEND_TEXT_OPS("cas", CAS);
+    SEND_TEXT_OPS("get", GET);
+    SEND_TEXT_OPS("gets", GETS);
+    SEND_TEXT_OPS("delete", DELETE);
+    SEND_TEXT_OPS("incr", INCR);
+    SEND_TEXT_OPS("decr", DECR);
+    SEND_TEXT_OPS("touch", TOUCH);
+    SEND_TEXT_OPS("lock", LOCK);
+    SEND_TEXT_OPS("unlock", UNLOCK);
+    SEND_TEXT_OPS("unlock_all", UNLOCK_ALL);
+    SEND_TEXT_OPS("slabs", SLABS);
+    SEND_TEXT_OPS("stats", STATS);
+    SEND_TEXT_OPS("flush_all", FLUSH_ALL);
+    SEND_TEXT_OPS("version", VERSION);
+    SEND_TEXT_OPS("verbosity", VERBOSITY);
+    SEND_TEXT_OPS("quit", QUIT);
+#undef SEND_TEXT_OPS
+
+#define SEND_BINARY_OPS(n)                                              \
+    os << "STAT binary:" #n " "                                         \
+       << g_stats.bin_ops[(std::size_t)binary_command::n].load(relaxed) << CRLF;
+    SEND_BINARY_OPS(Get);
+    SEND_BINARY_OPS(Set);
+    SEND_BINARY_OPS(Add);
+    SEND_BINARY_OPS(Replace);
+    SEND_BINARY_OPS(Delete);
+    SEND_BINARY_OPS(Increment);
+    SEND_BINARY_OPS(Decrement);
+    SEND_BINARY_OPS(Quit);
+    SEND_BINARY_OPS(Flush);
+    SEND_BINARY_OPS(GetQ);
+    SEND_BINARY_OPS(Noop);
+    SEND_BINARY_OPS(Version);
+    SEND_BINARY_OPS(GetK);
+    SEND_BINARY_OPS(GetKQ);
+    SEND_BINARY_OPS(Append);
+    SEND_BINARY_OPS(Prepend);
+    SEND_BINARY_OPS(Stat);
+    SEND_BINARY_OPS(SetQ);
+    SEND_BINARY_OPS(AddQ);
+    SEND_BINARY_OPS(ReplaceQ);
+    SEND_BINARY_OPS(DeleteQ);
+    SEND_BINARY_OPS(IncrementQ);
+    SEND_BINARY_OPS(DecrementQ);
+    SEND_BINARY_OPS(QuitQ);
+    SEND_BINARY_OPS(FlushQ);
+    SEND_BINARY_OPS(AppendQ);
+    SEND_BINARY_OPS(PrependQ);
+    SEND_BINARY_OPS(Touch);
+    SEND_BINARY_OPS(GaT);
+    SEND_BINARY_OPS(GaTQ);
+    SEND_BINARY_OPS(GaTK);
+    SEND_BINARY_OPS(GaTKQ);
+    SEND_BINARY_OPS(Lock);
+    SEND_BINARY_OPS(LockQ);
+    SEND_BINARY_OPS(Unlock);
+    SEND_BINARY_OPS(UnlockQ);
+    SEND_BINARY_OPS(UnlockAll);
+    SEND_BINARY_OPS(UnlockAllQ);
+    SEND_BINARY_OPS(LaG);
+    SEND_BINARY_OPS(LaGQ);
+    SEND_BINARY_OPS(LaGK);
+    SEND_BINARY_OPS(LaGKQ);
+    SEND_BINARY_OPS(RaU);
+    SEND_BINARY_OPS(RaUQ);
+#undef SEND_BINARY_OPS
+
+    std::string s = os.str();
+    m_socket.send(s.data(), s.size());
+}
+
 void text_response::stats_general(std::size_t n_slaves) {
     struct rusage ru;
     if( ::getrusage(RUSAGE_SELF, &ru) == -1 )
@@ -815,6 +901,9 @@ void binary_request::parse() noexcept {
             } else if( std::memcmp(p_extra, "sizes", 5) == 0 ) {
                 m_stats = stats_t::SIZES;
             }
+        } else if( key_len == 3 &&
+                   std::memcmp(p_extra, "ops", 3) == 0 ) {
+            m_stats = stats_t::OPS;
         }
         break;
     case binary_command::Quit:
@@ -993,6 +1082,85 @@ binary_response::stats_sizes() {
               std::to_string(g_stats.objects_under_4m.load(relaxed)));
     send_stat("huge",
               std::to_string(g_stats.objects_huge.load(relaxed)));
+    success();
+}
+
+void
+binary_response::stats_ops() {
+#define SEND_TEXT_OPS(n,i)                                              \
+    send_stat("text:" n,                                                \
+              std::to_string(g_stats.text_ops[(std::size_t)text_command::i].load(relaxed)))
+    SEND_TEXT_OPS("set", SET);
+    SEND_TEXT_OPS("add", ADD);
+    SEND_TEXT_OPS("replace", REPLACE);
+    SEND_TEXT_OPS("append", APPEND);
+    SEND_TEXT_OPS("prepend", PREPEND);
+    SEND_TEXT_OPS("cas", CAS);
+    SEND_TEXT_OPS("get", GET);
+    SEND_TEXT_OPS("gets", GETS);
+    SEND_TEXT_OPS("delete", DELETE);
+    SEND_TEXT_OPS("incr", INCR);
+    SEND_TEXT_OPS("decr", DECR);
+    SEND_TEXT_OPS("touch", TOUCH);
+    SEND_TEXT_OPS("lock", LOCK);
+    SEND_TEXT_OPS("unlock", UNLOCK);
+    SEND_TEXT_OPS("unlock_all", UNLOCK_ALL);
+    SEND_TEXT_OPS("slabs", SLABS);
+    SEND_TEXT_OPS("stats", STATS);
+    SEND_TEXT_OPS("flush_all", FLUSH_ALL);
+    SEND_TEXT_OPS("version", VERSION);
+    SEND_TEXT_OPS("verbosity", VERBOSITY);
+    SEND_TEXT_OPS("quit", QUIT);
+#undef SEND_TEXT_OPS
+
+#define SEND_BINARY_OPS(n)                                              \
+    send_stat("binary:" #n,                                             \
+              std::to_string(g_stats.bin_ops[(std::size_t)binary_command::n].load(relaxed)))
+    SEND_BINARY_OPS(Get);
+    SEND_BINARY_OPS(Set);
+    SEND_BINARY_OPS(Add);
+    SEND_BINARY_OPS(Replace);
+    SEND_BINARY_OPS(Delete);
+    SEND_BINARY_OPS(Increment);
+    SEND_BINARY_OPS(Decrement);
+    SEND_BINARY_OPS(Quit);
+    SEND_BINARY_OPS(Flush);
+    SEND_BINARY_OPS(GetQ);
+    SEND_BINARY_OPS(Noop);
+    SEND_BINARY_OPS(Version);
+    SEND_BINARY_OPS(GetK);
+    SEND_BINARY_OPS(GetKQ);
+    SEND_BINARY_OPS(Append);
+    SEND_BINARY_OPS(Prepend);
+    SEND_BINARY_OPS(Stat);
+    SEND_BINARY_OPS(SetQ);
+    SEND_BINARY_OPS(AddQ);
+    SEND_BINARY_OPS(ReplaceQ);
+    SEND_BINARY_OPS(DeleteQ);
+    SEND_BINARY_OPS(IncrementQ);
+    SEND_BINARY_OPS(DecrementQ);
+    SEND_BINARY_OPS(QuitQ);
+    SEND_BINARY_OPS(FlushQ);
+    SEND_BINARY_OPS(AppendQ);
+    SEND_BINARY_OPS(PrependQ);
+    SEND_BINARY_OPS(Touch);
+    SEND_BINARY_OPS(GaT);
+    SEND_BINARY_OPS(GaTQ);
+    SEND_BINARY_OPS(GaTK);
+    SEND_BINARY_OPS(GaTKQ);
+    SEND_BINARY_OPS(Lock);
+    SEND_BINARY_OPS(LockQ);
+    SEND_BINARY_OPS(Unlock);
+    SEND_BINARY_OPS(UnlockQ);
+    SEND_BINARY_OPS(UnlockAll);
+    SEND_BINARY_OPS(UnlockAllQ);
+    SEND_BINARY_OPS(LaG);
+    SEND_BINARY_OPS(LaGQ);
+    SEND_BINARY_OPS(LaGK);
+    SEND_BINARY_OPS(LaGKQ);
+    SEND_BINARY_OPS(RaU);
+    SEND_BINARY_OPS(RaUQ);
+#undef SEND_BINARY_OPS
     success();
 }
 

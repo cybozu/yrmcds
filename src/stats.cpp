@@ -37,6 +37,10 @@ void statistics::reset() noexcept {
     flush_time = 0;
     curr_connections = 0;
     total_connections = 0;
+    for( auto& v: text_ops )
+        v = 0;
+    for( auto& v: bin_ops )
+        v = 0;
 }
 
 } // namespace yrmcds

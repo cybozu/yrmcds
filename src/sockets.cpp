@@ -169,6 +169,8 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
         return;
     }
 
+    g_stats.bin_ops[(std::size_t)cmd.command()].fetch_add(1);
+
     const char* p;
     std::size_t len;
     hash_map::handler h = nullptr;
@@ -549,6 +551,9 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
         case mc::stats_t::SIZES:
             r.stats_sizes();
             break;
+        case mc::stats_t::OPS:
+            r.stats_ops();
+            break;
         default:
             r.stats_general(m_slaves.size());
         }
@@ -566,6 +571,8 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
         r.error();
         return;
     }
+
+    g_stats.text_ops[(std::size_t)cmd.command()].fetch_add(1);
 
     const char* p;
     std::size_t len;
@@ -853,6 +860,9 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
             break;
         case mc::stats_t::SIZES:
             r.stats_sizes();
+            break;
+        case mc::stats_t::OPS:
+            r.stats_ops();
             break;
         default:
             r.stats_general(m_slaves.size());

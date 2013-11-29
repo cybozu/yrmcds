@@ -4,6 +4,8 @@
 #ifndef YRMCDS_STATS_HPP
 #define YRMCDS_STATS_HPP
 
+#include "memcache.hpp"
+
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -54,6 +56,9 @@ struct statistics {
     alignas(CACHELINE_SIZE)
     std::atomic<std::uint64_t> curr_connections;
     std::atomic<std::uint64_t> total_connections;
+    alignas(CACHELINE_SIZE)
+    std::atomic<std::uint64_t> text_ops[(std::size_t)memcache::text_command::END_OF_COMMAND];
+    std::atomic<std::uint64_t> bin_ops[(std::size_t)memcache::binary_command::END_OF_COMMAND];
 };
 
 extern statistics g_stats;

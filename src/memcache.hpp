@@ -26,7 +26,7 @@ inline bool is_binary_request(const char* p) {
 
 // Possible stats categories.
 enum class stats_t {
-    GENERAL, SETTINGS, ITEMS, SIZES
+    GENERAL, SETTINGS, ITEMS, SIZES, OPS
 };
 
 using item = std::tuple<const char*, std::size_t>;
@@ -36,7 +36,8 @@ using item = std::tuple<const char*, std::size_t>;
 enum class text_command {
     UNKNOWN, SET, ADD, REPLACE, APPEND, PREPEND, CAS, GET, GETS, DELETE,
     INCR, DECR, TOUCH, LOCK, UNLOCK, UNLOCK_ALL, SLABS, STATS, FLUSH_ALL,
-    VERSION, VERBOSITY, QUIT
+    VERSION, VERBOSITY, QUIT,
+    END_OF_COMMAND // must be defined the last
 };
 
 
@@ -204,6 +205,7 @@ public:
     void stats_settings();
     void stats_items();
     void stats_sizes();
+    void stats_ops();
     void stats_general(std::size_t n_slaves);
     void version();
 
@@ -261,7 +263,8 @@ enum class binary_command: unsigned char {
     RaU        = '\x4a',
     RaUQ       = '\x4b',
 
-    Unknown // must be defined the last
+    Unknown,
+    END_OF_COMMAND // must be defined the last
 };
 
 
@@ -374,6 +377,7 @@ public:
     void stats_settings();
     void stats_items();
     void stats_sizes();
+    void stats_ops();
     void stats_general(std::size_t n_slaves);
     void version();
 
