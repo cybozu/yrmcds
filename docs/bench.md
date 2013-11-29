@@ -37,13 +37,13 @@ Results
 -------
 
 * memcached  
-    Ops: 71584331 TPS: 119298 Net_rate: 126.6M/s
+    Ops: 71584331 TPS: 119298
 * yrmcds (0 slave)  
-    Ops: 81028171 TPS: 135037 Net_rate: 119.2M/s
+    Ops: **81028171** TPS: **135037**
 * yrmcds (1 slave)  
-    Ops: 69657147 TPS: 116086 Net_rate: 113.4M/s
+    Ops: 69657147 TPS: 116086
 * yrmcds (2 slaves)  
-    Ops: 63479541 TPS: 105791 Net_rate: 101.2M/s
+    Ops: 63479541 TPS: 105791
 
 
 [memslap]: http://docs.libmemcached.org/bin/memslap.html
