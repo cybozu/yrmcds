@@ -1,3 +1,7 @@
+version 1.0.0
+
+	* [security] MurmurHash was replaced with SipHash.
+
 version 0.9.7
 
 	* add a new statistics option "stats ops" to report the total count

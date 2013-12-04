@@ -19,11 +19,8 @@ Future Plans
     <p />
 
 * Save snapshots periodically.  
-    This can be done by [forking][fork] a child process at slaves.
-    Since slaves are single-threaded, fork will do no harm.
+    This can be done by [forking][fork] a child process when all
+    worker threads are idle.
 
 
-[murmur]: https://code.google.com/p/smhasher/wiki/MurmurHash3
-[siphash]: https://131002.net/siphash/
 [fork]: http://manpages.ubuntu.com/manpages/precise/en/man2/fork.2.html
-[keepalived]: http://www.keepalived.org/
