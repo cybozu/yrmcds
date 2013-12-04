@@ -6,12 +6,14 @@
 #include "server.hpp"
 
 #include <cybozu/filesystem.hpp>
+#include <cybozu/siphash.hpp>
 #include <cybozu/util.hpp>
 
 #include <algorithm>
 #include <grp.h>
 #include <iostream>
 #include <pwd.h>
+#include <random>
 #include <string>
 #include <sys/prctl.h>
 #include <sys/types.h>
@@ -32,6 +34,19 @@ void print_help() {
 
 void print_version() {
     std::cout << yrmcds::VERSION << std::endl << std::endl << COPYING;
+}
+
+void seed_siphash() {
+    union {
+        char key[16];
+        std::uint64_t ikey[2];
+    } k;
+
+    std::random_device rd;
+    std::uniform_int_distribution<std::uint64_t> dis;
+    k.ikey[0] = dis(rd);
+    k.ikey[1] = dis(rd);
+    cybozu::siphash24_seed(k.key);
 }
 
 bool load_config(const std::vector<std::string>& args) {
@@ -70,6 +85,8 @@ int main(int argc, char** argv) {
     }
 
     using cybozu::logger;
+
+    seed_siphash();
 
     try {
         if( ! load_config(args) )

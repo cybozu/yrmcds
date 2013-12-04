@@ -4,7 +4,7 @@
 #ifndef CYBOZU_HASH_MAP_HPP
 #define CYBOZU_HASH_MAP_HPP
 
-#include "MurmurHash3.h"
+#include "siphash.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -28,9 +28,9 @@ public:
     //
     // As long as the constructed object lives, the memory pointed by `p`
     // must not be freed.
-    hash_key(const char* p, std::size_t len) noexcept:
-        m_p(p), m_len(len) {
-        MurmurHash3_x86_32(m_p, (int)m_len, 0, &m_hash);
+    hash_key(const char* p, std::size_t len) noexcept
+        : m_p(p), m_len(len) {
+        m_hash = siphash24(m_p, m_len);
     }
 
     // Construct by moving a <std::vector>.
@@ -41,7 +41,7 @@ public:
     // ```
     hash_key(std::vector<char> v):
         m_v(std::move(v)), m_p(m_v.data()), m_len(m_v.size()) {
-        MurmurHash3_x86_32(m_p, (int)m_len, 0, &m_hash);
+        m_hash = siphash24(m_p, m_len);
     }
 
     // Copy constructor.
@@ -54,7 +54,7 @@ public:
     hash_key(hash_key&& rhs) noexcept = default;
     hash_key& operator=(hash_key&& rhs) = default;
 
-    std::uint32_t hash() const noexcept {
+    std::uint64_t hash() const noexcept {
         return m_hash;
     }
 
@@ -74,7 +74,7 @@ private:
     std::vector<char> m_v;
     const char* m_p;
     std::size_t m_len;
-    std::uint32_t m_hash;
+    std::uint64_t m_hash;
 
     friend bool operator==(const hash_key&, const hash_key&) noexcept;
 };

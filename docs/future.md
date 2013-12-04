@@ -5,10 +5,6 @@ List of future plans.
 Future Plans
 ------------
 
-* Randomize hash seed to prevent some kind of attacks.  
-    Or should [MurmurHash][murmur] be replaced with [SipHash][siphash]?  
-    <p />
-
 * Replicate CAS unique values.  
     Currently, yrmcds does not replicate CAS values, which may lead to
     **false-positives** as well as (harmless) false-negatives.  

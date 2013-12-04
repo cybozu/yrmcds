@@ -16,6 +16,14 @@ shared between yrmcds and memcached.  yrmcds is developed for
 [cybozu.com][cybozu], a B2B cloud service widely adopted by companies in
 Japan.
 
+License
+-------
+
+yrmcds is licensed under [the BSD 2-clause license][bsd2].
+
+The source code contains a [SipHash][] implementation borrowed from
+[csiphash][] which is licensed under [the MIT license][mit].
+
 Features
 --------
 
@@ -77,6 +85,10 @@ An upstart script and a logrotate configuration file are installed too.
 [memcached]: http://memcached.org/
 [bench]: https://github.com/cybozu/yrmcds/blob/master/docs/bench.md#results
 [repcached]: http://repcached.lab.klab.org/
+[bsd2]: http://opensource.org/licenses/BSD-2-Clause
+[SipHash]: https://131002.net/siphash/
+[csiphash]: https://github.com/majek/csiphash
+[mit]: http://opensource.org/licenses/MIT
 [libyrmcds]: /libyrmcds/
 [php-yrmcds]: /php-yrmcds/
 [slab1]: http://nosql.mypopescu.com/post/13506116892/memcached-internals-memory-allocation-eviction
