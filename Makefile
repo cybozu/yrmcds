@@ -37,11 +37,15 @@ strip: $(EXE)
 	strip $(EXE)
 
 install: $(EXE)
-	cp etc/upstart /etc/init/yrmcds.conf
-	cp etc/logrotate /etc/logrotate.d/yrmcds
+	install -d $(PREFIX)/etc/init/
+	install -d $(PREFIX)/etc/logrotate.d/
+	install -d $(PREFIX)/sbin
+	install -d $(PREFIX)/var/log/
+	cp etc/upstart   $(PREFIX)/etc/init/yrmcds.conf
+	cp etc/logrotate $(PREFIX)/etc/logrotate.d/yrmcds
 	cp etc/yrmcds.conf $(DEFAULT_CONFIG)
 	cp $(EXE) $(PREFIX)/sbin/yrmcds
-	install -o nobody -g nogroup -m 644 /dev/null /var/log/yrmcds.log
+	install -m 644 /dev/null $(PREFIX)/var/log/yrmcds.log
 
 COPYING.hpp: COPYING
 	echo -n 'static char COPYING[] = R"(' > $@
