@@ -89,8 +89,8 @@ An upstart script and a logrotate configuration file are installed too.
 [SipHash]: https://131002.net/siphash/
 [csiphash]: https://github.com/majek/csiphash
 [mit]: http://opensource.org/licenses/MIT
-[libyrmcds]: /libyrmcds/
-[php-yrmcds]: /php-yrmcds/
+[libyrmcds]: http://cybozu.github.io/libyrmcds/
+[php-yrmcds]: http://cybozu.github.io/php-yrmcds/
 [slab1]: http://nosql.mypopescu.com/post/13506116892/memcached-internals-memory-allocation-eviction
 [slab2]: https://groups.google.com/forum/#!topic/memcached/DuJNy5gbQ0o
 [cybozu]: https://www.cybozu.com/us/
