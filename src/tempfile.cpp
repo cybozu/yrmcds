@@ -2,20 +2,9 @@
 
 #include "tempfile.hpp"
 
-#include <fcntl.h>
 #include <stdexcept>
 #include <sys/types.h>
 #include <thread>
-
-namespace {
-
-void flush_(int fd) {
-    if( ::fdatasync(fd) == 0 )
-        ::posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED);
-    ::close(fd);
-}
-
-} // anonymous namespace
 
 namespace yrmcds {
 
@@ -36,14 +25,6 @@ void tempfile::clear() {
     if( ftruncate(m_fd, 0) == -1 )
         cybozu::throw_unix_error(errno, "ftruncate");
     m_length = 0;
-}
-
-void tempfile::flush() const {
-    int new_fd = dup(m_fd);
-    if( new_fd == -1 )
-        cybozu::throw_unix_error(errno, "dup");
-    std::thread t(flush_, new_fd);
-    t.detach();
 }
 
 void tempfile::read_contents(cybozu::dynbuf& buf) const {

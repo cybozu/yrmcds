@@ -5,9 +5,11 @@
 #include "stats.hpp"
 
 #include <cstdint>
+#include <fcntl.h>
 #include <limits>
 #include <stdio.h>
 #include <string>
+#include <unistd.h>
 
 namespace {
 
@@ -23,6 +25,13 @@ std::uint64_t to_uint64(const char* p, std::size_t len) {
 namespace yrmcds {
 
 thread_local int g_context = -1;
+
+file_flusher::~file_flusher() {
+    if( m_fd == -1 ) return;
+    if( ::fdatasync(m_fd) == 0 )
+        ::posix_fadvise(m_fd, 0, 0, POSIX_FADV_DONTNEED);
+    ::close(m_fd);
+}
 
 object::object(const char* p, std::size_t len,
                std::uint32_t flags_, std::time_t exptime):

@@ -12,6 +12,7 @@
 #include <cybozu/tcp.hpp>
 #include <cybozu/thread.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -25,8 +26,11 @@ public:
               const std::vector<cybozu::tcp_socket*>& slaves,
               const std::vector<cybozu::tcp_socket*>& new_slaves):
         m_hash(m), m_slaves(slaves), m_new_slaves(new_slaves) {
-        for( cybozu::tcp_socket* s: new_slaves )
-            m_slaves.push_back(s);
+        for( cybozu::tcp_socket* s: new_slaves ) {
+            if( std::find(slaves.begin(), slaves.end(), s) == slaves.end() )
+                m_slaves.push_back(s);
+        }
+        m_flushers.reserve(10);
     }
     gc_thread(const gc_thread&) = delete;
     gc_thread& operator=(const gc_thread&) = delete;
@@ -59,6 +63,7 @@ private:
     std::uint32_t m_last_evictions = 0;
 
     int m_objects_in_bucket = 0;
+    std::vector<file_flusher> m_flushers;
 };
 
 } // namespace yrmcds

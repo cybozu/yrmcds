@@ -47,11 +47,10 @@ public:
     // Clear the current file contents.
     void clear();
 
-    // Flush page cache for this temporary file.
-    //
-    // This creates a background thread to synchronize file contents
-    // to the disk, then flush page cache for the temporary file.
-    void flush() const;
+    // Return the open file descriptor.
+    int fileno() const {
+        return m_fd;
+    }
 
     // Read the file contents.
     // @buf  Storage for the file contents.

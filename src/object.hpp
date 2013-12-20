@@ -7,6 +7,7 @@
 #include "stats.hpp"
 #include "tempfile.hpp"
 
+#include <cybozu/logger.hpp>
 #include <cybozu/util.hpp>
 
 #include <cstddef>
@@ -16,6 +17,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace yrmcds {
@@ -24,6 +26,23 @@ namespace yrmcds {
 //
 // The context is in fact the file descriptor of a client connection.
 extern thread_local int g_context;
+
+
+// Purge temporary file contents from the page cache at dtor.
+class file_flusher final {
+public:
+    file_flusher(int fd): m_fd(fd) {}
+    file_flusher(file_flusher&& rhs) {
+        std::swap(m_fd, rhs.m_fd);
+    }
+    file_flusher(const file_flusher&) = delete;
+    file_flusher& operator=(file_flusher&&) = delete;
+    file_flusher& operator=(const file_flusher&) = delete;
+    ~file_flusher();
+
+private:
+    int m_fd = -1;
+};
 
 
 // Object in the hash table.
@@ -95,10 +114,17 @@ public:
 
     unsigned int age() const noexcept { return m_gc_old; }
 
-    void survive() const {
+    void survive(std::vector<file_flusher>& flushers) const {
         ++ m_gc_old;
-        if( m_gc_old == FLUSH_AGE && m_file.get() != nullptr )
-            m_file->flush();
+        if( m_gc_old != FLUSH_AGE || m_file.get() == nullptr )
+            return;
+
+        int new_fd = ::dup(m_file->fileno());
+        if( new_fd == -1 ) {
+            cybozu::logger::warning() << "Failed to dup a file descriptor";
+            return;
+        }
+        flushers.emplace_back(new_fd);
     }
 
     void lock() {

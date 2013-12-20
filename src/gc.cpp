@@ -90,7 +90,7 @@ void gc_thread::gc() {
             return true;
         }
 
-        obj.survive();
+        obj.survive(m_flushers);
         if( ++m_objects_in_bucket == 2 )
             ++ m_conflicts;
         ++ m_objects;
@@ -125,6 +125,7 @@ void gc_thread::gc() {
     for( auto it = m_hash.begin(); it != m_hash.end(); ++it ) {
         m_objects_in_bucket = 0;
         it->gc(pred);
+        m_flushers.clear();
     }
 
     if( flush )
