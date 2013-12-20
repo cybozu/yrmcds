@@ -31,7 +31,7 @@ extern thread_local int g_context;
 // Purge temporary file contents from the page cache at dtor.
 class file_flusher final {
 public:
-    file_flusher(int fd): m_fd(fd) {}
+    explicit file_flusher(int fd): m_fd(fd) {}
     file_flusher(file_flusher&& rhs) {
         std::swap(m_fd, rhs.m_fd);
     }
