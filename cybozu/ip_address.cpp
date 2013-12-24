@@ -74,6 +74,7 @@ ip_address::ip_address(const struct sockaddr* ifa_addr) {
 
 bool ip_address::operator==(const ip_address& rhs) const {
     if( af != rhs.af ) return false;
+    if( af == addr_family::none ) return true;
     if( is_v4() ) {
         return std::memcmp(v4addr(), rhs.v4addr(), sizeof(struct in_addr)) == 0;
     }
