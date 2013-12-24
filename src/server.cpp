@@ -167,7 +167,7 @@ void server::serve_slave() {
 void server::serve_master() {
     cybozu::logger::info() << "Entering master mode";
 
-    auto callback = [this](cybozu::reactor& r) {
+    auto callback = [this](cybozu::reactor&) {
         std::time_t now = std::time(nullptr);
         g_stats.current_time.store(now, std::memory_order_relaxed);
 

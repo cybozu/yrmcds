@@ -62,14 +62,14 @@ uint64_t static_k1;
 namespace cybozu {
 
 void siphash24_seed(const char key[16]) {
-    const uint64_t *_key = (uint64_t *)key;
+    const uint64_t *_key = (const uint64_t *)key;
     static_k0 = le64toh(_key[0]);
     static_k1 = le64toh(_key[1]);
 }
 
 uint64_t siphash24(const void *src, std::size_t src_sz) {
     uint64_t b = (uint64_t)src_sz << 56;
-    const uint64_t *in = (uint64_t*)src;
+    const uint64_t *in = (const uint64_t*)src;
 
     uint64_t v0 = static_k0 ^ 0x736f6d6570736575ULL;
     uint64_t v1 = static_k1 ^ 0x646f72616e646f6dULL;
@@ -84,12 +84,12 @@ uint64_t siphash24(const void *src, std::size_t src_sz) {
         v0 ^= mi;
     }
 
-    uint64_t t = 0; uint8_t *pt = (uint8_t *)&t; uint8_t *m = (uint8_t *)in;
+    uint64_t t = 0; uint8_t *pt = (uint8_t *)&t; const uint8_t *m = (const uint8_t *)in;
     switch (src_sz) {
     case 7: pt[6] = m[6];
     case 6: pt[5] = m[5];
     case 5: pt[4] = m[4];
-    case 4: *((uint32_t*)&pt[0]) = *((uint32_t*)&m[0]); break;
+    case 4: *((uint32_t*)&pt[0]) = *((const uint32_t*)&m[0]); break;
     case 3: pt[2] = m[2];
     case 2: pt[1] = m[1];
     case 1: pt[0] = m[0];

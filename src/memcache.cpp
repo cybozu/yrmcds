@@ -773,7 +773,7 @@ void binary_request::parse() noexcept {
     m_request_len = BINARY_HEADER_SIZE + total_len;
 
     // Opcode parsing
-    m_command = (binary_command)*(unsigned char*)(m_p+1);
+    m_command = (binary_command)*(const unsigned char*)(m_p+1);
     m_quiet = ( m_command == binary_command::GetQ ||
                 m_command == binary_command::GetKQ ||
                 (binary_command::SetQ <= m_command &&
@@ -788,7 +788,7 @@ void binary_request::parse() noexcept {
     cybozu::ntoh(m_p + 2, key_len);
     if( key_len > MAX_KEY_LENGTH )
         return; // invalid
-    std::uint8_t extras_len = *(unsigned char*)(m_p + 4);
+    std::uint8_t extras_len = *(const unsigned char*)(m_p + 4);
     if( total_len < (key_len + extras_len) )
         return; // invalid
     if( key_len > 0 )
