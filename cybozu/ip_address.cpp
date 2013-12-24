@@ -86,8 +86,11 @@ std::string ip_address::str() const {
         char dst[INET_ADDRSTRLEN];
         return std::string(inet_ntop(AF_INET, v4addr(), dst, INET_ADDRSTRLEN));
     }
-    char dst[INET6_ADDRSTRLEN];
-    return std::string(inet_ntop(AF_INET6, v6addr(), dst, INET6_ADDRSTRLEN));
+    if( is_v6() ) {
+        char dst[INET6_ADDRSTRLEN];
+        return std::string(inet_ntop(AF_INET6, v6addr(), dst, INET6_ADDRSTRLEN));
+    }
+    return "";
 }
 
 bool has_ip_address(const ip_address& addr) {
