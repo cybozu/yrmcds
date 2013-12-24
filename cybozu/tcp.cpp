@@ -226,7 +226,7 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
 
     ::iovec v[MAX_IOVCNT];
     for( int i = 0; i < iovcnt; ++i ) {
-        v[i].iov_base = (void*)(iov[i].p);
+        v[i].iov_base = const_cast<char*>(iov[i].p);
         v[i].iov_len = iov[i].len;
     }
     int ind = 0;

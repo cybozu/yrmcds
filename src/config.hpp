@@ -56,7 +56,7 @@ public:
     const std::string& group() const noexcept {
         return m_group;
     }
-    const cybozu::severity threshold() const noexcept {
+    cybozu::severity threshold() const noexcept {
         return m_threshold;
     }
     const std::string& logfile() const noexcept {
