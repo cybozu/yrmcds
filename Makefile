@@ -16,7 +16,7 @@ CPPFLAGS += -DDEFAULT_CONFIG=$(DEFAULT_CONFIG) -DUSE_TCMALLOC
 OPTFLAGS = -O2 #-flto
 DEBUGFLAGS = -gdwarf-3 #-fsanitize=address
 WARNFLAGS = -Wall -Wnon-virtual-dtor -Woverloaded-virtual
-CPUFLAGS = -march=core2 -mtune=corei7
+CPUFLAGS = -march=native
 CXXFLAGS = -std=gnu++11 $(OPTFLAGS) $(DEBUGFLAGS) $(shell getconf LFS_CFLAGS) $(WARNFLAGS) $(CPUFLAGS)
 LDFLAGS = -L. $(shell getconf LFS_LDFLAGS)
 LIBTCMALLOC = -ltcmalloc_minimal
