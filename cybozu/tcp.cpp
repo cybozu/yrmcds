@@ -225,15 +225,19 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
     if( m_shutdown ) return false;
 
     ::iovec v[MAX_IOVCNT];
+    int v_size = 0;
     for( int i = 0; i < iovcnt; ++i ) {
-        v[i].iov_base = const_cast<char*>(iov[i].p);
-        v[i].iov_len = iov[i].len;
+        if( iov[i].len == 0 )
+            continue;
+        v[v_size].iov_base = const_cast<char*>(iov[i].p);
+        v[v_size].iov_len = iov[i].len;
+        ++v_size;
     }
     int ind = 0;
 
     if( m_pending.empty() ) {
-        while( ind < iovcnt ) {
-            ssize_t n = ::writev(m_fd, &(v[ind]), iovcnt - ind);
+        while( ind < v_size ) {
+            ssize_t n = ::writev(m_fd, &(v[ind]), v_size - ind);
             if( n == -1 ) {
                 if( errno == EAGAIN || errno == EWOULDBLOCK ) break;
                 if( errno == EINTR ) continue;
@@ -256,12 +260,12 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
                 ++ind;
             }
         }
-        if( ind == iovcnt ) return true;
+        if( ind == v_size ) return true;
     }
 
     // recalculate total length
     total = 0;
-    for( int i = ind; i < iovcnt; ++i ) {
+    for( int i = ind; i < v_size; ++i ) {
         total += v[i].iov_len;
     }
 
@@ -272,14 +276,14 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
                         << total << " bytes data.";
         m_tmpbuf.resize(total);
         char* p = m_tmpbuf.data();
-        for( int i = ind; i < iovcnt; ++i ) {
+        for( int i = ind; i < v_size; ++i ) {
             std::memcpy(p, v[i].iov_base, v[i].iov_len);
             p += v[i].iov_len;
         }
         return true;
     }
 
-    while( ind < iovcnt ) {
+    while( ind < v_size ) {
         char* t_p;
         std::size_t t_len;
         if(m_pending.empty() || std::get<1>(m_pending.back()) == SENDBUF_SIZE) {
@@ -299,7 +303,7 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
             std::get<1>(m_pending.back()) = t_len;
             if( to_write == v[ind].iov_len ) {
                 ++ind;
-                if( ind == iovcnt ) break;
+                if( ind == v_size ) break;
                 continue;
             }
             v[ind].iov_base = ((char*)v[ind].iov_base) + to_write;
