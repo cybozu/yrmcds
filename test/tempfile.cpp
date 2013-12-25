@@ -30,7 +30,6 @@ AUTOTEST(tempfile) {
     cybozu_assert( std::memcmp(buf.data(), "abcdexxx", 8) == 0 );
     buf.reset();
 
-    t.flush();
     t.clear();
     t.read_contents(buf);
     cybozu_assert( buf.size() == 0 );
