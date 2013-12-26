@@ -340,48 +340,50 @@ public:
 
     void incr(const std::string& key, std::uint64_t value, bool q,
               std::uint32_t expire = ~(std::uint32_t)0,
-              std::uint64_t initial = 0) {
+              std::uint64_t initial = 0, std::uint64_t cas = 0) {
         char extra[20];
         cybozu::hton(value, extra);
         cybozu::hton(initial, &extra[8]);
         cybozu::hton(expire, &extra[16]);
         request req(q ? binary_command::IncrementQ : binary_command::Increment,
                     (std::uint16_t)key.size(), key.data(),
-                    sizeof(extra), extra, 0, nullptr);
+                    sizeof(extra), extra, 0, nullptr, nullptr, cas);
         send(req.data(), req.length());
     }
 
     void decr(const std::string& key, std::uint64_t value, bool q,
               std::uint32_t expire = ~(std::uint32_t)0,
-              std::uint64_t initial = 0) {
+              std::uint64_t initial = 0, std::uint64_t cas = 0) {
         char extra[20];
         cybozu::hton(value, extra);
         cybozu::hton(initial, &extra[8]);
         cybozu::hton(expire, &extra[16]);
         request req(q ? binary_command::DecrementQ : binary_command::Decrement,
                     (std::uint16_t)key.size(), key.data(),
-                    sizeof(extra), extra, 0, nullptr);
+                    sizeof(extra), extra, 0, nullptr, nullptr, cas);
         send(req.data(), req.length());
     }
 
-    void append(const std::string& key, const std::string& value, bool q) {
+    void append(const std::string& key, const std::string& value, bool q,
+                std::uint64_t cas = 0) {
         request req(q ? binary_command::AppendQ : binary_command::Append,
                     (std::uint16_t)key.size(), key.data(), 0, nullptr,
-                    (std::uint32_t)value.size(), value.data());
+                    (std::uint32_t)value.size(), value.data(), nullptr, cas);
         send(req.data(), req.length());
     }
 
-    void prepend(const std::string& key, const std::string& value, bool q) {
+    void prepend(const std::string& key, const std::string& value, bool q,
+                 std::uint64_t cas = 0) {
         request req(q ? binary_command::PrependQ : binary_command::Prepend,
                     (std::uint16_t)key.size(), key.data(), 0, nullptr,
-                    (std::uint32_t)value.size(), value.data());
+                    (std::uint32_t)value.size(), value.data(), nullptr, cas);
         send(req.data(), req.length());
     }
 
-    void remove(const std::string& key, bool q) {
+    void remove(const std::string& key, bool q, std::uint64_t cas = 0) {
         request req(q ? binary_command::DeleteQ : binary_command::Delete,
                     (std::uint16_t)key.size(), key.data(),
-                    0, nullptr, 0, nullptr);
+                    0, nullptr, 0, nullptr, nullptr, cas);
         send(req.data(), req.length());
     }
 
@@ -604,15 +606,19 @@ AUTOTEST(touch) {
     cybozu_assert( c.get_response(r) );
     ASSERT_COMMAND(r, Touch);
     ASSERT_OK(r);
+    std::uint64_t cas = r.cas_unique();
+    cybozu_assert( cas != 0 );
 
     std::this_thread::sleep_for(std::chrono::seconds(4));
     c.get("abc", false);
     cybozu_assert( c.get_response(r) );
     ASSERT_OK(r);
+    cybozu_assert( r.cas_unique() == cas );
 
     c.touch("abc", 1);
     cybozu_assert( c.get_response(r) );
     ASSERT_OK(r);
+    cybozu_assert( r.cas_unique() == cas );
 
     std::this_thread::sleep_for(std::chrono::seconds(3));
     c.get("abc", false);
@@ -628,7 +634,7 @@ AUTOTEST(add) {
     c.add("abc", "123", true, 0, 0);
     cybozu_assert( c.get_response(r) );
     ASSERT_COMMAND(r, AddQ);
-    cybozu_assert( r.status() == binary_status::NotStored );
+    cybozu_assert( r.status() == binary_status::Exists );
 
     c.remove("abc", true);
     c.add("abc", "123", false, 0, 0);
@@ -644,7 +650,7 @@ AUTOTEST(replace) {
     c.replace("not exist", "hoge", true, 100, 0);
     cybozu_assert( c.get_response(r) );
     ASSERT_COMMAND(r, ReplaceQ);
-    cybozu_assert( r.status() == binary_status::NotStored );
+    cybozu_assert( r.status() == binary_status::NotFound );
 
     c.set("abc", "def", true, 10, 0);
     c.replace("abc", "123", false, 100, 0);
@@ -742,18 +748,25 @@ AUTOTEST(incr_decr) {
     ASSERT_OK(r);
     cybozu_assert( r.value() == 12 );
     cybozu_assert( r.flags() == 0 );
+    std::uint64_t cas = r.cas_unique();
+    cybozu_assert( cas != 0 );
 
     c.incr("abc", 10, false);
     cybozu_assert( c.get_response(r) );
     ASSERT_COMMAND(r, Increment);
     ASSERT_OK(r);
     cybozu_assert( r.value() == 22 );
+    cybozu_assert( r.cas_unique() != 0 );
+    cybozu_assert( cas != r.cas_unique() );
+    cas = r.cas_unique();
 
     c.decr("abc", 1, false);
     cybozu_assert( c.get_response(r) );
     ASSERT_COMMAND(r, Decrement);
     ASSERT_OK(r);
     cybozu_assert( r.value() == 21 );
+    cybozu_assert( r.cas_unique() != 0 );
+    cybozu_assert( cas != r.cas_unique() );
 
     c.decr("abc", 100, false);
     cybozu_assert( c.get_response(r) );
@@ -796,6 +809,8 @@ AUTOTEST(append_prepend) {
     cybozu_assert( c.get_response(r) );
     ASSERT_COMMAND(r, Append);
     ASSERT_OK(r);
+    std::uint64_t cas = r.cas_unique();
+    cybozu_assert( cas != 0 );
 
     c.get("ttt", false);
     cybozu_assert( c.get_response(r) );
@@ -806,6 +821,8 @@ AUTOTEST(append_prepend) {
     cybozu_assert( c.get_response(r) );
     ASSERT_COMMAND(r, Prepend);
     ASSERT_OK(r);
+    cybozu_assert( r.cas_unique() != 0 );
+    cybozu_assert( cas != r.cas_unique() );
 
     c.get("ttt", false);
     cybozu_assert( c.get_response(r) );
@@ -825,6 +842,19 @@ AUTOTEST(delete) {
 
     c.set("abc", "def", true, 10, 0);
     c.remove("abc", false);
+    cybozu_assert( c.get_response(r) );
+    ASSERT_COMMAND(r, Delete);
+    ASSERT_OK(r);
+
+    c.set("abc", "def", false, 10, 0);
+    cybozu_assert( c.get_response(r) );
+    ASSERT_OK(r);
+    std::uint64_t cas = r.cas_unique();
+    c.remove("abc", true, cas + 1);
+    cybozu_assert( c.get_response(r) );
+    ASSERT_COMMAND(r, DeleteQ);
+    cybozu_assert( r.status() == binary_status::Exists );
+    c.remove("abc", false, cas);
     cybozu_assert( c.get_response(r) );
     ASSERT_COMMAND(r, Delete);
     ASSERT_OK(r);
