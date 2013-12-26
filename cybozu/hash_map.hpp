@@ -139,12 +139,18 @@ public:
         // This function can be used to handle an existing object, or
         // to insert a new object when such an object does not exist.
         //
-        // If `h` is not `nullptr` and there is no existing object for
-        // `key`, `false` is returned.  If `c` is not `nullptr` and an
-        // object for `key` exists, `false` is returned.
+        // if `h` is `nullptr` and there is an existing object for `key`,
+        // `false` is returned.  If `c` is `nullptr` and there is no
+        // object for `key`, `false` is returned.
         //
-        // `h` can return `false` if it failed to handle the object.
-        // Otherwise, `h` should return `true`.
+        // If `h` is not `nullptr` and there is an existing object for
+        // `key`, then `h` is called and the return value of `h` is
+        // returned.  This means `h` can return `false` if it failed
+        // to handle the object.
+        //
+        // If `c` is not `nullptr` and there is no object for `key`,
+        // an object is created by calling `c` and stored, then `true`
+        // is returned.
         //
         // @return `true` if succeeded, `false` otherwise.
         bool apply_nolock(const hash_key& key,
@@ -263,12 +269,18 @@ public:
     // This function can be used to handle an existing object, or
     // to insert a new object when such an object does not exist.
     //
-    // If `h` is not `nullptr` and there is no existing object for
-    // `key`, `false` is returned.  If `c` is not `nullptr` and an
-    // object for `key` exists, `false` is returned.
+    // if `h` is `nullptr` and there is an existing object for `key`,
+    // `false` is returned.  If `c` is `nullptr` and there is no
+    // object for `key`, `false` is returned.
     //
-    // `h` can return `false` if it failed to handle the object.
-    // Otherwise, `h` should return `true`.
+    // If `h` is not `nullptr` and there is an existing object for
+    // `key`, then `h` is called and the return value of `h` is
+    // returned.  This means `h` can return `false` if it failed
+    // to handle the object.
+    //
+    // If `c` is not `nullptr` and there is no object for `key`,
+    // an object is created by calling `c` and stored, then `true`
+    // is returned.
     //
     // @return `true` if succeeded, `false` otherwise.
     bool apply_nolock(const hash_key& key,
