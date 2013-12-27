@@ -1,3 +1,11 @@
+version 1.0.1
+	* fix an infinite loop when sending 0 byte object via binary protocol.
+	* improve binary protocol compatibility with memcached.
+	  Specifically, Delete/Append/Prepend/Increment/Decrement with CAS
+	  are supported now.
+	* improve flush logic of temporary files.
+	* fix some potential bugs: #23, #24
+
 version 1.0.0
 
 	* [security] MurmurHash was replaced with SipHash.
