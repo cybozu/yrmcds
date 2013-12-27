@@ -248,11 +248,14 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
             if( obj.expired() ) {
                 if( cmd.cas_unique() != 0 ||
                     cmd.command() == binary_command::Replace ||
-                    cmd.command() == binary_command::ReplaceQ )
-                    return false;
+                    cmd.command() == binary_command::ReplaceQ ) {
+                    r.error( binary_status::NotFound );
+                    return true;
+                }
             } else if( cmd.command() == binary_command::Add ||
                        cmd.command() == binary_command::AddQ ) {
-                return false;
+                r.error( binary_status::Exists );
+                return true;
             }
             if( cmd.cas_unique() != 0 &&
                 cmd.cas_unique() != obj.cas_unique() ) {
@@ -284,13 +287,8 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                 return std::move(o);
             };
         }
-        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
-            if( cmd.cas_unique() != 0 ) {
-                r.error( binary_status::NotFound );
-            } else {
-                r.error( binary_status::NotStored );
-            }
-        }
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
+            r.error( binary_status::NotFound );
         break;
     case binary_command::RaU:
     case binary_command::RaUQ:
@@ -325,13 +323,8 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                 repl_object(m_slaves, k, obj);
             return true;
         };
-        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
-            if( cmd.cas_unique() != 0 ) {
-                r.error( binary_status::NotFound );
-            } else {
-                r.error( binary_status::NotStored );
-            }
-        }
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
+            r.error( binary_status::NotFound );
         break;
     case binary_command::Append:
     case binary_command::AppendQ:
@@ -342,12 +335,17 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                 return true;
             }
             if( obj.expired() ) return false;
+            if( cmd.cas_unique() != 0 &&
+                cmd.cas_unique() != obj.cas_unique() ) {
+                r.error( binary_status::Exists );
+                return true;
+            }
             const char* p2;
             std::size_t len2;
             std::tie(p2, len2) = cmd.data();
             obj.append(p2, len2);
             if( ! cmd.quiet() )
-                r.success();
+                r.set( obj.cas_unique() );
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj);
             return true;
@@ -364,12 +362,17 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                 return true;
             }
             if( obj.expired() ) return false;
+            if( cmd.cas_unique() != 0 &&
+                cmd.cas_unique() != obj.cas_unique() ) {
+                r.error( binary_status::Exists );
+                return true;
+            }
             const char* p2;
             std::size_t len2;
             std::tie(p2, len2) = cmd.data();
             obj.prepend(p2, len2);
             if( ! cmd.quiet() )
-                r.success();
+                r.set( obj.cas_unique() );
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj);
             return true;
@@ -383,6 +386,11 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
         pred = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
             if( obj.locked_by_other() ) {
                 r.error( binary_status::Locked );
+                return false;
+            }
+            if( cmd.cas_unique() != 0 &&
+                cmd.cas_unique() != obj.cas_unique() ) {
+                r.error( binary_status::Exists );
                 return false;
             }
             if( obj.locked_by_self() )
@@ -406,6 +414,11 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                 return true;
             }
             if( obj.expired() ) return false;
+            if( cmd.cas_unique() != 0 &&
+                cmd.cas_unique() != obj.cas_unique() ) {
+                r.error( binary_status::Exists );
+                return true;
+            }
             try {
                 std::uint64_t n = obj.incr( cmd.value() );
                 if( ! cmd.quiet() )
@@ -439,6 +452,11 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                 return true;
             }
             if( obj.expired() ) return false;
+            if( cmd.cas_unique() != 0 &&
+                cmd.cas_unique() != obj.cas_unique() ) {
+                r.error( binary_status::Exists );
+                return true;
+            }
             try {
                 std::uint64_t n = obj.decr( cmd.value() );
                 if( ! cmd.quiet() )
@@ -465,18 +483,16 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
         break;
     case binary_command::Touch:
         std::tie(p, len) = cmd.key();
-        h = [this,&cmd](const cybozu::hash_key& k, object& obj) -> bool {
+        h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
             if( obj.expired() ) return false;
             obj.touch( cmd.exptime() );
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj, false);
+            r.set( obj.cas_unique() );
             return true;
         };
-        if( m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
-            r.success();
-        } else {
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
             r.error( binary_status::NotFound );
-        }
         break;
     case binary_command::Lock:
     case binary_command::LockQ:
