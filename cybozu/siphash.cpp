@@ -84,17 +84,16 @@ uint64_t siphash24(const void *src, std::size_t src_sz) {
         v0 ^= mi;
     }
 
-    uint64_t t = 0; uint8_t *pt = (uint8_t *)&t; const uint8_t *m = (const uint8_t *)in;
+    const uint8_t *m = (const uint8_t *)in;
     switch (src_sz) {
-    case 7: pt[6] = m[6];
-    case 6: pt[5] = m[5];
-    case 5: pt[4] = m[4];
-    case 4: *((uint32_t*)&pt[0]) = *((const uint32_t*)&m[0]); break;
-    case 3: pt[2] = m[2];
-    case 2: pt[1] = m[1];
-    case 1: pt[0] = m[0];
+    case 7: b |= uint64_t(m[6]) << 48;
+    case 6: b |= uint64_t(m[5]) << 40;
+    case 5: b |= uint64_t(m[4]) << 32;
+    case 4: b |= uint64_t(m[3]) << 24;
+    case 3: b |= uint64_t(m[2]) << 16;
+    case 2: b |= uint64_t(m[1]) << 8;
+    case 1: b |= uint64_t(m[0]);
     }
-    b |= le64toh(t);
 
     v3 ^= b;
     DOUBLE_ROUND(v0,v1,v2,v3);
