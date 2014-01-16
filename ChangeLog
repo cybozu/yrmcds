@@ -1,4 +1,11 @@
+version 1.0.2
+
+	* fix siphash implementation to avoid unaligned memory access.
+	* improve Makefile for better platform portability.
+	* fix test/reactor to use pipes instead of stdin.
+
 version 1.0.1
+
 	* fix an infinite loop when sending 0 byte object via binary protocol.
 	* improve binary protocol compatibility with memcached.
 	  Specifically, Delete/Append/Prepend/Increment/Decrement with CAS
