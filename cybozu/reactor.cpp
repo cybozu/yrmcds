@@ -125,9 +125,10 @@ void reactor::poll() {
             continue;
         }
         if( ev.events & EPOLLHUP ) {
-            if( ! r.on_hangup() )
+            if( ! r.on_hangup() ) {
                 remove_resource(fd);
-            continue;
+                continue;
+            }
         }
         if( ev.events & EPOLLIN ) {
             if( ! r.on_readable() ) {
