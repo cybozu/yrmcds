@@ -1,8 +1,8 @@
 #include <cybozu/test.hpp>
 #include <cybozu/siphash.hpp>
-#include <stdint.h>
+#include <cstdint>
 
-const uint64_t vectors[64] = {
+const std::uint64_t vectors[64] = {
     0x726fdb47dd0e0e31ULL, 0x74f839c593dc67fdULL, 0x0d6c8009d9a94f5aULL, 0x85676696d7fb7e2dULL,
     0xcf2794e0277187b7ULL, 0x18765564cd99a68dULL, 0xcbc9466e58fee3ceULL, 0xab0200f58b01d137ULL,
     0x93f5f5799a932462ULL, 0x9e0082df0ba9e4b0ULL, 0x7a5dbbc594ddb9f3ULL, 0xf4b32f46226bada7ULL,

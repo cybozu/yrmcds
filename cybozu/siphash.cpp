@@ -33,7 +33,7 @@
 
 #include "siphash.hpp"
 #include <endian.h>
-#include <memory.h>
+#include <cstring>
 
 #define ROTATE(x, b) (std::uint64_t)( ((x) << (b)) | ( (x) >> (64 - (b))) )
 
@@ -64,9 +64,9 @@ namespace cybozu {
 
 void siphash24_seed(const char key[16]) {
     uint64_t t;
-    memcpy(&t, key, sizeof(t));
+    std::memcpy(&t, key, sizeof(t));
     static_k0 = le64toh(t);
-    memcpy(&t, key + 8, sizeof(t));
+    std::memcpy(&t, key + 8, sizeof(t));
     static_k1 = le64toh(t);
 }
 
@@ -81,7 +81,7 @@ uint64_t siphash24(const void *src, std::size_t src_sz) {
 
     while (src_sz >= 8) {
         uint64_t mi;
-        memcpy(&mi, m, sizeof(mi));
+        std::memcpy(&mi, m, sizeof(mi));
         mi = le64toh(mi);
         m += 8; src_sz -= 8;
         v3 ^= mi;
