@@ -1,3 +1,8 @@
+version 1.0.3
+
+	* fix a compilation problem on non-SSE Intel 32bit CPU.
+	* remove test/async as it is not related to any part of yrmcds.
+
 version 1.0.2
 
 	* fix siphash implementation to avoid unaligned memory access.
