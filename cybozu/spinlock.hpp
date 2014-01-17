@@ -27,7 +27,11 @@ private:
     std::atomic_flag m_flag;
     void pause() {
 #if defined(__i386__) || defined(__x86_64__)
+# if defined(__SSE__)
         _mm_pause();
+# else
+        __asm__ __volatile__ ("rep; nop");
+# endif
 #endif
     }
 };
