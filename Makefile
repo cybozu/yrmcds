@@ -20,7 +20,7 @@ CPUFLAGS = #-march=core2 -mtune=corei7
 CXXFLAGS = -std=gnu++11 $(OPTFLAGS) $(DEBUGFLAGS) $(shell getconf LFS_CFLAGS) $(WARNFLAGS) $(CPUFLAGS)
 LDFLAGS = -L. $(shell getconf LFS_LDFLAGS)
 LIBTCMALLOC = -ltcmalloc_minimal
-LDLIBS = $(shell getconf LFS_LIBS) -lyrmcds $(LIBTCMALLOC) -lpthread
+LDLIBS = $(shell getconf LFS_LIBS) -lyrmcds $(LIBTCMALLOC) -latomic -lpthread
 CLDOC = LD_LIBRARY_PATH=/usr/local/clang/lib cldoc
 
 HEADERS = $(wildcard src/*.hpp cybozu/*.hpp)
