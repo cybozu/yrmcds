@@ -2,8 +2,8 @@
 
 #include "constants.hpp"
 #include "server.hpp"
-#include "sockets.hpp"
-#include "stats.hpp"
+#include "memcache/handler.hpp"
+#include "semaphore/handler.hpp"
 
 #include <cybozu/logger.hpp>
 #include <cybozu/signal.hpp>
@@ -15,12 +15,8 @@
 
 namespace yrmcds {
 
-server::server():
-    m_is_slave( ! is_master() ),
-    m_hash(g_config.buckets()), m_syncer(m_workers) {
-    m_slaves.reserve(MAX_SLAVES);
-    m_new_slaves.reserve(MAX_SLAVES);
-    m_finder = [this]() ->cybozu::worker* {
+server::server(): m_is_slave( ! is_master() ), m_syncer(m_workers) {
+    auto finder = [this]() ->cybozu::worker* {
         std::size_t n_workers = m_workers.size();
         for( std::size_t i = 0; i < n_workers; ++i ) {
             cybozu::worker* pw = m_workers[m_worker_index].get();
@@ -30,54 +26,22 @@ server::server():
         }
         return nullptr;
     };
-}
+    auto is_slave = [this]{ return m_is_slave; };
 
-inline bool server::gc_ready() {
-    std::time_t now = std::time(nullptr);
-
-    if( m_gc_thread.get() != nullptr ) {
-        if( ! m_gc_thread->done() )
-            return false;
-        m_last_gc = now;
-        m_gc_thread = nullptr;
+    m_handlers.emplace_back(
+        new memcache::memcache_handler(finder, is_slave, m_reactor, m_syncer));
+    if( g_config.semaphore().enable() ) {
+        m_handlers.emplace_back(
+            new semaphore::semaphore_handler(finder, is_slave, m_reactor));
     }
-
-    std::time_t t = g_stats.flush_time.load(std::memory_order_relaxed);
-    if( t != 0 && now >= t )
-        return true;
-
-    // run GC immediately if the heap is over used.
-    if( g_stats.used_memory.load(std::memory_order_relaxed) >
-        g_config.memory_limit() ) return true;
-
-    // Run GC when there are new slaves.
-    // In case there are unstable slaves that try to connect to
-    // the master too frequently, the number of consecutive GCs is limited.
-    if( ! m_new_slaves.empty() && m_consecutive_gcs < MAX_CONSECUTIVE_GCS ) {
-        ++m_consecutive_gcs;
-        return true;
-    }
-
-    if( now > (m_last_gc + g_config.gc_interval()) ) {
-        m_consecutive_gcs = 0;
-        return true;
-    }
-
-    return false;
 }
 
 inline bool server::reactor_gc_ready() {
-    if( ! m_reactor.has_garbage() ) return false;
-    if( ! m_syncer.empty() ) return false;
-    if( m_gc_thread.get() != nullptr ) return false;
-    if( ! m_new_slaves.empty() ) return false;
-    return true;
-}
-
-inline void server::clear_everything() {
-    for( auto& bucket: m_hash )
-        bucket.clear_nolock();
-    g_stats.total_objects.store(0, std::memory_order_relaxed);
+    auto ready = [](const std::unique_ptr<protocol_handler>& p) {
+        return p->reactor_gc_ready();
+    };
+    return m_reactor.has_garbage() && m_syncer.empty() &&
+           std::all_of(m_handlers.begin(), m_handlers.end(), ready);
 }
 
 void server::serve() {
@@ -99,15 +63,13 @@ void server::serve() {
                      });
     m_reactor.add_resource(std::move(res), cybozu::reactor::EVENT_IN);
 
-    using cybozu::make_server_socket;
-    cybozu::tcp_server_socket::wrapper w =
-        [this](int s, const cybozu::ip_address&) {
-        return make_memcache_socket(s); };
-    m_reactor.add_resource(make_server_socket(NULL, g_config.port(), w),
-                           cybozu::reactor::EVENT_IN);
+    for( auto& handler: m_handlers )
+        handler->on_start();
 
     while( m_is_slave ) {
-        clear_everything();
+        for( auto& handler: m_handlers )
+            handler->on_clear();
+
         serve_slave();
         if( m_signaled ) return;
 
@@ -121,12 +83,6 @@ void server::serve() {
         }
     }
 
-    cybozu::tcp_server_socket::wrapper w2 =
-        [this](int s, const cybozu::ip_address&) {
-        return make_repl_socket(s); };
-    m_reactor.add_resource(make_server_socket(NULL, g_config.repl_port(), w2),
-                           cybozu::reactor::EVENT_IN);
-
     serve_master();
     std::quick_exit(0);
 }
@@ -139,29 +95,26 @@ void server::serve_slave() {
         return;
     }
 
-    repl_client_socket* rs = new repl_client_socket(fd, m_hash);
-    m_reactor.add_resource(std::unique_ptr<cybozu::resource>(rs),
-                           cybozu::reactor::EVENT_IN|cybozu::reactor::EVENT_OUT );
-
     cybozu::logger::info() << "Slave start";
-    m_reactor.run([rs](cybozu::reactor& r) {
-            std::time_t now = std::time(nullptr);
-            g_stats.current_time.store(now, std::memory_order_relaxed);
 
+    for( auto& handler: m_handlers )
+        handler->on_slave_start(fd);
+
+    m_reactor.run([this](cybozu::reactor& r) {
             if( is_master() ) {
-                if( rs->valid() )
-                    r.remove_resource(*rs);
+                for( auto& handler: m_handlers )
+                    handler->on_slave_end();
                 r.quit();
                 return;
             }
 
-            // ping to the master
-            char c = '\0';
-            rs->send(&c, sizeof(c), true);
+            for( auto& handler: m_handlers )
+                handler->on_slave_interval();
 
             r.fix_garbage();
             r.gc();
         });
+
 
     cybozu::logger::info() << "Slave end";
 }
@@ -169,27 +122,16 @@ void server::serve_slave() {
 void server::serve_master() {
     cybozu::logger::info() << "Entering master mode";
 
+    for( auto& handler: m_handlers )
+        handler->on_master_start();
+
     auto callback = [this](cybozu::reactor&) {
-        std::time_t now = std::time(nullptr);
-        g_stats.current_time.store(now, std::memory_order_relaxed);
-
-        for( auto it = m_slaves.begin(); it != m_slaves.end(); ) {
-            if( ! (*it)->valid() ) {
-                it = m_slaves.erase(it);
-            } else {
-                ++it;
-            }
-        }
-
+        for( auto& handler: m_handlers )
+            handler->on_master_pre_sync();
         if( ! m_syncer.empty() )
             m_syncer.check();
-
-        if( gc_ready() ) {
-            m_gc_thread = std::unique_ptr<gc_thread>(
-                new gc_thread(m_hash, m_slaves, m_new_slaves));
-            m_new_slaves.clear();
-            m_gc_thread->start();
-        }
+        for( auto& handler: m_handlers )
+            handler->on_master_interval();
 
         if( reactor_gc_ready() ) {
             m_reactor.fix_garbage();
@@ -209,8 +151,8 @@ void server::serve_master() {
         m_reactor.invalidate();
         for( auto& w: m_workers )
             w->stop();
-        if( m_gc_thread.get() != nullptr )
-            m_gc_thread = nullptr; // join
+        for( auto& handler: m_handlers )
+            handler->on_master_end();
     };
 
     try {
@@ -218,39 +160,12 @@ void server::serve_master() {
                                << std::this_thread::get_id();
         m_reactor.run(callback);
         cybozu::logger::info() << "Exiting";
-
     } catch( ... ) {
         stop();
         throw;
     }
 
     stop();
-}
-
-std::unique_ptr<cybozu::tcp_socket> server::make_memcache_socket(int s) {
-    if( m_is_slave )
-        return nullptr;
-
-    unsigned int mc = g_config.max_connections();
-    if( mc != 0 &&
-        (g_stats.curr_connections.load(std::memory_order_relaxed) >= mc) )
-        return nullptr;
-
-    return std::unique_ptr<cybozu::tcp_socket>(
-        new memcache_socket(s, m_finder, m_hash, m_slaves) );
-}
-
-std::unique_ptr<cybozu::tcp_socket> server::make_repl_socket(int s) {
-    if( m_slaves.size() == MAX_SLAVES )
-        return nullptr;
-    std::unique_ptr<cybozu::tcp_socket> t( new repl_socket(s, m_finder) );
-    cybozu::tcp_socket* pt = t.get();
-    m_slaves.push_back(pt);
-    m_syncer.add_request(
-        std::unique_ptr<sync_request>(
-            new sync_request([this,pt]{ m_new_slaves.push_back(pt); })
-            ));
-    return std::move(t);
 }
 
 } // namespace yrmcds

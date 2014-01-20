@@ -4,7 +4,7 @@
 #ifndef YRMCDS_MEMCACHE_HPP
 #define YRMCDS_MEMCACHE_HPP
 
-#include "constants.hpp"
+#include "../constants.hpp"
 
 #include <cybozu/dynbuf.hpp>
 #include <cybozu/hash_map.hpp>

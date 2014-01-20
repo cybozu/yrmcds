@@ -11,7 +11,7 @@
 
 #include <vector>
 
-namespace yrmcds {
+namespace yrmcds { namespace memcache {
 
 void repl_object(const std::vector<cybozu::tcp_socket*>& slaves,
                  const cybozu::hash_key& key, const object& obj,
@@ -23,6 +23,6 @@ void repl_delete(const std::vector<cybozu::tcp_socket*>& slaves,
 std::size_t repl_recv(const char* p, std::size_t len,
                       cybozu::hash_map<object>& hash);
 
-} // namespace yrmcds
+}} // namespace yrmcds::memcache
 
 #endif // YRMCDS_REPLICATION_HPP

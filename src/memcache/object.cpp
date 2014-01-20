@@ -1,6 +1,6 @@
 // (C) 2013 Cybozu.
 
-#include "config.hpp"
+#include "../config.hpp"
 #include "object.hpp"
 #include "stats.hpp"
 
@@ -22,7 +22,7 @@ std::uint64_t to_uint64(const char* p, std::size_t len) {
 
 } // anonymous namespace
 
-namespace yrmcds {
+namespace yrmcds { namespace memcache {
 
 thread_local int g_context = -1;
 
@@ -170,4 +170,4 @@ std::uint64_t object::decr(std::uint64_t n) {
     return u64_value;
 }
 
-} // namespace yrmcds
+}} // namespace yrmcds::memcache

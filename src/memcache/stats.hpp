@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <ctime>
 
-namespace yrmcds {
+namespace yrmcds { namespace memcache {
 
 // statistics counters.
 struct statistics {
@@ -63,6 +63,6 @@ struct statistics {
 
 extern statistics g_stats;
 
-} // namespace yrmcds
+}} // namespace yrmcds::memcache
 
 #endif // YRMCDS_STATS_HPP

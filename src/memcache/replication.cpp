@@ -31,7 +31,7 @@ fill_header(char* buf, std::uint16_t key_len, std::uint8_t extras_len,
 
 } // anonymous namespace
 
-namespace yrmcds {
+namespace yrmcds { namespace memcache {
 
 void repl_object(const std::vector<cybozu::tcp_socket*>& slaves,
                  const cybozu::hash_key& key, const object& obj,
@@ -121,4 +121,4 @@ std::size_t repl_recv(const char* p, std::size_t len,
     return consumed;
 }
 
-} // namespace yrmcds
+}} // namespace yrmcds::memcache

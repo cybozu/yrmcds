@@ -5,7 +5,7 @@
 #define YRMCDS_OBJECT_HPP
 
 #include "stats.hpp"
-#include "tempfile.hpp"
+#include "../tempfile.hpp"
 
 #include <cybozu/logger.hpp>
 #include <cybozu/util.hpp>
@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-namespace yrmcds {
+namespace yrmcds { namespace memcache {
 
 // Context for object locking.
 //
@@ -174,6 +174,6 @@ private:
     std::thread::id m_unlocker;
 };
 
-} // namespace yrmcds
+}} // namespace yrmcds::memcache
 
 #endif // YRMCDS_OBJECT_HPP

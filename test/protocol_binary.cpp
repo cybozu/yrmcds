@@ -1,4 +1,4 @@
-#include "../src/memcache.hpp"
+#include "../src/memcache/memcache.hpp"
 
 #include <cybozu/dynbuf.hpp>
 #include <cybozu/tcp.hpp>

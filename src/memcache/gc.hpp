@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace yrmcds {
+namespace yrmcds { namespace memcache {
 
 class gc_thread final: public cybozu::thread_base<gc_thread> {
 public:
@@ -66,6 +66,6 @@ private:
     std::vector<file_flusher> m_flushers;
 };
 
-} // namespace yrmcds
+}} // namespace yrmcds::memcache
 
 #endif // YRMCDS_GC_HPP
