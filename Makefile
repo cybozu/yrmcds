@@ -45,7 +45,7 @@ install: $(EXE)
 	cp etc/upstart /etc/init/yrmcds.conf
 	cp etc/logrotate /etc/logrotate.d/yrmcds
 	cp etc/yrmcds.conf $(DEFAULT_CONFIG)
-	cp $(EXE) $(PREFIX)/sbin/yrmcds
+	cp $(EXE) $(PREFIX)/sbin/yrmcdsd
 	install -o nobody -g nogroup -m 644 /dev/null /var/log/yrmcds.log
 
 COPYING.hpp: COPYING
