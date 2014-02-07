@@ -9,6 +9,7 @@
 #include <cybozu/signal.hpp>
 #include <cybozu/tcp.hpp>
 
+#include <cstdlib>
 #include <signal.h>
 #include <thread>
 
@@ -127,6 +128,7 @@ void server::serve() {
                            cybozu::reactor::EVENT_IN);
 
     serve_master();
+    std::quick_exit(0);
 }
 
 void server::serve_slave() {
