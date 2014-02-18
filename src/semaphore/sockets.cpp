@@ -203,34 +203,32 @@ void semaphore_socket::cmd_release(const semaphore::request& cmd, semaphore::res
 }
 
 void semaphore_socket::on_acquire(const cybozu::hash_key& k, std::uint32_t resources) {
-    for( auto& res: m_acquired_resources ) {
-        if( res.name == k ) {
-            res.count += resources;
-            return;
-        }
+    auto it = m_acquired_resources.find(&k);
+    if( it != m_acquired_resources.end() ) {
+        it->second += resources;
+        return;
     }
-    m_acquired_resources.emplace_back(k, resources);
+    m_acquired_resources.emplace(&k, resources);
 }
 
 bool semaphore_socket::on_release(const cybozu::hash_key& k, std::uint32_t resources) {
-    for( auto it = m_acquired_resources.begin(); it != m_acquired_resources.end(); ++it ) {
-        if( it->name == k ) {
-            if( it->count < resources )
-                return false;
-            if( it->count == resources ) {
-                m_acquired_resources.erase(it);
-                return true;
-            }
-            it->count -= resources;
+    auto it = m_acquired_resources.find(&k);
+    if( it != m_acquired_resources.end() ) {
+        if( it->second < resources )
+            return false;
+        if( it->second == resources ) {
+            m_acquired_resources.erase(it);
             return true;
         }
+        it->second -= resources;
+        return true;
     }
     return false;
 }
 
 void semaphore_socket::release_all() {
     for( auto& res: m_acquired_resources ) {
-        uint32_t count = res.count;
+        uint32_t count = res.second;
         auto h = [count](const cybozu::hash_key&, object& obj) -> bool {
             if( ! obj.release(count) ) {
                 cybozu::dump_stack();
@@ -238,10 +236,10 @@ void semaphore_socket::release_all() {
             }
             return true;
         };
-        if( ! m_hash.apply(res.name, h, nullptr) ) {
+        if( ! m_hash.apply(*res.first, h, nullptr) ) {
             cybozu::dump_stack();
             throw std::logic_error("<semaphore_socket::release_all> not found: "
-                                   + res.name.get().str());
+                                   + res.first->str());
         }
     }
     m_acquired_resources.clear();

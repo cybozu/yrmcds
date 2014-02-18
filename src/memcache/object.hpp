@@ -1,8 +1,8 @@
 // The cache object.
 // (C) 2013 Cybozu.
 
-#ifndef YRMCDS_OBJECT_HPP
-#define YRMCDS_OBJECT_HPP
+#ifndef YRMCDS_MEMCACHE_OBJECT_HPP
+#define YRMCDS_MEMCACHE_OBJECT_HPP
 
 #include "stats.hpp"
 #include "../tempfile.hpp"
@@ -176,4 +176,4 @@ private:
 
 }} // namespace yrmcds::memcache
 
-#endif // YRMCDS_OBJECT_HPP
+#endif // YRMCDS_MEMCACHE_OBJECT_HPP

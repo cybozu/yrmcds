@@ -13,7 +13,9 @@
 namespace yrmcds { namespace semaphore {
 
 struct statistics {
-    statistics() {}
+    statistics() {
+        reset();
+    }
 
     void reset() noexcept;
 
@@ -31,11 +33,11 @@ struct statistics {
     std::atomic<std::uint64_t> curr_connections;
     std::atomic<std::uint64_t> total_connections;
     alignas(CACHELINE_SIZE)
-    std::atomic<std::uint64_t> ops[(std::size_t)semaphore::command::END_OF_COMMAND];
+    std::atomic<std::uint64_t> ops[(std::size_t)command::END_OF_COMMAND];
 };
 
 extern statistics g_stats;
 
 }} // namespace yrmcds::semaphore
 
-#endif // YRMCDS_STATS_HPP
+#endif // YRMCDS_SEMAPHORE_STATS_HPP

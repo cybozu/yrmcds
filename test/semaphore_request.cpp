@@ -28,7 +28,7 @@ AUTOTEST(noop) {
     cybozu_assert( r2.length() == 12 );
     cybozu_assert( r2.status() == status::OK );
     cybozu_assert( r2.command() == command::Noop );
-    cybozu_assert( r2.opaque() == 0x01020304 );
+    cybozu_assert( std::memcmp(r2.opaque(), "\01\02\03\04", 4) == 0 );
 
     // valid request + incomplete request
     REQ(3, "\x90\x00\x00\x00"
@@ -38,7 +38,7 @@ AUTOTEST(noop) {
     cybozu_assert( r3.length() == 12 );
     cybozu_assert( r3.status() == status::OK );
     cybozu_assert( r3.command() == command::Noop );
-    cybozu_assert( r3.opaque() == 0x01020304 );
+    cybozu_assert( std::memcmp(r3.opaque(), "\01\02\03\04", 4) == 0 );
 }
 
 AUTOTEST(get) {

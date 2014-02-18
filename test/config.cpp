@@ -18,4 +18,9 @@ AUTOTEST(config) {
     cybozu_assert(g_config.heap_data_limit() == (16 << 10));
     cybozu_assert(g_config.workers() == 10);
     cybozu_assert(g_config.gc_interval() == 20);
+    cybozu_assert(g_config.semaphore().enable() == false);
+    cybozu_assert(g_config.semaphore().port() == 11215);
+    cybozu_assert(g_config.semaphore().max_connections() == 0);
+    cybozu_assert(g_config.semaphore().buckets() == 1000000);
+    cybozu_assert(g_config.semaphore().gc_interval() == 10);
 }

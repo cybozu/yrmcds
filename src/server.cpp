@@ -9,6 +9,7 @@
 #include <cybozu/signal.hpp>
 #include <cybozu/tcp.hpp>
 
+#include <algorithm>
 #include <cstdlib>
 #include <signal.h>
 #include <thread>
@@ -26,22 +27,19 @@ server::server(): m_is_slave( ! is_master() ), m_syncer(m_workers) {
         }
         return nullptr;
     };
-    auto is_slave = [this]{ return m_is_slave; };
 
-    m_handlers.emplace_back(
-        new memcache::memcache_handler(finder, is_slave, m_reactor, m_syncer));
-    if( g_config.semaphore().enable() ) {
-        m_handlers.emplace_back(
-            new semaphore::semaphore_handler(finder, is_slave, m_reactor));
-    }
+    m_handlers.emplace_back(new memcache::handler(finder, m_reactor, m_syncer));
+    if( g_config.semaphore().enable() )
+        m_handlers.emplace_back(new semaphore::handler(finder, m_reactor));
 }
 
 inline bool server::reactor_gc_ready() {
+    if( ! m_reactor.has_garbage() ) return false;
+    if( ! m_syncer.empty() ) return false;
     auto ready = [](const std::unique_ptr<protocol_handler>& p) {
         return p->reactor_gc_ready();
     };
-    return m_reactor.has_garbage() && m_syncer.empty() &&
-           std::all_of(m_handlers.begin(), m_handlers.end(), ready);
+    return std::all_of(m_handlers.cbegin(), m_handlers.cend(), ready);
 }
 
 void server::serve() {
@@ -68,7 +66,7 @@ void server::serve() {
 
     while( m_is_slave ) {
         for( auto& handler: m_handlers )
-            handler->on_clear();
+            handler->clear();
 
         serve_slave();
         if( m_signaled ) return;
@@ -88,17 +86,16 @@ void server::serve() {
 }
 
 void server::serve_slave() {
-    int fd = cybozu::tcp_connect(g_config.vip().str().c_str(),
-                                 g_config.repl_port());
-    if( fd == -1 ) {
-        m_reactor.run_once();
-        return;
+    for( auto it1 = m_handlers.begin(); it1 != m_handlers.end(); ++it1 ) {
+        if( ! (*it1)->on_slave_start() ) {
+            // failed to start. stop already started handlers.
+            for( auto it2 = m_handlers.begin(); it2 != it1; ++it2 )
+                (*it2)->on_slave_end();
+            return;
+        }
     }
 
     cybozu::logger::info() << "Slave start";
-
-    for( auto& handler: m_handlers )
-        handler->on_slave_start(fd);
 
     m_reactor.run([this](cybozu::reactor& r) {
             if( is_master() ) {
@@ -115,7 +112,6 @@ void server::serve_slave() {
             r.gc();
         });
 
-
     cybozu::logger::info() << "Slave end";
 }
 
@@ -126,8 +122,6 @@ void server::serve_master() {
         handler->on_master_start();
 
     auto callback = [this](cybozu::reactor&) {
-        for( auto& handler: m_handlers )
-            handler->on_master_pre_sync();
         if( ! m_syncer.empty() )
             m_syncer.check();
         for( auto& handler: m_handlers )

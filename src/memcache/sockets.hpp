@@ -1,8 +1,8 @@
 // Defines sockets for yrmcds.
 // (C) 2013 Cybozu.
 
-#ifndef YRMCDS_SOCKETS_HPP
-#define YRMCDS_SOCKETS_HPP
+#ifndef YRMCDS_MEMCACHE_SOCKETS_HPP
+#define YRMCDS_MEMCACHE_SOCKETS_HPP
 
 #include "../constants.hpp"
 #include "memcache.hpp"
@@ -135,4 +135,4 @@ private:
 
 }} // namespace yrmcds::memcache
 
-#endif // YRMCDS_SOCKETS_HPP
+#endif // YRMCDS_MEMCACHE_SOCKETS_HPP

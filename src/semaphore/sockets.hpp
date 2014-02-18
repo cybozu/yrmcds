@@ -16,6 +16,7 @@
 #include <cybozu/worker.hpp>
 
 #include <functional>
+#include <unordered_map>
 #include <vector>
 
 namespace yrmcds { namespace semaphore {
@@ -30,13 +31,6 @@ public:
     void execute(const semaphore::request& cmd);
 
 private:
-    struct acquired_resource {
-        std::reference_wrapper<const cybozu::hash_key> name;
-        std::uint32_t count;
-        acquired_resource(const cybozu::hash_key& name, std::uint32_t count):
-            name(name), count(count) {}
-    };
-
     alignas(CACHELINE_SIZE)
     std::atomic<bool> m_busy;
     const std::function<cybozu::worker*()>& m_finder;
@@ -45,9 +39,8 @@ private:
     std::function<void(cybozu::dynbuf&)> m_recvjob;
     std::function<void(cybozu::dynbuf&)> m_sendjob;
 
-    // Assume that the number of different resources aquired by a connection
-    // is small enough.  Otherwise, std::map may be preferable.
-    std::vector<acquired_resource> m_acquired_resources;
+    std::unordered_map<const cybozu::hash_key*, std::uint32_t>
+        m_acquired_resources;
 
     virtual void on_invalidate() override final {
         g_stats.curr_connections.fetch_sub(1);

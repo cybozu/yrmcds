@@ -1,8 +1,8 @@
 // Replication protocol.
 // (C) 2013 Cybozu.
 
-#ifndef YRMCDS_REPLICATION_HPP
-#define YRMCDS_REPLICATION_HPP
+#ifndef YRMCDS_MEMCACHE_REPLICATION_HPP
+#define YRMCDS_MEMCACHE_REPLICATION_HPP
 
 #include "object.hpp"
 
@@ -25,4 +25,4 @@ std::size_t repl_recv(const char* p, std::size_t len,
 
 }} // namespace yrmcds::memcache
 
-#endif // YRMCDS_REPLICATION_HPP
+#endif // YRMCDS_MEMCACHE_REPLICATION_HPP

@@ -1,8 +1,8 @@
 // semaphore server-side protocol.
 // (C) 2014 Cybozu.
 
-#ifndef YRMCDS_SEMAPHORE_HPP
-#define YRMCDS_SEMAPHORE_HPP
+#ifndef YRMCDS_SEMAPHORE_SEMAPHORE_HPP
+#define YRMCDS_SEMAPHORE_SEMAPHORE_HPP
 
 #include <cybozu/config_parser.hpp>
 #include <cybozu/tcp.hpp>
@@ -30,8 +30,6 @@ enum class status: std::uint8_t {
     OutOfMemory             = 0x82,
 };
 
-const char* status_to_string(status);
-
 struct string_slice {
     const char* p = nullptr;
     std::size_t len = 0;
@@ -43,7 +41,7 @@ class request final {
 public:
     request(const char* p, std::size_t len) {
         if( p == nullptr )
-            throw std::logic_error("<semaphore::request> `p` must not be zero");
+            throw std::logic_error("<semaphore::request> `p` must not be nullptr");
         if( len == 0 )
             throw std::logic_error("<semaphore::request> `len` must not be zero");
         parse(p, len);
@@ -53,7 +51,7 @@ public:
     semaphore::command command() const noexcept { return m_command; }
     std::uint8_t flags() const noexcept { return m_flags; }
     std::uint32_t body_length() const noexcept { return m_body_length; }
-    std::uint32_t opaque() const noexcept { return m_opaque; }
+    const char* opaque() const noexcept { return m_opaque; }
     std::uint32_t resources() const noexcept { return m_resources; }
     std::uint32_t initial() const noexcept { return m_initial; }
     string_slice name() const noexcept { return m_name; }
@@ -66,7 +64,7 @@ private:
     semaphore::command m_command = semaphore::command::Unknown;
     std::uint8_t m_flags = 0;
     std::uint32_t m_body_length = 0;
-    std::uint32_t m_opaque = 0;
+    char m_opaque[4] = {};
     std::uint32_t m_resources = 0;
     std::uint32_t m_initial = 0;
     string_slice m_name;
@@ -75,7 +73,9 @@ private:
 
 class response final {
 public:
-    response(cybozu::tcp_socket& socket, const request& request);
+    response(cybozu::tcp_socket& socket, const request& request):
+        m_socket(socket), m_request(request) {}
+
     void success();
     void error(semaphore::status status);
     void get(std::uint32_t available);
@@ -92,4 +92,4 @@ private:
 
 }} // namespace yrmcds::semaphore
 
-#endif // YRMCDS_SEMAPHORE_HPP
+#endif // YRMCDS_SEMAPHORE_SEMAPHORE_HPP

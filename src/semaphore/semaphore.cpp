@@ -5,6 +5,9 @@
 
 #include <cybozu/util.hpp>
 
+#include <string>
+#include <vector>
+
 namespace {
 
 const std::size_t HEADER_SIZE = 12;
@@ -17,9 +20,6 @@ const char STATUS_RESOURCE_NOT_AVAILABLE[] = "Resource not available";
 const char STATUS_NOT_ACQUIRED[]           = "Not acquired";
 const char STATUS_UNKNOWN_COMMAND[]        = "Unknown command";
 const char STATUS_OUT_OF_MEMORY[]          = "OutOfMemory";
-
-using namespace yrmcds;
-using namespace yrmcds::semaphore;
 
 void add_stat(std::vector<char>& body, const std::string& name,
               const std::string& value) {
@@ -38,9 +38,9 @@ void add_stat_atomic(std::vector<char>& body, const std::string& name,
 }
 
 void add_stat_op(std::vector<char>& body, const std::string& name,
-                 semaphore::command c) {
-    std::uint64_t n = g_stats.ops[(uint8_t)c].load(std::memory_order_relaxed);
-    add_stat(body, name, std::to_string(n));
+                 yrmcds::semaphore::command c) {
+    const auto& n = yrmcds::semaphore::g_stats.ops[(std::uint8_t)c];
+    add_stat(body, name, std::to_string(n.load(std::memory_order_relaxed)));
 }
 
 } // namespace anonymous
@@ -56,7 +56,7 @@ void request::parse(const char* p, std::size_t len) noexcept {
     m_command = (semaphore::command)*(const uint8_t*)(p+1);
     m_flags = *(const uint8_t*)(p+2);
     m_body_length = body_length;
-    cybozu::ntoh(p + 8, m_opaque);
+    memcpy(m_opaque, p + 8, 4);
 
     m_request_length = HEADER_SIZE + body_length;
     const char* body = p + HEADER_SIZE;
@@ -117,10 +117,6 @@ void request::parse(const char* p, std::size_t len) noexcept {
     m_status = semaphore::status::OK;
 }
 
-response::response(cybozu::tcp_socket& socket, const request& request):
-    m_socket(socket), m_request(request) {
-}
-
 void response::success() {
     char header[HEADER_SIZE];
     fill_header(header, semaphore::status::OK, 0);
@@ -129,26 +125,29 @@ void response::success() {
 
 void response::error(semaphore::status status) {
     switch( status ) {
-    case semaphore::status::OK:
-        send_error(status, STATUS_OK, sizeof(STATUS_OK) - 1);
-        break;
     case semaphore::status::NotFound:
-        send_error(status, STATUS_NOT_FOUND, sizeof(STATUS_NOT_FOUND) - 1);
+        send_error(status, STATUS_NOT_FOUND,
+                   sizeof(STATUS_NOT_FOUND) - 1);
         break;
     case semaphore::status::Invalid:
-        send_error(status, STATUS_INVALID, sizeof(STATUS_INVALID) - 1);
+        send_error(status, STATUS_INVALID,
+                   sizeof(STATUS_INVALID) - 1);
         break;
     case semaphore::status::ResourceNotAvailable:
-        send_error(status, STATUS_RESOURCE_NOT_AVAILABLE, sizeof(STATUS_RESOURCE_NOT_AVAILABLE) - 1);
+        send_error(status, STATUS_RESOURCE_NOT_AVAILABLE,
+                   sizeof(STATUS_RESOURCE_NOT_AVAILABLE) - 1);
         break;
     case semaphore::status::NotAcquired:
-        send_error(status, STATUS_NOT_ACQUIRED, sizeof(STATUS_NOT_ACQUIRED) - 1);
+        send_error(status, STATUS_NOT_ACQUIRED,
+                   sizeof(STATUS_NOT_ACQUIRED) - 1);
         break;
     case semaphore::status::UnknownCommand:
-        send_error(status, STATUS_UNKNOWN_COMMAND, sizeof(STATUS_UNKNOWN_COMMAND) - 1);
+        send_error(status, STATUS_UNKNOWN_COMMAND,
+                   sizeof(STATUS_UNKNOWN_COMMAND) - 1);
         break;
     case semaphore::status::OutOfMemory:
-        send_error(status, STATUS_OUT_OF_MEMORY, sizeof(STATUS_OUT_OF_MEMORY) - 1);
+        send_error(status, STATUS_OUT_OF_MEMORY,
+                   sizeof(STATUS_OUT_OF_MEMORY) - 1);
         break;
     default:
         cybozu::dump_stack();
@@ -201,16 +200,18 @@ void response::stats() {
     m_socket.sendv(iov, 2, true);
 }
 
-void response::fill_header(char* header, semaphore::status status, std::uint32_t body_length) {
+void response::fill_header(char* header, semaphore::status status,
+                           std::uint32_t body_length) {
     header[0] = (char)RESPONSE_MAGIC;
     header[1] = (char)m_request.command();
     header[2] = (char)status;
     header[3] = 0;
     cybozu::hton(body_length, header + 4);
-    cybozu::hton(m_request.opaque(), header + 8);
+    memcpy(header + 8, m_request.opaque(), 4);
 }
 
-void response::send_error(semaphore::status status, const char* message, std::size_t length) {
+void response::send_error(semaphore::status status, const char* message,
+                          std::size_t length) {
     char header[HEADER_SIZE];
     fill_header(header, status, length);
     cybozu::tcp_socket::iovec iov[] = {

@@ -1,8 +1,8 @@
 // Garbage object collection.
 // (C) 2013 Cybozu.
 
-#ifndef YRMCDS_GC_HPP
-#define YRMCDS_GC_HPP
+#ifndef YRMCDS_MEMCACHE_GC_HPP
+#define YRMCDS_MEMCACHE_GC_HPP
 
 #include "object.hpp"
 #include "stats.hpp"
@@ -68,4 +68,4 @@ private:
 
 }} // namespace yrmcds::memcache
 
-#endif // YRMCDS_GC_HPP
+#endif // YRMCDS_MEMCACHE_GC_HPP

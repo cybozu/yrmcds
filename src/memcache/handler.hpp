@@ -9,28 +9,27 @@
 #include "gc.hpp"
 #include "object.hpp"
 #include "sockets.hpp"
+#include <cybozu/reactor.hpp>
 #include <cybozu/worker.hpp>
 
 #include <functional>
 
 namespace yrmcds { namespace memcache {
 
-class memcache_handler: public protocol_handler {
+class handler: public protocol_handler {
 public:
-    memcache_handler(const std::function<cybozu::worker*()>& m_finder,
-                     const std::function<bool()>& is_slave,
-                     cybozu::reactor& reactor,
-                     syncer& syncer);
+    handler(const std::function<cybozu::worker*()>& finder,
+            cybozu::reactor& reactor,
+            syncer& syncer);
     virtual void on_start() override;
     virtual void on_master_start() override;
-    virtual void on_master_pre_sync() override;
     virtual void on_master_interval() override;
     virtual void on_master_end() override;
-    virtual void on_slave_start(int fd) override;
+    virtual bool on_slave_start() override;
     virtual void on_slave_end() override;
     virtual void on_slave_interval() override;
-    virtual void on_clear() override;
-    virtual bool reactor_gc_ready() override;
+    virtual void clear() override;
+    virtual bool reactor_gc_ready() const override;
 
 private:
     bool gc_ready();
@@ -38,9 +37,9 @@ private:
     std::unique_ptr<cybozu::tcp_socket> make_repl_socket(int s);
 
     std::function<cybozu::worker*()> m_finder;
-    std::function<bool()> m_is_slave;
     cybozu::reactor& m_reactor;
     syncer& m_syncer;
+    bool m_is_slave = true;
     cybozu::hash_map<object> m_hash;
     std::time_t m_last_gc = 0;
     std::unique_ptr<gc_thread> m_gc_thread = nullptr;

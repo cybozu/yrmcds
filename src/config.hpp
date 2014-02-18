@@ -20,18 +20,32 @@ class semaphore_config {
 public:
     void load(const cybozu::config_parser&);
 
-    bool enable() const noexcept { return m_enable; }
-    std::uint16_t port() const noexcept { return m_port; }
-    unsigned max_connections() const noexcept { return m_max_connections; }
-    unsigned buckets() const noexcept { return m_buckets; }
-    unsigned gc_interval() const noexcept { return m_gc_interval; }
+    bool enable() const noexcept {
+        return m_enable;
+    }
+
+    std::uint16_t port() const noexcept {
+        return m_port;
+    }
+
+    unsigned int max_connections() const noexcept {
+        return m_max_connections;
+    }
+
+    unsigned int buckets() const noexcept {
+        return m_buckets;
+    }
+
+    unsigned int gc_interval() const noexcept {
+        return m_gc_interval;
+    }
 
 private:
     bool m_enable = false;
     std::uint16_t m_port = DEFAULT_SEMAPHORE_PORT;
-    unsigned m_max_connections = 0;
-    unsigned m_buckets = DEFAULT_BUCKETS;
-    unsigned m_gc_interval = DEFAULT_GC_INTERVAL;
+    unsigned int m_max_connections = 0;
+    unsigned int m_buckets = DEFAULT_BUCKETS;
+    unsigned int m_gc_interval = DEFAULT_GC_INTERVAL;
 };
 
 // Configurations for yrmcds.

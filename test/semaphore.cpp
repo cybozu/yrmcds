@@ -19,8 +19,8 @@
 
 using namespace semaphore_client;
 
-const char* g_server;
-uint16_t g_port;
+const char* g_server = nullptr;
+uint16_t g_port = 11215;
 
 int connect_server() {
     int s = cybozu::tcp_connect(g_server, g_port);
@@ -197,21 +197,41 @@ AUTOTEST(multi_names) {
     cybozu_assert(r.available() == 8);
 }
 
+void print_usage() {
+    std::cout << "Usage: semaphore.exe [SERVER [PORT]]\n"
+                 "Environment options:\n"
+                 "  YRMCDS_SERVER : the name of a yrmcds server.\n"
+                 "                  used only when `SERVER` is unspecified.\n"
+                 "  YRMCDS_PORT   : the port number of a yrmcds server.\n"
+                 "                  used only when `PORT` is unspecified.\n"
+              << std::flush;
+}
+
 // main
 bool optparse(int argc, char** argv) {
-    if( argc != 2 && argc != 3 ) {
-        std::cout << "Usage: semaphore.exe SERVER [PORT]" << std::endl;
+    if( argc > 3 ) {
+        print_usage();
         return false;
     }
-    g_server = argv[1];
-    g_port = 11215;
-    if( argc == 3 ) {
-        int n = std::stoi(argv[2]);
-        if( n <= 0 || n > 65535 ) {
-            std::cout << "Invalid port number: " << argv[2] << std::endl;
-            return false;
-        }
-        g_port = n;
+
+    g_server = getenv("YRMCDS_SERVER");
+    const char* env_port = getenv("YRMCDS_PORT");
+    if( env_port != nullptr )
+        g_port = std::stoi(env_port);
+
+    if( argc >= 2 )
+        g_server = argv[1];
+    if( argc >= 3 )
+        g_port = std::stoi(argv[2]);
+
+    if( g_server == nullptr ) {
+        std::cout << "No server specified." << std::endl;
+        print_usage();
+        return false;
+    }
+    if( g_port <= 0 || g_port > 65535 ) {
+        std::cout << "Invalid port number: " << argv[2] << std::endl;
+        return false;
     }
 
     int s = connect_server();

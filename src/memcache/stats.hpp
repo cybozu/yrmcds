@@ -1,8 +1,8 @@
 // Atomic counters for statistics.
 // (C) 2013 Cybozu.
 
-#ifndef YRMCDS_STATS_HPP
-#define YRMCDS_STATS_HPP
+#ifndef YRMCDS_MEMCACHE_STATS_HPP
+#define YRMCDS_MEMCACHE_STATS_HPP
 
 #include "memcache.hpp"
 
@@ -15,7 +15,9 @@ namespace yrmcds { namespace memcache {
 
 // statistics counters.
 struct statistics {
-    statistics(): current_time(std::time(nullptr)) {}
+    statistics() {
+        reset();
+    }
 
     // Reset all counters.
     void reset() noexcept;
@@ -65,4 +67,4 @@ extern statistics g_stats;
 
 }} // namespace yrmcds::memcache
 
-#endif // YRMCDS_STATS_HPP
+#endif // YRMCDS_MEMCACHE_STATS_HPP
