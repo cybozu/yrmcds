@@ -1,3 +1,8 @@
+version 1.0.4
+
+	* fix "make install" to property install yrmcdsd.
+	* fixed bugs: #31, #34
+
 version 1.0.3
 
 	* fix a compilation problem on non-SSE Intel 32bit CPU.
