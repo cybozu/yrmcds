@@ -14,6 +14,9 @@ public:
     // Called when the server starts.
     virtual void on_start() {}
 
+    // Called when the server exits.
+    virtual void on_exit() {}
+
     // Called when the server enters the master mode.
     virtual void on_master_start() {}
 
@@ -38,7 +41,7 @@ public:
     // Called when the server discards all stored data.
     virtual void clear() {}
 
-    // If this protocol handler ready to run the reactor GC,
+    // If this protocol handler is ready for the reactor GC,
     // returns true. Otherwise, return false.
     virtual bool reactor_gc_ready() const { return true; }
 };

@@ -56,7 +56,7 @@ void request::parse(const char* p, std::size_t len) noexcept {
     m_command = (semaphore::command)*(const uint8_t*)(p+1);
     m_flags = *(const uint8_t*)(p+2);
     m_body_length = body_length;
-    memcpy(m_opaque, p + 8, 4);
+    m_opaque = p + 8;
 
     m_request_length = HEADER_SIZE + body_length;
     const char* body = p + HEADER_SIZE;
@@ -115,6 +115,16 @@ void request::parse(const char* p, std::size_t len) noexcept {
     }
 
     m_status = semaphore::status::OK;
+}
+
+inline void response::fill_header(char* header, semaphore::status status,
+                                  std::uint32_t body_length) {
+    header[0] = (char)RESPONSE_MAGIC;
+    header[1] = (char)m_request.command();
+    header[2] = (char)status;
+    header[3] = 0;
+    cybozu::hton(body_length, header + 4);
+    std::memcpy(header + 8, m_request.opaque(), 4);
 }
 
 void response::success() {
@@ -198,16 +208,6 @@ void response::stats() {
         {body.data(), body.size()},
     };
     m_socket.sendv(iov, 2, true);
-}
-
-void response::fill_header(char* header, semaphore::status status,
-                           std::uint32_t body_length) {
-    header[0] = (char)RESPONSE_MAGIC;
-    header[1] = (char)m_request.command();
-    header[2] = (char)status;
-    header[3] = 0;
-    cybozu::hton(body_length, header + 4);
-    memcpy(header + 8, m_request.opaque(), 4);
 }
 
 void response::send_error(semaphore::status status, const char* message,

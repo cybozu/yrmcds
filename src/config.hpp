@@ -23,19 +23,15 @@ public:
     bool enable() const noexcept {
         return m_enable;
     }
-
     std::uint16_t port() const noexcept {
         return m_port;
     }
-
     unsigned int max_connections() const noexcept {
         return m_max_connections;
     }
-
     unsigned int buckets() const noexcept {
         return m_buckets;
     }
-
     unsigned int gc_interval() const noexcept {
         return m_gc_interval;
     }

@@ -14,7 +14,6 @@
 #include <cybozu/worker.hpp>
 
 #include <ctime>
-#include <functional>
 #include <vector>
 
 namespace yrmcds {
@@ -31,7 +30,6 @@ public:
     void serve();
 
 private:
-    bool m_is_slave;
     bool m_signaled = false;
     cybozu::reactor m_reactor;
     std::vector<std::unique_ptr<cybozu::worker>> m_workers;

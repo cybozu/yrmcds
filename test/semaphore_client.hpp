@@ -162,9 +162,9 @@ public:
         cybozu::hton((uint16_t)name.size(), body);
 
         m_send_buffer.resize(HEADER_SIZE + sizeof(body) + name.size());
-        memcpy(m_send_buffer.data(), header, HEADER_SIZE);
-        memcpy(m_send_buffer.data() + HEADER_SIZE, body, sizeof(body));
-        memcpy(m_send_buffer.data() + HEADER_SIZE + sizeof(body), name.data(), name.size());
+        std::memcpy(m_send_buffer.data(), header, HEADER_SIZE);
+        std::memcpy(m_send_buffer.data() + HEADER_SIZE, body, sizeof(body));
+        std::memcpy(m_send_buffer.data() + HEADER_SIZE + sizeof(body), name.data(), name.size());
 
         ssize_t n = ::send(m_socket, m_send_buffer.data(), m_send_buffer.size(), 0);
         cybozu_assert( n == (ssize_t)m_send_buffer.size() );
@@ -180,9 +180,9 @@ public:
         cybozu::hton((uint16_t)name.size(), body + 8);
 
         m_send_buffer.resize(HEADER_SIZE + sizeof(body) + name.size());
-        memcpy(m_send_buffer.data(), header, HEADER_SIZE);
-        memcpy(m_send_buffer.data() + HEADER_SIZE, body, sizeof(body));
-        memcpy(m_send_buffer.data() + HEADER_SIZE + sizeof(body), name.data(), name.size());
+        std::memcpy(m_send_buffer.data(), header, HEADER_SIZE);
+        std::memcpy(m_send_buffer.data() + HEADER_SIZE, body, sizeof(body));
+        std::memcpy(m_send_buffer.data() + HEADER_SIZE + sizeof(body), name.data(), name.size());
 
         ssize_t n = ::send(m_socket, m_send_buffer.data(), m_send_buffer.size(), 0);
         cybozu_assert( n == (ssize_t)m_send_buffer.size() );
@@ -197,9 +197,9 @@ public:
         cybozu::hton((uint16_t)name.size(), body + 4);
 
         m_send_buffer.resize(HEADER_SIZE + sizeof(body) + name.size());
-        memcpy(m_send_buffer.data(), header, HEADER_SIZE);
-        memcpy(m_send_buffer.data() + HEADER_SIZE, body, sizeof(body));
-        memcpy(m_send_buffer.data() + HEADER_SIZE + sizeof(body), name.data(), name.size());
+        std::memcpy(m_send_buffer.data(), header, HEADER_SIZE);
+        std::memcpy(m_send_buffer.data() + HEADER_SIZE, body, sizeof(body));
+        std::memcpy(m_send_buffer.data() + HEADER_SIZE + sizeof(body), name.data(), name.size());
 
         ssize_t n = ::send(m_socket, m_send_buffer.data(), m_send_buffer.size(), 0);
         cybozu_assert( n == (ssize_t)m_send_buffer.size() );

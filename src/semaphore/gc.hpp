@@ -13,7 +13,7 @@ namespace yrmcds { namespace semaphore {
 
 class gc_thread final: public cybozu::thread_base<gc_thread> {
 public:
-    gc_thread(cybozu::hash_map<object>& hash):
+    explicit gc_thread(cybozu::hash_map<object>& hash):
         m_hash(hash) {}
 
     gc_thread(const gc_thread&) = delete;

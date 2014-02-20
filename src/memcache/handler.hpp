@@ -9,9 +9,11 @@
 #include "gc.hpp"
 #include "object.hpp"
 #include "sockets.hpp"
+
 #include <cybozu/reactor.hpp>
 #include <cybozu/worker.hpp>
 
+#include <ctime>
 #include <functional>
 
 namespace yrmcds { namespace memcache {
@@ -32,7 +34,7 @@ public:
     virtual bool reactor_gc_ready() const override;
 
 private:
-    bool gc_ready();
+    bool gc_ready(std::time_t now);
     std::unique_ptr<cybozu::tcp_socket> make_memcache_socket(int s);
     std::unique_ptr<cybozu::tcp_socket> make_repl_socket(int s);
 

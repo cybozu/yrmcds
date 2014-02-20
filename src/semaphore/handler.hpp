@@ -12,6 +12,7 @@
 #include <cybozu/tcp.hpp>
 #include <cybozu/worker.hpp>
 
+#include <ctime>
 #include <functional>
 
 namespace yrmcds { namespace semaphore {

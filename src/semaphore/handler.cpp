@@ -9,10 +9,10 @@
 namespace yrmcds { namespace semaphore {
 
 handler::handler(const std::function<cybozu::worker*()>& finder,
-                 cybozu::reactor& reactor):
-    m_finder(finder),
-    m_reactor(reactor),
-    m_hash(g_config.semaphore().buckets()) {
+                 cybozu::reactor& reactor)
+    : m_finder(finder),
+      m_reactor(reactor),
+      m_hash(g_config.semaphore().buckets()) {
 }
 
 bool handler::gc_ready() {
@@ -44,7 +44,8 @@ std::unique_ptr<cybozu::tcp_socket> handler::make_semaphore_socket(int s) {
         g_stats.curr_connections.load(std::memory_order_relaxed) >= mc )
         return nullptr;
 
-    return std::unique_ptr<cybozu::tcp_socket>(new semaphore_socket(s, m_finder, m_hash));
+    return std::unique_ptr<cybozu::tcp_socket>(
+        new semaphore_socket(s, m_finder, m_hash) );
 }
 
 void handler::on_master_interval() {

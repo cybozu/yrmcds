@@ -64,7 +64,7 @@ private:
     semaphore::command m_command = semaphore::command::Unknown;
     std::uint8_t m_flags = 0;
     std::uint32_t m_body_length = 0;
-    char m_opaque[4] = {};
+    const char* m_opaque = nullptr;
     std::uint32_t m_resources = 0;
     std::uint32_t m_initial = 0;
     string_slice m_name;
@@ -83,8 +83,10 @@ public:
     void stats();
 
 private:
-    void fill_header(char* header, semaphore::status status, std::uint32_t body_length);
-    void send_error(semaphore::status status, const char* message, std::size_t length);
+    void fill_header(char* header, semaphore::status status,
+                     std::uint32_t body_length);
+    void send_error(semaphore::status status, const char* message,
+                    std::size_t length);
 
     cybozu::tcp_socket& m_socket;
     const request& m_request;

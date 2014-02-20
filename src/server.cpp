@@ -1,9 +1,9 @@
 // (C) 2013 Cybozu.
 
 #include "constants.hpp"
-#include "server.hpp"
 #include "memcache/handler.hpp"
 #include "semaphore/handler.hpp"
+#include "server.hpp"
 
 #include <cybozu/logger.hpp>
 #include <cybozu/signal.hpp>
@@ -16,7 +16,7 @@
 
 namespace yrmcds {
 
-server::server(): m_is_slave( ! is_master() ), m_syncer(m_workers) {
+server::server(): m_syncer(m_workers) {
     auto finder = [this]() ->cybozu::worker* {
         std::size_t n_workers = m_workers.size();
         for( std::size_t i = 0; i < n_workers; ++i ) {
@@ -64,7 +64,9 @@ void server::serve() {
     for( auto& handler: m_handlers )
         handler->on_start();
 
-    while( m_is_slave ) {
+    if( is_master() )
+        goto MASTER_ENTRY;
+    while( true ) {
         for( auto& handler: m_handlers )
             handler->clear();
 
@@ -73,14 +75,13 @@ void server::serve() {
 
         // disconnected from the master
         for( int i = 0; i < MASTER_CHECKS; ++i ) {
-            if( is_master() ) {
-                m_is_slave = false;
-                break;
-            }
+            if( is_master() )
+                goto MASTER_ENTRY;
             std::this_thread::sleep_for( std::chrono::milliseconds(100) );
         }
     }
 
+  MASTER_ENTRY:
     serve_master();
     std::quick_exit(0);
 }
@@ -99,8 +100,6 @@ void server::serve_slave() {
 
     m_reactor.run([this](cybozu::reactor& r) {
             if( is_master() ) {
-                for( auto& handler: m_handlers )
-                    handler->on_slave_end();
                 r.quit();
                 return;
             }
@@ -111,6 +110,8 @@ void server::serve_slave() {
             r.fix_garbage();
             r.gc();
         });
+    for( auto& handler: m_handlers )
+        handler->on_slave_end();
 
     cybozu::logger::info() << "Slave end";
 }
