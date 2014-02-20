@@ -29,6 +29,7 @@ Features
 
 * Memcached text and binary protocols.
 * [Server-side locking](docs/locking.md).
+* [Server-side semaphore](docs/semaphore.md).
 * Large objects can be stored in temporary files, not in memory.
 * Global LRU eviction / no slab distribution problem.
     * Unlike memcached, yrmcds is not involved with slabs problems.
@@ -37,8 +38,8 @@ Features
     * Automatic fail-over.
     * Automatic recovery of redundancy.
 
-A companion client library [libyrmcds][] and a [PHP extension][php-yrmcds]
-are also available.
+A companion client library [libyrmcds][], [libyrmcds-semaphore][], and
+a [PHP extension][php-yrmcds] are also available.
 
 See also [usage guide](docs/usage.md), [future plans](docs/future.md),
 [differences from memcached](docs/diffs.md), [design notes](docs/design.md)
@@ -90,6 +91,7 @@ An upstart script and a logrotate configuration file are installed too.
 [csiphash]: https://github.com/majek/csiphash
 [mit]: http://opensource.org/licenses/MIT
 [libyrmcds]: http://cybozu.github.io/libyrmcds/
+[libyrmcds-semaphore]: https://github.com/cybozu/libyrmcds-semaphore/
 [php-yrmcds]: http://cybozu.github.io/php-yrmcds/
 [slab1]: http://nosql.mypopescu.com/post/13506116892/memcached-internals-memory-allocation-eviction
 [slab2]: https://groups.google.com/forum/#!topic/memcached/DuJNy5gbQ0o
