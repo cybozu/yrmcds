@@ -1,5 +1,5 @@
 // Constants used in yrmcds.
-// (C) 2013 Cybozu.
+// (C) 2013, 2014 Cybozu.
 
 #ifndef YRMCDS_CONSTANTS_HPP
 #define YRMCDS_CONSTANTS_HPP
@@ -30,7 +30,7 @@ const std::size_t   MAX_REQUEST_LENGTH  = 30 << 20; // 30 MiB
 const int           MAX_SLAVES          = 5;
 const int           MAX_CONSECUTIVE_GCS = 3;
 
-const char          VERSION[] = "yrmcds version 1.0.4";
+const char          VERSION[] = "yrmcds version 1.1.0-rc1";
 
 } // namespace yrmcds
 
