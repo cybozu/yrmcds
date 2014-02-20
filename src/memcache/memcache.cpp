@@ -1,6 +1,6 @@
 // (C) 2013 Cybozu.
 
-#include "config.hpp"
+#include "../config.hpp"
 #include "memcache.hpp"
 #include "stats.hpp"
 
@@ -69,7 +69,7 @@ inline std::time_t binary_exptime(const char* p) noexcept {
         return memcache::binary_request::EXPTIME_NONE;
     if( t > EXPTIME_THRESHOLD )
         return t;
-    return g_stats.current_time.load(relaxed) + t;
+    return memcache::g_stats.current_time.load(relaxed) + t;
 }
 
 } // anonymous namespace

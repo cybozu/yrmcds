@@ -1,8 +1,8 @@
 // Garbage object collection.
 // (C) 2013 Cybozu.
 
-#ifndef YRMCDS_GC_HPP
-#define YRMCDS_GC_HPP
+#ifndef YRMCDS_MEMCACHE_GC_HPP
+#define YRMCDS_MEMCACHE_GC_HPP
 
 #include "object.hpp"
 #include "stats.hpp"
@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace yrmcds {
+namespace yrmcds { namespace memcache {
 
 class gc_thread final: public cybozu::thread_base<gc_thread> {
 public:
@@ -66,6 +66,6 @@ private:
     std::vector<file_flusher> m_flushers;
 };
 
-} // namespace yrmcds
+}} // namespace yrmcds::memcache
 
-#endif // YRMCDS_GC_HPP
+#endif // YRMCDS_MEMCACHE_GC_HPP

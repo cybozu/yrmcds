@@ -119,10 +119,8 @@ public:
             T object;
             item* next;
 
-            // perfect forwarding
-            template<typename X>
-            item(const hash_key& k, X&& o, item* n):
-                key(k), object(std::forward<X>(o)), next(n) {}
+            item(const hash_key& k, const creator& c, item* next):
+                key(k), object(c(key)), next(next) {}
         };
 
     public:
@@ -162,7 +160,7 @@ public:
                 }
             }
             if( ! c ) return false;
-            m_objects = new item(key, c(key), m_objects);
+            m_objects = new item(key, c, m_objects);
             return true;
         }
 

@@ -1,6 +1,6 @@
 // (C) 2013 Cybozu.
 
-#include "config.hpp"
+#include "../config.hpp"
 #include "gc.hpp"
 #include "replication.hpp"
 #include "stats.hpp"
@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cstdlib>
 
-namespace yrmcds {
+namespace yrmcds { namespace memcache {
 
 void gc_thread::run() {
     if( ! cybozu::has_ip_address(g_config.vip()) ) {
@@ -133,4 +133,4 @@ void gc_thread::gc() {
 }
 
 
-} // namespace yrmcds
+}} // namespace yrmcds::memcache

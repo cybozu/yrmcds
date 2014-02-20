@@ -5,8 +5,7 @@
 #define YRMCDS_SERVER_HPP
 
 #include "config.hpp"
-#include "gc.hpp"
-#include "object.hpp"
+#include "handler.hpp"
 #include "sync.hpp"
 
 #include <cybozu/hash_map.hpp>
@@ -15,7 +14,6 @@
 #include <cybozu/worker.hpp>
 
 #include <ctime>
-#include <functional>
 #include <vector>
 
 namespace yrmcds {
@@ -32,28 +30,16 @@ public:
     void serve();
 
 private:
-    bool m_is_slave;
     bool m_signaled = false;
-    cybozu::hash_map<object> m_hash;
     cybozu::reactor m_reactor;
     std::vector<std::unique_ptr<cybozu::worker>> m_workers;
     int m_worker_index = 0;
-    std::time_t m_last_gc = 0;
-    std::unique_ptr<gc_thread> m_gc_thread = nullptr;
-    int m_consecutive_gcs = 0;
-    std::vector<cybozu::tcp_socket*> m_slaves;
-    std::vector<cybozu::tcp_socket*> m_new_slaves;
     syncer m_syncer;
-    std::function<cybozu::worker*()> m_finder;
+    std::vector<std::unique_ptr<protocol_handler>> m_handlers;
 
-    bool gc_ready();
     bool reactor_gc_ready();
-    void clear_everything();
     void serve_slave();
     void serve_master();
-
-    std::unique_ptr<cybozu::tcp_socket> make_memcache_socket(int s);
-    std::unique_ptr<cybozu::tcp_socket> make_repl_socket(int s);
 };
 
 } // namespace yrmcds

@@ -22,7 +22,7 @@ const char NOT_LOCKED[] = "CLIENT_ERROR object is not locked or not found\x0d\x0
 
 } // anonymous namespace
 
-namespace yrmcds {
+namespace yrmcds { namespace memcache {
 
 using hash_map = cybozu::hash_map<object>;
 
@@ -965,4 +965,4 @@ bool repl_client_socket::on_readable() {
     return true;
 }
 
-} // namespace yrmcds
+}} // namespace yrmcds::memcache
