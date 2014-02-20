@@ -2,7 +2,7 @@
 
 #include "stats.hpp"
 
-namespace yrmcds {
+namespace yrmcds { namespace memcache {
 
 statistics g_stats;
 
@@ -43,4 +43,4 @@ void statistics::reset() noexcept {
         v = 0;
 }
 
-} // namespace yrmcds
+}} // namespace yrmcds::memcache

@@ -23,8 +23,8 @@ LIBTCMALLOC = -ltcmalloc_minimal
 LDLIBS = $(shell getconf LFS_LIBS) -lyrmcds $(LIBTCMALLOC) -latomic -lpthread
 CLDOC := LD_LIBRARY_PATH=$(shell llvm-config --libdir) cldoc
 
-HEADERS = $(wildcard src/*.hpp cybozu/*.hpp)
-SOURCES = $(wildcard src/*.cpp cybozu/*.cpp)
+HEADERS = $(wildcard src/*.hpp src/*/*.hpp cybozu/*.hpp)
+SOURCES = $(wildcard src/*.cpp src/*/*.cpp cybozu/*.cpp)
 OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
 
 EXE = yrmcdsd
@@ -79,7 +79,7 @@ serve: html
 	@cd html; python -m SimpleHTTPServer 8888 || true
 
 clean:
-	rm -f src/*.o cybozu/*.o test/*.o test/*.exe COPYING.hpp $(EXE) $(EXE).map $(LIB)
+	rm -f src/*.o src/*/*.o cybozu/*.o test/*.o test/*.exe COPYING.hpp $(EXE) $(EXE).map $(LIB)
 
 setup:
 	sudo apt-get install -y --install-recommends $(PACKAGES)

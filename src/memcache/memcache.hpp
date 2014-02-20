@@ -1,10 +1,10 @@
 // memcached server-side protocol.
 // (C) 2013 Cybozu.
 
-#ifndef YRMCDS_MEMCACHE_HPP
-#define YRMCDS_MEMCACHE_HPP
+#ifndef YRMCDS_MEMCACHE_MEMCACHE_HPP
+#define YRMCDS_MEMCACHE_MEMCACHE_HPP
 
-#include "constants.hpp"
+#include "../constants.hpp"
 
 #include <cybozu/dynbuf.hpp>
 #include <cybozu/hash_map.hpp>
@@ -407,4 +407,4 @@ private:
 
 }} // namespace yrmcds::memcache
 
-#endif // YRMCDS_MEMCACHE_HPP
+#endif // YRMCDS_MEMCACHE_MEMCACHE_HPP

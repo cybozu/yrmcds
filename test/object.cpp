@@ -1,11 +1,11 @@
 #include "../src/config.hpp"
-#include "../src/object.hpp"
+#include "../src/memcache/object.hpp"
 
 #include <cybozu/test.hpp>
 
 #include <cstdlib>
 
-using yrmcds::object;
+using yrmcds::memcache::object;
 using cybozu::dynbuf;
 
 std::size_t reset_heap_limit() {
