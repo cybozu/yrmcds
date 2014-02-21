@@ -3,6 +3,14 @@
 #include "handler.hpp"
 #include "../constants.hpp"
 
+#include <cybozu/logger.hpp>
+
+namespace {
+
+const enum std::memory_order relaxed = std::memory_order_relaxed;
+
+}
+
 namespace yrmcds { namespace memcache {
 
 handler::handler(const std::function<cybozu::worker*()>& finder,
@@ -23,12 +31,12 @@ bool handler::gc_ready(std::time_t now) {
         m_gc_thread = nullptr;
     }
 
-    std::time_t t = g_stats.flush_time.load(std::memory_order_relaxed);
+    std::time_t t = g_stats.flush_time.load(relaxed);
     if( t != 0 && now >= t )
         return true;
 
     // run GC immediately if the heap is over used.
-    if( g_stats.used_memory.load(std::memory_order_relaxed) >
+    if( g_stats.used_memory.load(relaxed) >
         g_config.memory_limit() ) return true;
 
     // Run GC when there are new slaves.
@@ -74,7 +82,7 @@ void handler::on_master_start() {
 
 void handler::on_master_interval() {
     std::time_t now = std::time(nullptr);
-    g_stats.current_time.store(now, std::memory_order_relaxed);
+    g_stats.current_time.store(now, relaxed);
 
     for( auto it = m_slaves.begin(); it != m_slaves.end(); ) {
         if( ! (*it)->valid() ) {
@@ -112,7 +120,7 @@ bool handler::on_slave_start() {
 
 void handler::on_slave_interval() {
     std::time_t now = std::time(nullptr);
-    g_stats.current_time.store(now, std::memory_order_relaxed);
+    g_stats.current_time.store(now, relaxed);
 
     // ping to the master
     char c = '\0';
@@ -124,10 +132,36 @@ void handler::on_slave_end() {
         m_reactor.remove_resource(*m_repl_client_socket);
 }
 
+void handler::dump_stats() {
+    using logger = cybozu::logger;
+
+    if( m_is_slave ) {
+        logger::info() << "memcache replication stats: "
+                       << g_stats.repl_created << " created, "
+                       << g_stats.repl_updated << " updated, "
+                       << g_stats.repl_removed << " removed.";
+        return;
+    }
+
+    // master
+    std::uint64_t ops = 0;
+    for( auto& v: g_stats.text_ops ) {
+        ops += v.load(relaxed);
+    }
+    for( auto& v: g_stats.bin_ops ) {
+        ops += v.load(relaxed);
+    }
+    logger::info() << "memcache master: "
+                   << m_slaves.size() << " slaves, "
+                   << g_stats.objects.load(relaxed) << " objects, "
+                   << g_stats.curr_connections.load(relaxed) << " clients, "
+                   << ops << " total ops.";
+}
+
 void handler::clear() {
     for( auto& bucket: m_hash )
         bucket.clear_nolock();
-    g_stats.total_objects.store(0, std::memory_order_relaxed);
+    g_stats.total_objects.store(0, relaxed);
 }
 
 std::unique_ptr<cybozu::tcp_socket> handler::make_memcache_socket(int s) {
@@ -136,7 +170,7 @@ std::unique_ptr<cybozu::tcp_socket> handler::make_memcache_socket(int s) {
 
     unsigned int mc = g_config.max_connections();
     if( mc != 0 &&
-        (g_stats.curr_connections.load(std::memory_order_relaxed) >= mc) )
+        (g_stats.curr_connections.load(relaxed) >= mc) )
         return nullptr;
 
     return std::unique_ptr<cybozu::tcp_socket>(

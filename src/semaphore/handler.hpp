@@ -24,6 +24,7 @@ public:
     virtual void on_master_start() override;
     virtual void on_master_interval() override;
     virtual void on_master_end() override;
+    virtual void dump_stats() override;
     virtual void clear() override;
 
 private:

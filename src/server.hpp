@@ -1,5 +1,5 @@
 // Logics and data structures for the main thread.
-// (C) 2013 Cybozu.
+// (C) 2013-2014 Cybozu.
 
 #ifndef YRMCDS_SERVER_HPP
 #define YRMCDS_SERVER_HPP

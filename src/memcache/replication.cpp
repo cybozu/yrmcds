@@ -1,7 +1,8 @@
-// (C) 2013 Cybozu.
+// (C) 2013-2014 Cybozu.
 
 #include "memcache.hpp"
 #include "replication.hpp"
+#include "stats.hpp"
 
 #include <cybozu/logger.hpp>
 #include <cybozu/util.hpp>
@@ -92,6 +93,7 @@ std::size_t repl_recv(const char* p, std::size_t len,
                 const char* p2;
                 std::size_t len2;
                 std::tie(p2, len2) = parser.data();
+                ++ g_stats.repl_updated;
                 obj.set(p2, len2, parser.flags(), parser.exptime());
                 return true;
             };
@@ -99,6 +101,7 @@ std::size_t repl_recv(const char* p, std::size_t len,
                 const char* p2;
                 std::size_t len2;
                 std::tie(p2, len2) = parser.data();
+                ++ g_stats.repl_created;
                 return object(p2, len2, parser.flags(), parser.exptime());
             };
             std::tie(key_data, key_len) = parser.key();
@@ -110,6 +113,7 @@ std::size_t repl_recv(const char* p, std::size_t len,
             std::tie(key_data, key_len) = parser.key();
             cybozu::logger::debug() << "repl: remove "
                                     << std::string(key_data, key_len);
+            ++ g_stats.repl_removed;
             hash.remove_nolock(cybozu::hash_key(key_data, key_len), nullptr);
             break;
         default:

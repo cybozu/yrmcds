@@ -1,4 +1,4 @@
-// (C) 2013 Cybozu.
+// (C) 2013-2014 Cybozu.
 
 #include "constants.hpp"
 #include "memcache/handler.hpp"
@@ -43,10 +43,14 @@ inline bool server::reactor_gc_ready() {
 }
 
 void server::serve() {
-    auto res = cybozu::signal_setup({SIGHUP, SIGQUIT, SIGTERM, SIGINT});
+    auto res = cybozu::signal_setup({SIGHUP, SIGQUIT, SIGTERM, SIGINT, SIGUSR1});
     res->set_handler([this](const struct signalfd_siginfo& si,
                             cybozu::reactor& r) {
                          switch(si.ssi_signo) {
+                         case SIGUSR1:
+                             for( auto& handler: m_handlers )
+                                 handler->dump_stats();
+                             break;
                          case SIGHUP:
                              cybozu::logger::instance().reopen();
                              cybozu::logger::info() << "got SIGHUP.";

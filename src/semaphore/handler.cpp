@@ -6,6 +6,14 @@
 #include "stats.hpp"
 #include "sockets.hpp"
 
+#include <cybozu/logger.hpp>
+
+namespace {
+
+const enum std::memory_order relaxed = std::memory_order_relaxed;
+
+}
+
 namespace yrmcds { namespace semaphore {
 
 handler::handler(const std::function<cybozu::worker*()>& finder,
@@ -41,7 +49,7 @@ void handler::on_master_start() {
 std::unique_ptr<cybozu::tcp_socket> handler::make_semaphore_socket(int s) {
     unsigned int mc = g_config.semaphore().max_connections();
     if( mc != 0 &&
-        g_stats.curr_connections.load(std::memory_order_relaxed) >= mc )
+        g_stats.curr_connections.load(relaxed) >= mc )
         return nullptr;
 
     return std::unique_ptr<cybozu::tcp_socket>(
@@ -59,10 +67,22 @@ void handler::on_master_end() {
     m_gc_thread = nullptr; // join
 }
 
+void handler::dump_stats() {
+    std::uint64_t ops = 0;
+    for( auto& v: g_stats.ops ) {
+        ops += v.load(relaxed);
+    }
+    using logger = cybozu::logger;
+    logger::info() << "semaphore: "
+                   << g_stats.objects.load(relaxed) << " objects, "
+                   << g_stats.curr_connections.load(relaxed) << " clients, "
+                   << ops << " total ops.";
+}
+
 void handler::clear() {
     for( auto& bucket: m_hash )
         bucket.clear_nolock();
-    g_stats.total_objects.store(0, std::memory_order_relaxed);
+    g_stats.total_objects.store(0, relaxed);
 }
 
 }} // namespace yrmcds::semaphore

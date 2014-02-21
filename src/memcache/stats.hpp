@@ -1,5 +1,5 @@
 // Atomic counters for statistics.
-// (C) 2013 Cybozu.
+// (C) 2013-2014 Cybozu.
 
 #ifndef YRMCDS_MEMCACHE_STATS_HPP
 #define YRMCDS_MEMCACHE_STATS_HPP
@@ -47,6 +47,11 @@ struct statistics {
     std::atomic<std::uint64_t> total_evictions;
     std::atomic<std::uint64_t> last_gc_elapsed;  // micro seconds
     std::atomic<std::uint64_t> total_gc_elapsed; // micro seconds
+
+    /* Replication statistics - non atomic. */
+    std::uint64_t repl_created;
+    std::uint64_t repl_updated;
+    std::uint64_t repl_removed;
 
     /* Realtime staticstics. */
     alignas(CACHELINE_SIZE)

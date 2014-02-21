@@ -30,6 +30,7 @@ public:
     virtual bool on_slave_start() override;
     virtual void on_slave_end() override;
     virtual void on_slave_interval() override;
+    virtual void dump_stats() override;
     virtual void clear() override;
     virtual bool reactor_gc_ready() const override;
 

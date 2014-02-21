@@ -4,6 +4,8 @@
 #ifndef YRMCDS_HANDLER_HPP
 #define YRMCDS_HANDLER_HPP
 
+#include <cybozu/logger.hpp>
+
 namespace yrmcds {
 
 // An interface for protocol-specific logics.
@@ -37,6 +39,11 @@ public:
 
     // Called when the server leaves the slave mode.
     virtual void on_slave_end() {}
+
+    // Called to dump the statistics.
+    //
+    // Implementations should use `cybozu::logger::info()` to emit stats.
+    virtual void dump_stats() = 0;
 
     // Called when the server discards all stored data.
     virtual void clear() {}

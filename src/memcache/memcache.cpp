@@ -1,4 +1,4 @@
-// (C) 2013 Cybozu.
+// (C) 2013-2014 Cybozu.
 
 #include "../config.hpp"
 #include "memcache.hpp"
@@ -19,7 +19,7 @@
 namespace {
 
 using namespace yrmcds;
-enum std::memory_order relaxed = std::memory_order_relaxed;
+const enum std::memory_order relaxed = std::memory_order_relaxed;
 
 const char CRLF[] = "\x0d\x0a";
 const char CR = '\x0d';

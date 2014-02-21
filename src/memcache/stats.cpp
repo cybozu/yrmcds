@@ -1,4 +1,4 @@
-// (C) 2013 Cybozu.
+// (C) 2013-2014 Cybozu.
 
 #include "stats.hpp"
 
@@ -30,6 +30,11 @@ void statistics::reset() noexcept {
     total_evictions = 0;
     last_gc_elapsed = 0;
     total_gc_elapsed = 0;
+
+    /* Replication statistics - non atomic. */
+    repl_created = 0;
+    repl_updated = 0;
+    repl_removed = 0;
 
     /* Realtime staticstics. */
     total_objects = 0;

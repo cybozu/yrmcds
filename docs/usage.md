@@ -81,6 +81,15 @@ For stability, keepalived should be configured in non-preemptive mode.
 
 A sample configuration file is available at [etc/keepalived.conf](https://github.com/cybozu/yrmcds/blob/master/etc/keepalived.conf).
 
+### Replication status
+
+`yrmcdsd`, either it is master or slave, dumps the current replication
+status to the log file when it receives `SIGUSR1` signal.
+
+```
+$ kill -USR1 <pid of yrmcdsd>
+```
+
 ### How replication works
 
 `yrmcdsd` **periodically watches** if the server owns the virtual IP address
