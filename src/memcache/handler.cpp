@@ -162,6 +162,9 @@ void handler::clear() {
     for( auto& bucket: m_hash )
         bucket.clear_nolock();
     g_stats.total_objects.store(0, relaxed);
+    g_stats.repl_created = 0;
+    g_stats.repl_updated = 0;
+    g_stats.repl_removed = 0;
 }
 
 std::unique_ptr<cybozu::tcp_socket> handler::make_memcache_socket(int s) {
