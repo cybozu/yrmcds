@@ -38,7 +38,7 @@ Features
     * Automatic fail-over.
     * Automatic recovery of redundancy.
 
-A companion client library [libyrmcds][], [libyrmcds-semaphore][], and
+Companion client libraries [libyrmcds][] / [libyrmcds-semaphore][], and
 a [PHP extension][php-yrmcds] are also available.
 
 See also [usage guide](docs/usage.md), [future plans](docs/future.md),
