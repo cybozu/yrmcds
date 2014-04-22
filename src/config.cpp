@@ -28,7 +28,7 @@ const char SEMAPHORE_ENABLE[] = "semaphore.enable";
 const char SEMAPHORE_PORT[] = "semaphore.port";
 const char SEMAPHORE_MAX_CONNECTIONS[] = "semaphore.max_connections";
 const char SEMAPHORE_BUCKETS[] = "semaphore.buckets";
-const char SEMAPHORE_GC_INTERVAL[] = "semaphore.gc_interval";
+const char SEMAPHORE_CONSUMPTION_STATS_INTERVAL[] = "semaphore.consumption_stats.interval";
 
 std::unordered_map<std::string, cybozu::severity> THRESHOLDS {
     {"error", cybozu::severity::error},
@@ -79,7 +79,7 @@ void semaphore_config::load(const cybozu::config_parser& cp) {
     if( cp.exists(SEMAPHORE_MAX_CONNECTIONS) ) {
         int conns = cp.get_as_int(SEMAPHORE_MAX_CONNECTIONS);
         if( conns < 0 )
-            throw config::bad_config("max_connections must be >= 0");
+            throw config::bad_config("semaphore.max_connections must be >= 0");
         m_max_connections = conns;
     }
 
@@ -92,11 +92,11 @@ void semaphore_config::load(const cybozu::config_parser& cp) {
         m_buckets = buckets;
     }
 
-    if( cp.exists(SEMAPHORE_GC_INTERVAL) ) {
-        int n = cp.get_as_int(SEMAPHORE_GC_INTERVAL);
-        if( n < 1 )
-            throw config::bad_config("gc_interval must be > 0");
-        m_gc_interval = n;
+    if( cp.exists(SEMAPHORE_CONSUMPTION_STATS_INTERVAL) ) {
+        int n = cp.get_as_int(SEMAPHORE_CONSUMPTION_STATS_INTERVAL);
+        if( n < 10 )
+            throw config::bad_config("semaphore.consumption_stat.interval must be >= 10");
+        m_consumption_stats_interval = n;
     }
 }
 

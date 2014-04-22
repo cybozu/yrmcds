@@ -4,6 +4,7 @@
 #include "memcache/handler.hpp"
 #include "semaphore/handler.hpp"
 #include "server.hpp"
+#include "global.hpp"
 
 #include <cybozu/logger.hpp>
 #include <cybozu/signal.hpp>
@@ -108,6 +109,9 @@ void server::serve_slave() {
                 return;
             }
 
+            std::time_t now = std::time(nullptr);
+            g_current_time.store(now, std::memory_order_relaxed);
+
             for( auto& handler: m_handlers )
                 handler->on_slave_interval();
 
@@ -127,6 +131,9 @@ void server::serve_master() {
         handler->on_master_start();
 
     auto callback = [this](cybozu::reactor&) {
+        std::time_t now = std::time(nullptr);
+        g_current_time.store(now, std::memory_order_relaxed);
+
         if( ! m_syncer.empty() )
             m_syncer.check();
         for( auto& handler: m_handlers )

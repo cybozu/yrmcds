@@ -15,6 +15,7 @@ enum class command: std::uint8_t {
     Acquire         = 0x02,
     Release         = 0x03,
     Stats           = 0x10,
+    Dump            = 0x11,
 
     Unknown,
     END_OF_COMMAND
@@ -81,6 +82,9 @@ public:
     void get(std::uint32_t available);
     void acquire(std::uint32_t resources);
     void stats();
+    void dump(const char* name, std::uint16_t name_len,
+              std::uint32_t available, std::uint32_t maximum,
+              std::uint32_t max_conumption);
 
 private:
     void fill_header(char* header, semaphore::status status,

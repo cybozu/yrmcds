@@ -99,6 +99,7 @@ The semaphore extension has its own binary protocol.
 | `0x02` | `Acquire`
 | `0x03` | `Release`
 | `0x10` | `Stats`
+| `0x11` | `Dump`
 
 
 ### Flags
@@ -280,6 +281,38 @@ N+4| Name2 ... Value2 ...
 - `Value` is an ASCII text information.
 
 
+### Dump
+
+`Dump` dumps all semaphores.
+
+Request body: No body.
+
+Successful responses:
+
+`Dump` command returns multiple responses for one request.
+
+Each response contains a semaphore, the current number of its available resources, and the maximum number of available resources.
+The response also contains the maximum consumption of resources in the interval given in the configuration file.
+
+The end of the series of responses are indicated by the response whose body length is zero.
+
+```
+ Byte/     0       |       1       |       2       |       3       |
+    /              |               |               |               |
+   |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
+   +---------------+---------------+---------------+---------------+
+  0| Current available resources                                   |
+   +---------------+---------------+---------------+---------------+
+  4| Maximum number of resources                                   |
+   +---------------------------------------------------------------+
+  8| Maximum consumption                                           |
+   +---------------+---------------+---------------+---------------+
+ 12| Name length                   | (Name data) ...
+   +---------------+---------------+
+   Total 14 + (Name length) bytes
+```
+
+
 Configurations
 --------------
 
@@ -299,21 +332,7 @@ semaphore.max_connections = 0
 # The size of the semaphore hash table. (default: 1000000)
 semaphore.buckets = 1000000
 
-# The interval between garbage collections for semaphore objects
-# in seconds. (default: 10)
-semaphore.gc_interval = 10
+# The interval of measuring the maximum number of resource consumption
+# in seconds. (default: 86400)
+semaphore.consumption_stats.interval = 86400
 ```
-
-
-Implementation
---------------
-
-### gc_thread
-
-Make new class for the semaphore protocol.
-Not share the code with existing `gc_thread`.
-
-
-### Protocol classes
-
-Implement `yrmcds::semaphore::request` and `yrmcds::semaphore::response`.

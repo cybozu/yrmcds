@@ -170,6 +170,14 @@ public:
             return apply_nolock(key, h, c);
         }
 
+        // Apply `pred` for each object.
+        // @pred     Predicate function
+        void foreach(const std::function<void(const hash_key&, T&)>& pred) {
+            lock_guard g(m_lock);
+            for( item* p = m_objects; p != nullptr; p = p->next )
+                pred(p->key, p->object);
+        }
+
         // Remove an object for `key`.
         // @key       The object's key.
         // @callback  A function called when an object is removed.
@@ -250,6 +258,7 @@ public:
                 m_objects = next;
             }
         }
+
     private:
         using lock_guard = std::lock_guard<std::mutex>;
         mutable std::mutex m_lock;
@@ -289,6 +298,13 @@ public:
     // Thread-safe <apply_nolock>.
     bool apply(const hash_key& key, const handler& h, const creator& c) {
         return get_bucket(key).apply(key, h, c);
+    }
+
+    // Apply `pred` for each object.
+    // @pred     Predicate function
+    void foreach(const std::function<void(const hash_key&, T&)>& pred) {
+        for( auto& bucket: m_buckets )
+            bucket.foreach(pred);
     }
 
     // Remove an object for `key`.

@@ -2,6 +2,7 @@
 
 #include "handler.hpp"
 #include "../constants.hpp"
+#include "../global.hpp"
 
 #include <cybozu/logger.hpp>
 
@@ -81,9 +82,6 @@ void handler::on_master_start() {
 }
 
 void handler::on_master_interval() {
-    std::time_t now = std::time(nullptr);
-    g_stats.current_time.store(now, relaxed);
-
     for( auto it = m_slaves.begin(); it != m_slaves.end(); ) {
         if( ! (*it)->valid() ) {
             it = m_slaves.erase(it);
@@ -92,7 +90,7 @@ void handler::on_master_interval() {
         }
     }
 
-    if( gc_ready(now) ) {
+    if( gc_ready(g_current_time.load(relaxed)) ) {
         m_gc_thread = std::unique_ptr<gc_thread>(
             new gc_thread(m_hash, m_slaves, m_new_slaves));
         m_new_slaves.clear();
@@ -119,9 +117,6 @@ bool handler::on_slave_start() {
 }
 
 void handler::on_slave_interval() {
-    std::time_t now = std::time(nullptr);
-    g_stats.current_time.store(now, relaxed);
-
     // ping to the master
     char c = '\0';
     m_repl_client_socket->send(&c, sizeof(c), true);

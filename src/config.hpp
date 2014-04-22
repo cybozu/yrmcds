@@ -32,8 +32,8 @@ public:
     unsigned int buckets() const noexcept {
         return m_buckets;
     }
-    unsigned int gc_interval() const noexcept {
-        return m_gc_interval;
+    unsigned int consumption_stats_interval() const noexcept {
+        return m_consumption_stats_interval;
     }
 
 private:
@@ -41,7 +41,7 @@ private:
     std::uint16_t m_port = DEFAULT_SEMAPHORE_PORT;
     unsigned int m_max_connections = 0;
     unsigned int m_buckets = DEFAULT_BUCKETS;
-    unsigned int m_gc_interval = DEFAULT_GC_INTERVAL;
+    unsigned int m_consumption_stats_interval = DEFAULT_CONSUMPTION_STATS_INTERVAL;
 };
 
 // Configurations for yrmcds.

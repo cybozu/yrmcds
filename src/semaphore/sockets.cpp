@@ -149,6 +149,9 @@ void semaphore_socket::execute(const semaphore::request& cmd) {
     case semaphore::command::Stats:
         r.stats();
         break;
+    case semaphore::command::Dump:
+        cmd_dump(r);
+        break;
     default:
         cybozu::logger::info() << "not implemented";
         r.error( semaphore::status::UnknownCommand );
@@ -202,6 +205,15 @@ void semaphore_socket::cmd_release(const semaphore::request& cmd, semaphore::res
         r.error( semaphore::status::NotFound );
 }
 
+void semaphore_socket::cmd_dump(semaphore::response& r) {
+    auto pred = [this,&r](const cybozu::hash_key& k, object& obj) {
+        r.dump(k.data(), k.length(),
+               obj.available(), obj.maximum(), obj.max_consumption());
+    };
+    m_hash.foreach(pred);
+    r.success();
+}
+
 void semaphore_socket::on_acquire(const cybozu::hash_key& k, std::uint32_t resources) {
     auto it = m_acquired_resources.find(&k);
     if( it != m_acquired_resources.end() ) {
@@ -213,17 +225,16 @@ void semaphore_socket::on_acquire(const cybozu::hash_key& k, std::uint32_t resou
 
 bool semaphore_socket::on_release(const cybozu::hash_key& k, std::uint32_t resources) {
     auto it = m_acquired_resources.find(&k);
-    if( it != m_acquired_resources.end() ) {
-        if( it->second < resources )
-            return false;
-        if( it->second == resources ) {
-            m_acquired_resources.erase(it);
-            return true;
-        }
-        it->second -= resources;
+    if( it == m_acquired_resources.end() )
+        return false;
+    if( it->second < resources )
+        return false;
+    if( it->second == resources ) {
+        m_acquired_resources.erase(it);
         return true;
     }
-    return false;
+    it->second -= resources;
+    return true;
 }
 
 void semaphore_socket::release_all() {

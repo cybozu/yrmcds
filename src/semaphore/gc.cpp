@@ -26,7 +26,7 @@ void gc_thread::run() {
 
 void gc_thread::gc() {
     auto pred = [this](const cybozu::hash_key& k, object& obj) -> bool {
-        if( ! obj.acquired() )
+        if( obj.deletable() )
             return true;
         ++m_objects;
         ++m_objects_in_bucket;

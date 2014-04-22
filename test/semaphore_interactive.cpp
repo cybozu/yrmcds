@@ -88,6 +88,24 @@ AUTOTEST(interactive) {
                 std::cout << r.message() << std::endl;
             }
         }
+        else if( cmd == "dump" ) {
+            s = c.dump();
+            for(;;) {
+                ASSERT_RESPONSE(c, r, s, Dump);
+                if( r.status() == yrmcds::semaphore::status::OK ) {
+                    if( r.body_length() == 0 ) {
+                        std::cout << "END" << std::endl;
+                        break;
+                    }
+                    std::cout << r.name() << ": " << r.available()
+                                          << ", " << r.maximum()
+                                          << ", " << r.max_consumption()
+                                          << std::endl;
+                } else {
+                    std::cout << r.message() << std::endl;
+                }
+            }
+        }
 
         if( std::cin.fail() ) {
             std::cin.clear();

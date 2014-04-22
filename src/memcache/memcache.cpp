@@ -1,6 +1,7 @@
 // (C) 2013-2014 Cybozu.
 
 #include "../config.hpp"
+#include "../global.hpp"
 #include "memcache.hpp"
 #include "stats.hpp"
 
@@ -69,7 +70,7 @@ inline std::time_t binary_exptime(const char* p) noexcept {
         return memcache::binary_request::EXPTIME_NONE;
     if( t > EXPTIME_THRESHOLD )
         return t;
-    return memcache::g_stats.current_time.load(relaxed) + t;
+    return g_current_time.load(relaxed) + t;
 }
 
 } // anonymous namespace
@@ -80,7 +81,7 @@ constexpr item text_request::eos;
 
 inline void
 text_request::parse_flushall(const char* b, const char* e) noexcept {
-    m_exptime = g_stats.current_time.load(relaxed);
+    m_exptime = g_current_time.load(relaxed);
 
     while( *b == SP ) ++b;
     if( b == e ) {
@@ -95,7 +96,7 @@ text_request::parse_flushall(const char* b, const char* e) noexcept {
         std::time_t t = to_uint<std::time_t>(b, result);
         if( ! result ) return;
         m_exptime = (t > EXPTIME_THRESHOLD) ? t :
-            (g_stats.current_time.load(relaxed) + t);
+            (g_current_time.load(relaxed) + t);
         b = exp_end;
     }
 
@@ -182,7 +183,7 @@ text_request::parse_storage(const char* b, const char* e, bool is_cas) noexcept 
     if( ! result ) return;
     if( t != 0 )
         m_exptime = (t > EXPTIME_THRESHOLD) ? t :
-            (g_stats.current_time.load(relaxed) + t);
+            (g_current_time.load(relaxed) + t);
     b = exptime_end;
 
     while( *b == SP ) ++b;
@@ -276,7 +277,7 @@ text_request::parse_touch(const char* b, const char* e) noexcept {
     if( ! result ) return;
     if( t != 0 )
         m_exptime = (t > EXPTIME_THRESHOLD) ? t :
-            (g_stats.current_time.load(relaxed) + t);
+            (g_current_time.load(relaxed) + t);
     b = exptime_end;
 
     while( *b == SP ) ++b;
@@ -724,7 +725,7 @@ void text_response::stats_general(std::size_t n_slaves) {
 
     std::ostringstream os;
     os << "STAT pid " << ::getpid() << CRLF;
-    os << "STAT time " << g_stats.current_time.load(relaxed) << CRLF;
+    os << "STAT time " << g_current_time.load(relaxed) << CRLF;
     os << "STAT version " << VERSION << CRLF;
     os << "STAT pointer_size " << sizeof(void*)*8 << CRLF;
     os << "STAT rusage_user " << ru.ru_utime.tv_sec << ":"
@@ -872,7 +873,7 @@ void binary_request::parse() noexcept {
         if( extras_len == 4 ) { // yrmcds extension
             m_exptime = binary_exptime(p_extra);
         } else {
-            m_exptime = g_stats.current_time.load(relaxed);
+            m_exptime = g_current_time.load(relaxed);
         }
         break;
     case binary_command::Append:
@@ -1171,7 +1172,7 @@ binary_response::stats_general(std::size_t n_slaves) {
         cybozu::throw_unix_error(errno, "getrusage");
 
     send_stat("pid", std::to_string(::getpid()));
-    send_stat("time", std::to_string(g_stats.current_time.load(relaxed)));
+    send_stat("time", std::to_string(g_current_time.load(relaxed)));
     send_stat("version", VERSION);
     send_stat("pointer_size", std::to_string(sizeof(void*)*8));
     send_stat("rusage_user",

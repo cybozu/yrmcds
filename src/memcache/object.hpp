@@ -5,6 +5,7 @@
 #define YRMCDS_MEMCACHE_OBJECT_HPP
 
 #include "stats.hpp"
+#include "../global.hpp"
 #include "../tempfile.hpp"
 
 #include <cybozu/logger.hpp>
@@ -106,7 +107,7 @@ public:
     bool expired() const noexcept {
         if( locked() ) return false;
         std::time_t t = g_stats.flush_time.load(std::memory_order_relaxed);
-        std::time_t now = g_stats.current_time.load(std::memory_order_relaxed);
+        std::time_t now = g_current_time.load(std::memory_order_relaxed);
         if( t != 0 && t <= now ) return true;
         if( m_exptime == 0 ) return false;
         return m_exptime <= now;

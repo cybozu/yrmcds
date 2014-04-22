@@ -68,6 +68,7 @@ void request::parse(const char* p, std::size_t len) noexcept {
     switch( m_command ) {
     case semaphore::command::Noop:
     case semaphore::command::Stats:
+    case semaphore::command::Dump:
         // no body
         break;
 
@@ -168,12 +169,12 @@ void response::error(semaphore::status status) {
 
 void response::get(std::uint32_t available) {
     char header[HEADER_SIZE];
-    fill_header(header, semaphore::status::OK, sizeof(available));
     char body[4];
+    fill_header(header, semaphore::status::OK, sizeof(body));
     cybozu::hton(available, body);
     cybozu::tcp_socket::iovec iov[] = {
         {header, HEADER_SIZE},
-        {body, 4},
+        {body, sizeof(body)},
     };
     m_socket.sendv(iov, 2, true);
 }
@@ -181,6 +182,24 @@ void response::get(std::uint32_t available) {
 void response::acquire(std::uint32_t resources) {
     // internally same as get()
     get(resources);
+}
+
+void response::dump(const char* name, std::uint16_t name_len,
+                    std::uint32_t available, std::uint32_t maximum,
+                    std::uint32_t max_conumption) {
+    char header[HEADER_SIZE];
+    char body[14];
+    fill_header(header, semaphore::status::OK, sizeof(body) + name_len);
+    cybozu::hton(available, body);
+    cybozu::hton(maximum, body + 4);
+    cybozu::hton(max_conumption, body + 8);
+    cybozu::hton(name_len, body + 12);
+    cybozu::tcp_socket::iovec iov[] = {
+        {header, HEADER_SIZE},
+        {body, sizeof(body)},
+        {name, name_len},
+    };
+    m_socket.sendv(iov, 3, false);
 }
 
 void response::stats() {
@@ -200,6 +219,7 @@ void response::stats() {
     add_stat_op(body, "command:acquire", semaphore::command::Acquire);
     add_stat_op(body, "command:release", semaphore::command::Release);
     add_stat_op(body, "command:stats", semaphore::command::Stats);
+    add_stat_op(body, "command:dump", semaphore::command::Dump);
 
     char header[HEADER_SIZE];
     fill_header(header, semaphore::status::OK, body.size());

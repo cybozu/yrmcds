@@ -24,7 +24,7 @@ handler::handler(const std::function<cybozu::worker*()>& finder,
 }
 
 bool handler::gc_ready() {
-    std::time_t now = std::time(nullptr);
+    std::time_t now = g_current_time.load(relaxed);
 
     if( m_gc_thread.get() != nullptr ) {
         if( ! m_gc_thread->done() )
@@ -33,7 +33,9 @@ bool handler::gc_ready() {
         m_gc_thread = nullptr;  // join
     }
 
-    return now > (m_last_gc + g_config.semaphore().gc_interval());
+    unsigned int interval = g_config.semaphore().consumption_stats_interval();
+    std::time_t boundary = (now / interval) * interval;
+    return m_last_gc < boundary;
 }
 
 void handler::on_master_start() {

@@ -61,21 +61,14 @@ public:
         return r;
     }
 
-    const string_slice name() const {
-        uint16_t name_len;
-        switch( command() ) {
-        case yrmcds::semaphore::command::Get:
-            cybozu::ntoh(m_body.data(), name_len);
-            return string_slice(m_body.data() + 2, name_len);
-        case yrmcds::semaphore::command::Acquire:
-            cybozu::ntoh(m_body.data() + 8, name_len);
-            return string_slice(m_body.data() + 10, name_len);
-        case yrmcds::semaphore::command::Release:
-            cybozu::ntoh(m_body.data() + 4, name_len);
-            return string_slice(m_body.data() + 6, name_len);
-        default:
-            cybozu_assert(false);
+    const std::string name() const {
+        if( command() == yrmcds::semaphore::command::Dump ) {
+            uint16_t name_len;
+            cybozu::ntoh(m_body.data() + 12, name_len);
+            return std::string(m_body.data() + 14, name_len);
         }
+        cybozu_assert(false);
+        return "";
     }
 
     std::uint32_t opaque() const {
@@ -93,6 +86,20 @@ public:
 
     std::uint32_t available() const {
         return resources();
+    }
+
+    std::uint32_t maximum() const {
+        cybozu_assert(m_body.size() >= 8);
+        uint32_t r;
+        cybozu::ntoh(m_body.data() + 4, r);
+        return r;
+    }
+
+    std::uint32_t max_consumption() const {
+        cybozu_assert(m_body.size() >= 12);
+        uint32_t r;
+        cybozu::ntoh(m_body.data() + 8, r);
+        return r;
     }
 
     std::string message() const {
@@ -118,7 +125,6 @@ public:
 private:
     char m_header[HEADER_SIZE] = {};
     std::vector<char> m_body;
-    std::string m_name;
 };
 
 class client {
@@ -209,6 +215,14 @@ public:
     serial_t stats() {
         char header[HEADER_SIZE];
         fill_header(header, 0x10, 0, m_serial);
+        ssize_t n = ::send(m_socket, header, HEADER_SIZE, 0);
+        cybozu_assert( n == ssize_t(HEADER_SIZE) );
+        return m_serial++;
+    }
+
+    serial_t dump() {
+        char header[HEADER_SIZE];
+        fill_header(header, 0x11, 0, m_serial);
         ssize_t n = ::send(m_socket, header, HEADER_SIZE, 0);
         cybozu_assert( n == ssize_t(HEADER_SIZE) );
         return m_serial++;

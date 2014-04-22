@@ -53,6 +53,7 @@ private:
     void cmd_get(const semaphore::request& cmd, semaphore::response& r);
     void cmd_acquire(const semaphore::request& cmd, semaphore::response& r);
     void cmd_release(const semaphore::request& cmd, semaphore::response& r);
+    void cmd_dump(semaphore::response& r);
 
     // `on_acquire` augments the number of resources this connection has acquired
     // recorded in `m_acquired_resources`.

@@ -221,3 +221,12 @@ AUTOTEST(stats) {
     cybozu_assert( r1.status() == status::OK );
     cybozu_assert( r1.command() == command::Stats );
 }
+
+AUTOTEST(dump) {
+    REQ(1, "\x90\x11\x00\x00"
+           "\x00\x00\x00\x00"
+           "\x01\x02\x03\x04");
+    cybozu_assert( r1.length() == 12 );
+    cybozu_assert( r1.status() == status::OK );
+    cybozu_assert( r1.command() == command::Dump );
+}

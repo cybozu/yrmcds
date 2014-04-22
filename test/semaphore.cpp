@@ -197,6 +197,42 @@ AUTOTEST(multi_names) {
     cybozu_assert(r.available() == 8);
 }
 
+AUTOTEST(dump) {
+    client c(connect_server());
+    response r;
+    serial_t s;
+
+    s = c.acquire("dump:aaa", 5, 10);
+    ASSERT_RESPONSE(c, r, s, Acquire, OK);
+    s = c.acquire("dump:aaa", 3, 10);
+    ASSERT_RESPONSE(c, r, s, Acquire, OK);
+    s = c.release("dump:aaa", 1);
+    ASSERT_RESPONSE(c, r, s, Release, OK);
+    s = c.acquire("dump:bbb", 100, 100);
+    ASSERT_RESPONSE(c, r, s, Acquire, OK);
+    s = c.release("dump:bbb", 100);
+    ASSERT_RESPONSE(c, r, s, Release, OK);
+
+    s = c.dump();
+    for(;;) {
+        cybozu_assert( c.recv(r) );
+        cybozu_assert( r.status() == yrmcds::semaphore::status::OK );
+        if( r.status() != yrmcds::semaphore::status::OK )
+            break;
+        if( r.body_length() == 0 )
+            break;
+        if( r.name() == "dump:aaa" ) {
+            cybozu_assert( r.available() == 3 );
+            cybozu_assert( r.maximum() == 10 );
+            cybozu_assert( r.max_consumption() == 8 );
+        } else if( r.name() == "dump:bbb" ) {
+            cybozu_assert( r.available() == 100 );
+            cybozu_assert( r.maximum() == 100 );
+            cybozu_assert( r.max_consumption() == 100 );
+        }
+    }
+}
+
 void print_usage() {
     std::cout << "Usage: semaphore.exe [SERVER [PORT]]\n"
                  "Environment options:\n"
