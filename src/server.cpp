@@ -2,7 +2,7 @@
 
 #include "constants.hpp"
 #include "memcache/handler.hpp"
-#include "semaphore/handler.hpp"
+#include "counter/handler.hpp"
 #include "server.hpp"
 #include "global.hpp"
 
@@ -30,8 +30,8 @@ server::server(): m_syncer(m_workers) {
     };
 
     m_handlers.emplace_back(new memcache::handler(finder, m_reactor, m_syncer));
-    if( g_config.semaphore().enable() )
-        m_handlers.emplace_back(new semaphore::handler(finder, m_reactor));
+    if( g_config.counter().enable() )
+        m_handlers.emplace_back(new counter::handler(finder, m_reactor));
 }
 
 inline bool server::reactor_gc_ready() {

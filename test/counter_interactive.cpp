@@ -1,8 +1,8 @@
 #define TEST_DISABLE_AUTO_RUN
-#include "../src/semaphore/semaphore.hpp"
-#include "semaphore_client.hpp"
+#include "../src/counter/counter.hpp"
+#include "counter_client.hpp"
 
-using namespace semaphore_client;
+using namespace counter_client;
 
 const char* g_server;
 uint16_t g_port;
@@ -23,7 +23,7 @@ int connect_server() {
 #define ASSERT_RESPONSE(c, r, s, cmd) do { \
         cybozu_assert( c.recv(r) ); \
         cybozu_assert( r.opaque() == s ); \
-        cybozu_assert( r.command() == yrmcds::semaphore::command::cmd ); \
+        cybozu_assert( r.command() == yrmcds::counter::command::cmd ); \
     } while( false )
 
 AUTOTEST(interactive) {
@@ -38,7 +38,7 @@ AUTOTEST(interactive) {
         if( cmd == "noop" ) {
             s = c.noop();
             ASSERT_RESPONSE(c, r, s, Noop);
-            if( r.status() == yrmcds::semaphore::status::OK )
+            if( r.status() == yrmcds::counter::status::OK )
                 std::cout << "OK" << std::endl;
             else
                 std::cout << r.message() << std::endl;
@@ -48,19 +48,19 @@ AUTOTEST(interactive) {
             std::cin >> name;
             s = c.get(name);
             ASSERT_RESPONSE(c, r, s, Get);
-            if( r.status() == yrmcds::semaphore::status::OK )
-                std::cout << r.available() << std::endl;
+            if( r.status() == yrmcds::counter::status::OK )
+                std::cout << r.consumption() << std::endl;
             else
                 std::cout << r.message() << std::endl;
         }
         else if( cmd == "acquire" ) {
             std::string name;
             std::cin >> name;
-            std::uint32_t resources, initial;
-            std::cin >> resources >> initial;
-            s = c.acquire(name, resources, initial);
+            std::uint32_t resources, maximum;
+            std::cin >> resources >> maximum;
+            s = c.acquire(name, resources, maximum);
             ASSERT_RESPONSE(c, r, s, Acquire);
-            if( r.status() == yrmcds::semaphore::status::OK )
+            if( r.status() == yrmcds::counter::status::OK )
                 std::cout << r.resources() << std::endl;
             else
                 std::cout << r.message() << std::endl;
@@ -72,7 +72,7 @@ AUTOTEST(interactive) {
             std::cin >> resources;
             s = c.release(name, resources);
             ASSERT_RESPONSE(c, r, s, Release);
-            if( r.status() == yrmcds::semaphore::status::OK )
+            if( r.status() == yrmcds::counter::status::OK )
                 std::cout << "OK" << std::endl;
             else
                 std::cout << r.message() << std::endl;
@@ -80,7 +80,7 @@ AUTOTEST(interactive) {
         else if( cmd == "stats" ) {
             s = c.stats();
             ASSERT_RESPONSE(c, r, s, Stats);
-            if( r.status() == yrmcds::semaphore::status::OK ) {
+            if( r.status() == yrmcds::counter::status::OK ) {
                 for( auto& stat: r.stats() )
                     std::cout << stat.name << ": " << stat.value << std::endl;
                 std::cout << "END" << std::endl;
@@ -92,13 +92,12 @@ AUTOTEST(interactive) {
             s = c.dump();
             for(;;) {
                 ASSERT_RESPONSE(c, r, s, Dump);
-                if( r.status() == yrmcds::semaphore::status::OK ) {
+                if( r.status() == yrmcds::counter::status::OK ) {
                     if( r.body_length() == 0 ) {
                         std::cout << "END" << std::endl;
                         break;
                     }
-                    std::cout << r.name() << ": " << r.available()
-                                          << ", " << r.maximum()
+                    std::cout << r.name() << ": " << r.consumption()
                                           << ", " << r.max_consumption()
                                           << std::endl;
                 } else {
@@ -117,7 +116,7 @@ AUTOTEST(interactive) {
 // main
 bool optparse(int argc, char** argv) {
     if( argc != 2 && argc != 3 ) {
-        std::cout << "Usage: semaphore_interactive.exe SERVER [PORT]" << std::endl;
+        std::cout << "Usage: counter_interactive.exe SERVER [PORT]" << std::endl;
         return false;
     }
     g_server = argv[1];

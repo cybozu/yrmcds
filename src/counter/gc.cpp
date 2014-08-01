@@ -3,7 +3,7 @@
 #include "gc.hpp"
 #include "stats.hpp"
 
-namespace yrmcds { namespace semaphore {
+namespace yrmcds { namespace counter {
 
 void gc_thread::run() {
     using namespace std::chrono;
@@ -42,4 +42,4 @@ void gc_thread::gc() {
     }
 }
 
-}} // namespace yrmcds::semaphore
+}} // namespace yrmcds::counter

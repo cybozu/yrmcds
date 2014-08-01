@@ -2,7 +2,7 @@
 
 #include "stats.hpp"
 
-namespace yrmcds { namespace semaphore {
+namespace yrmcds { namespace counter {
 
 statistics g_stats;
 
@@ -20,4 +20,4 @@ void statistics::reset() noexcept {
         v = 0;
 }
 
-}} // namespace yrmcds::semaphore
+}} // namespace yrmcds::counter

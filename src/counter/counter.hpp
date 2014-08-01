@@ -1,13 +1,13 @@
-// semaphore server-side protocol.
+// counter server-side protocol.
 // (C) 2014 Cybozu.
 
-#ifndef YRMCDS_SEMAPHORE_SEMAPHORE_HPP
-#define YRMCDS_SEMAPHORE_SEMAPHORE_HPP
+#ifndef YRMCDS_COUNTER_COUNTER_HPP
+#define YRMCDS_COUNTER_COUNTER_HPP
 
 #include <cybozu/config_parser.hpp>
 #include <cybozu/tcp.hpp>
 
-namespace yrmcds { namespace semaphore {
+namespace yrmcds { namespace counter {
 
 enum class command: std::uint8_t {
     Noop            = 0x00,
@@ -42,34 +42,34 @@ class request final {
 public:
     request(const char* p, std::size_t len) {
         if( p == nullptr )
-            throw std::logic_error("<semaphore::request> `p` must not be nullptr");
+            throw std::logic_error("<counter::request> `p` must not be nullptr");
         if( len == 0 )
-            throw std::logic_error("<semaphore::request> `len` must not be zero");
+            throw std::logic_error("<counter::request> `len` must not be zero");
         parse(p, len);
     }
 
     std::size_t length() const noexcept { return m_request_length; }
-    semaphore::command command() const noexcept { return m_command; }
+    counter::command command() const noexcept { return m_command; }
     std::uint8_t flags() const noexcept { return m_flags; }
     std::uint32_t body_length() const noexcept { return m_body_length; }
     const char* opaque() const noexcept { return m_opaque; }
     std::uint32_t resources() const noexcept { return m_resources; }
-    std::uint32_t initial() const noexcept { return m_initial; }
+    std::uint32_t maximum() const noexcept { return m_maximum; }
     string_slice name() const noexcept { return m_name; }
-    semaphore::status status() const noexcept { return m_status; }
+    counter::status status() const noexcept { return m_status; }
 
 private:
     void parse(const char* p, std::size_t len) noexcept;
 
     std::size_t m_request_length = 0;
-    semaphore::command m_command = semaphore::command::Unknown;
+    counter::command m_command = counter::command::Unknown;
     std::uint8_t m_flags = 0;
     std::uint32_t m_body_length = 0;
     const char* m_opaque = nullptr;
     std::uint32_t m_resources = 0;
-    std::uint32_t m_initial = 0;
+    std::uint32_t m_maximum = 0;
     string_slice m_name;
-    semaphore::status m_status = semaphore::status::Invalid;
+    counter::status m_status = counter::status::Invalid;
 };
 
 class response final {
@@ -78,24 +78,23 @@ public:
         m_socket(socket), m_request(request) {}
 
     void success();
-    void error(semaphore::status status);
-    void get(std::uint32_t available);
+    void error(counter::status status);
+    void get(std::uint32_t consumption);
     void acquire(std::uint32_t resources);
     void stats();
     void dump(const char* name, std::uint16_t name_len,
-              std::uint32_t available, std::uint32_t maximum,
-              std::uint32_t max_conumption);
+              std::uint32_t consumption, std::uint32_t max_conumption);
 
 private:
-    void fill_header(char* header, semaphore::status status,
+    void fill_header(char* header, counter::status status,
                      std::uint32_t body_length);
-    void send_error(semaphore::status status, const char* message,
+    void send_error(counter::status status, const char* message,
                     std::size_t length);
 
     cybozu::tcp_socket& m_socket;
     const request& m_request;
 };
 
-}} // namespace yrmcds::semaphore
+}} // namespace yrmcds::counter
 
-#endif // YRMCDS_SEMAPHORE_SEMAPHORE_HPP
+#endif // YRMCDS_COUNTER_COUNTER_HPP

@@ -15,8 +15,8 @@
 
 namespace yrmcds {
 
-// Configurations for semaphore extension.
-class semaphore_config {
+// Configurations for counter extension.
+class counter_config {
 public:
     void load(const cybozu::config_parser&);
 
@@ -38,7 +38,7 @@ public:
 
 private:
     bool m_enable = false;
-    std::uint16_t m_port = DEFAULT_SEMAPHORE_PORT;
+    std::uint16_t m_port = DEFAULT_COUNTER_PORT;
     unsigned int m_max_connections = 0;
     unsigned int m_buckets = DEFAULT_BUCKETS;
     unsigned int m_consumption_stats_interval = DEFAULT_CONSUMPTION_STATS_INTERVAL;
@@ -111,8 +111,8 @@ public:
         return m_gc_interval;
     }
 
-    const semaphore_config& semaphore() const noexcept {
-        return m_semaphore_config;
+    const counter_config& counter() const noexcept {
+        return m_counter_config;
     }
 
     void set_heap_data_limit(std::size_t new_limit) noexcept {
@@ -136,7 +136,7 @@ private:
     std::size_t m_memory_limit = DEFAULT_MEMORY_LIMIT;
     unsigned int m_workers = DEFAULT_WORKER_THREADS;
     unsigned int m_gc_interval = DEFAULT_GC_INTERVAL;
-    semaphore_config m_semaphore_config;
+    counter_config m_counter_config;
 };
 
 // Global configuration object.
