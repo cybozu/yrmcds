@@ -65,7 +65,7 @@ AUTOTEST(one_client) {
 
     s = c.get("hoge");
     ASSERT_RESPONSE(c, r, s, Get, OK);
-    cybozu_assert(r.available() == 8);
+    cybozu_assert(r.consumption() == 2);
 
     s = c.acquire("hoge", 3, 10);
     ASSERT_RESPONSE(c, r, s, Acquire, OK);
@@ -73,7 +73,7 @@ AUTOTEST(one_client) {
 
     s = c.get("hoge");
     ASSERT_RESPONSE(c, r, s, Get, OK);
-    cybozu_assert(r.available() == 5);
+    cybozu_assert(r.consumption() == 5);
 
     s = c.acquire("hoge", 5, 10);
     ASSERT_RESPONSE(c, r, s, Acquire, OK);
@@ -81,7 +81,7 @@ AUTOTEST(one_client) {
 
     s = c.get("hoge");
     ASSERT_RESPONSE(c, r, s, Get, OK);
-    cybozu_assert(r.available() == 0);
+    cybozu_assert(r.consumption() == 10);
 
     s = c.acquire("hoge", 1, 10);
     ASSERT_RESPONSE(c, r, s, Acquire, ResourceNotAvailable);
@@ -165,15 +165,15 @@ AUTOTEST(multi_names) {
 
     s = c.get("a");
     ASSERT_RESPONSE(c, r, s, Get, OK);
-    cybozu_assert(r.available() == 9);
+    cybozu_assert(r.consumption() == 1);
 
     s = c.get("b");
     ASSERT_RESPONSE(c, r, s, Get, OK);
-    cybozu_assert(r.available() == 8);
+    cybozu_assert(r.consumption() == 2);
 
     s = c.get("c");
     ASSERT_RESPONSE(c, r, s, Get, OK);
-    cybozu_assert(r.available() == 6);
+    cybozu_assert(r.consumption() == 4);
 
     s = c.release("a", 1);
     ASSERT_RESPONSE(c, r, s, Release, OK);
@@ -186,15 +186,15 @@ AUTOTEST(multi_names) {
 
     s = c.get("a");
     ASSERT_RESPONSE(c, r, s, Get, OK);
-    cybozu_assert(r.available() == 10);
+    cybozu_assert(r.consumption() == 0);
 
     s = c.get("b");
     ASSERT_RESPONSE(c, r, s, Get, OK);
-    cybozu_assert(r.available() == 9);
+    cybozu_assert(r.consumption() == 1);
 
     s = c.get("c");
     ASSERT_RESPONSE(c, r, s, Get, OK);
-    cybozu_assert(r.available() == 8);
+    cybozu_assert(r.consumption() == 2);
 }
 
 AUTOTEST(dump) {
@@ -214,6 +214,7 @@ AUTOTEST(dump) {
     ASSERT_RESPONSE(c, r, s, Release, OK);
 
     s = c.dump();
+    int count = 0;
     for(;;) {
         cybozu_assert( c.recv(r) );
         cybozu_assert( r.status() == yrmcds::semaphore::status::OK );
@@ -222,15 +223,16 @@ AUTOTEST(dump) {
         if( r.body_length() == 0 )
             break;
         if( r.name() == "dump:aaa" ) {
-            cybozu_assert( r.available() == 3 );
-            cybozu_assert( r.maximum() == 10 );
+            cybozu_assert( r.consumption() == 7 );
             cybozu_assert( r.max_consumption() == 8 );
+            ++count;
         } else if( r.name() == "dump:bbb" ) {
-            cybozu_assert( r.available() == 100 );
-            cybozu_assert( r.maximum() == 100 );
+            cybozu_assert( r.consumption() == 0 );
             cybozu_assert( r.max_consumption() == 100 );
+            ++count;
         }
     }
+    cybozu_assert( count == 2 );
 }
 
 void print_usage() {

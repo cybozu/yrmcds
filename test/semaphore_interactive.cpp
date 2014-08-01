@@ -49,16 +49,16 @@ AUTOTEST(interactive) {
             s = c.get(name);
             ASSERT_RESPONSE(c, r, s, Get);
             if( r.status() == yrmcds::semaphore::status::OK )
-                std::cout << r.available() << std::endl;
+                std::cout << r.consumption() << std::endl;
             else
                 std::cout << r.message() << std::endl;
         }
         else if( cmd == "acquire" ) {
             std::string name;
             std::cin >> name;
-            std::uint32_t resources, initial;
-            std::cin >> resources >> initial;
-            s = c.acquire(name, resources, initial);
+            std::uint32_t resources, maximum;
+            std::cin >> resources >> maximum;
+            s = c.acquire(name, resources, maximum);
             ASSERT_RESPONSE(c, r, s, Acquire);
             if( r.status() == yrmcds::semaphore::status::OK )
                 std::cout << r.resources() << std::endl;
@@ -97,8 +97,7 @@ AUTOTEST(interactive) {
                         std::cout << "END" << std::endl;
                         break;
                     }
-                    std::cout << r.name() << ": " << r.available()
-                                          << ", " << r.maximum()
+                    std::cout << r.name() << ": " << r.consumption()
                                           << ", " << r.max_consumption()
                                           << std::endl;
                 } else {

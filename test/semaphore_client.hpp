@@ -84,15 +84,8 @@ public:
         return r;
     }
 
-    std::uint32_t available() const {
+    std::uint32_t consumption() const {
         return resources();
-    }
-
-    std::uint32_t maximum() const {
-        cybozu_assert(m_body.size() >= 8);
-        uint32_t r;
-        cybozu::ntoh(m_body.data() + 4, r);
-        return r;
     }
 
     std::uint32_t max_consumption() const {

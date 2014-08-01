@@ -25,7 +25,7 @@ void add_stat(std::vector<char>& body, const std::string& name,
               const std::string& value) {
     char buffer[4];
     cybozu::hton((uint16_t)name.size(), buffer);
-    cybozu::hton((uint16_t)value.size(), buffer+2);
+    cybozu::hton((uint16_t)value.size(), buffer + 2);
     body.insert(body.end(), buffer, buffer + 4);
     body.insert(body.end(), name.begin(), name.end());
     body.insert(body.end(), value.begin(), value.end());
@@ -53,8 +53,8 @@ void request::parse(const char* p, std::size_t len) noexcept {
     cybozu::ntoh(p + 4, body_length);
     if( len < HEADER_SIZE + body_length ) return;  // incomplete
 
-    m_command = (semaphore::command)*(const uint8_t*)(p+1);
-    m_flags = *(const uint8_t*)(p+2);
+    m_command = (semaphore::command)*(const uint8_t*)(p + 1);
+    m_flags = *(const uint8_t*)(p + 2);
     m_body_length = body_length;
     m_opaque = p + 8;
 
@@ -88,8 +88,8 @@ void request::parse(const char* p, std::size_t len) noexcept {
         cybozu::ntoh(body, m_resources);
         if( m_resources == 0 )
             return;     // invalid
-        cybozu::ntoh(body + 4, m_initial);
-        if( m_initial < m_resources )
+        cybozu::ntoh(body + 4, m_maximum);
+        if( m_maximum < m_resources )
             return;
         cybozu::ntoh(body + 8, name_len);
         if( name_len == 0 || 10U + name_len > body_length )
@@ -167,11 +167,11 @@ void response::error(semaphore::status status) {
     }
 }
 
-void response::get(std::uint32_t available) {
+void response::get(std::uint32_t consumption) {
     char header[HEADER_SIZE];
     char body[4];
     fill_header(header, semaphore::status::OK, sizeof(body));
-    cybozu::hton(available, body);
+    cybozu::hton(consumption, body);
     cybozu::tcp_socket::iovec iov[] = {
         {header, HEADER_SIZE},
         {body, sizeof(body)},
@@ -185,13 +185,12 @@ void response::acquire(std::uint32_t resources) {
 }
 
 void response::dump(const char* name, std::uint16_t name_len,
-                    std::uint32_t available, std::uint32_t maximum,
-                    std::uint32_t max_conumption) {
+                    std::uint32_t consumption, std::uint32_t max_conumption) {
     char header[HEADER_SIZE];
     char body[14];
     fill_header(header, semaphore::status::OK, sizeof(body) + name_len);
-    cybozu::hton(available, body);
-    cybozu::hton(maximum, body + 4);
+    cybozu::hton(consumption, body);
+    cybozu::hton(0, body + 4);
     cybozu::hton(max_conumption, body + 8);
     cybozu::hton(name_len, body + 12);
     cybozu::tcp_socket::iovec iov[] = {

@@ -14,8 +14,7 @@ Each semaphore has a non-empty name.  The maximum name is up to 65535 bytes.  Th
 - The semaphore extension is disabled by default.  It can be enabled by a configuration file.
 - TCP port used for the semaphore protocol is different from that of the memcache protocol.
 - The namespace of semaphore objects is different from that of the memcache objects.
-- When a connection is closed, all semaphore objects acquired by the connection 
-are released automatically.
+- When a connection is closed, all semaphore objects acquired by the connection are released automatically.
 - A semaphore is created dynamically at the first time the resources managed by the semaphore are acquired.
 - Semaphores will be deleted by the GC thread if all resources managed by them are released.
 - Semaphores are not replicated.
@@ -152,7 +151,7 @@ Request body:
    +---------------+---------------+---------------+---------------+
   0| Resources                                                     |
    +---------------+---------------+---------------+---------------+
-  4| Initial resources                                             |
+  4| Maximum                                                       |
    +---------------+---------------+---------------+---------------+
   8| Name length                   | (Name data) ...
    +---------------+---------------+
@@ -174,16 +173,16 @@ Successful response body:
 - `Resources` is a 4-byte unsigned integer number.
   This request will acquire this count of resources.
   If this is zero, `Invalid arguments` is returned.
-- `Initial` is a 4-byte unsigned integer number.
-  This is used to initialize the value of a new semaphore.
-  `Initial` must be equal to or greater than `Resources`, otherwise
+- `Maximum` is a 4-byte unsigned integer number.
+- This parameter represents the maximum number of resources.
+  `Maximum` must be equal to or greater than `Resources`, otherwise
   `Invalid arguments` is returned.
 - `Name length` is a 2-byte unsigned integer number.
   If this is zero, `Invalid arguments` is returned.
 
-If the named semaphore does not exist, `Acquire` creates a new semaphore whose value is `Initial - Resources`, and returns the success.
+If the named semaphore does not exist, `Acquire` creates a new semaphore, sets its consumption to be `Resources`, and returns the success.
 
-Otherwise, if `Resources` is equal to or less than the value of the semaphore, this request will minus `Resources` from the semaphore value then returns the success.  Else, this returns `Resource not available` error.
+Otherwise, if `Consumption + Resources < Maximum` where `Consumption` is the current consumption of the resource, then this request will augment `Consumption` by `Resources`, and return the success.  Else, this returns `Resource not available` error.
 
 
 ### Release
@@ -240,7 +239,7 @@ Success response body:
     /              |               |               |               |
    |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
    +---------------+---------------+---------------+---------------+
-  0| Resources                                                     |
+  0| Consumption                                                   |
    +---------------+---------------+---------------+---------------+
    Total 4 bytes
 ```
@@ -291,7 +290,7 @@ Successful responses:
 
 `Dump` command returns multiple responses for one request.
 
-Each response contains a semaphore, the current number of its available resources, and the maximum number of available resources.
+Each response contains the name of a semaphore and the current consumption of the resource.
 The response also contains the maximum consumption of resources in the interval given in the configuration file.
 
 The end of the series of responses are indicated by the response whose body length is zero.
@@ -301,10 +300,10 @@ The end of the series of responses are indicated by the response whose body leng
     /              |               |               |               |
    |0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|
    +---------------+---------------+---------------+---------------+
-  0| Current available resources                                   |
+  0| Current consumption                                           |
    +---------------+---------------+---------------+---------------+
-  4| Maximum number of resources                                   |
-   +---------------------------------------------------------------+
+  4| Reserved                                                      |
+   +---------------+---------------+---------------+---------------+
   8| Maximum consumption                                           |
    +---------------+---------------+---------------+---------------+
  12| Name length                   | (Name data) ...

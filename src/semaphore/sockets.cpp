@@ -160,7 +160,7 @@ void semaphore_socket::execute(const semaphore::request& cmd) {
 
 void semaphore_socket::cmd_get(const semaphore::request& cmd, semaphore::response& r) {
     auto h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
-        r.get(obj.available());
+        r.get(obj.consumption());
         return true;
     };
     if( ! m_hash.apply(cybozu::hash_key(cmd.name().p, cmd.name().len), h, nullptr) )
@@ -169,9 +169,9 @@ void semaphore_socket::cmd_get(const semaphore::request& cmd, semaphore::respons
 
 void semaphore_socket::cmd_acquire(const semaphore::request& cmd, semaphore::response& r) {
     uint32_t resources = cmd.resources();
-    uint32_t initial = cmd.initial();
-    auto h = [this,resources,&r](const cybozu::hash_key& k, object& obj) -> bool {
-        if( ! obj.acquire(resources) ) {
+    uint32_t maximum = cmd.maximum();
+    auto h = [this,resources,maximum,&r](const cybozu::hash_key& k, object& obj) -> bool {
+        if( ! obj.acquire(resources, maximum) ) {
             r.error( semaphore::status::ResourceNotAvailable );
             return true;
         }
@@ -179,10 +179,10 @@ void semaphore_socket::cmd_acquire(const semaphore::request& cmd, semaphore::res
         r.acquire(resources);
         return true;
     };
-    auto c = [this,resources,initial,&r](const cybozu::hash_key& k) -> object {
+    auto c = [this,resources,&r](const cybozu::hash_key& k) -> object {
         on_acquire(k, resources);
         r.acquire(resources);
-        return object(initial - resources, initial);
+        return object(resources);
     };
     m_hash.apply(cybozu::hash_key(cmd.name().p, cmd.name().len), h, c);
 }
@@ -207,8 +207,7 @@ void semaphore_socket::cmd_release(const semaphore::request& cmd, semaphore::res
 
 void semaphore_socket::cmd_dump(semaphore::response& r) {
     auto pred = [this,&r](const cybozu::hash_key& k, object& obj) {
-        r.dump(k.data(), k.length(),
-               obj.available(), obj.maximum(), obj.max_consumption());
+        r.dump(k.data(), k.length(), obj.consumption(), obj.max_consumption());
     };
     m_hash.foreach(pred);
     r.success();

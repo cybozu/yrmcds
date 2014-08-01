@@ -54,7 +54,7 @@ public:
     std::uint32_t body_length() const noexcept { return m_body_length; }
     const char* opaque() const noexcept { return m_opaque; }
     std::uint32_t resources() const noexcept { return m_resources; }
-    std::uint32_t initial() const noexcept { return m_initial; }
+    std::uint32_t maximum() const noexcept { return m_maximum; }
     string_slice name() const noexcept { return m_name; }
     semaphore::status status() const noexcept { return m_status; }
 
@@ -67,7 +67,7 @@ private:
     std::uint32_t m_body_length = 0;
     const char* m_opaque = nullptr;
     std::uint32_t m_resources = 0;
-    std::uint32_t m_initial = 0;
+    std::uint32_t m_maximum = 0;
     string_slice m_name;
     semaphore::status m_status = semaphore::status::Invalid;
 };
@@ -79,12 +79,11 @@ public:
 
     void success();
     void error(semaphore::status status);
-    void get(std::uint32_t available);
+    void get(std::uint32_t consumption);
     void acquire(std::uint32_t resources);
     void stats();
     void dump(const char* name, std::uint16_t name_len,
-              std::uint32_t available, std::uint32_t maximum,
-              std::uint32_t max_conumption);
+              std::uint32_t consumption, std::uint32_t max_conumption);
 
 private:
     void fill_header(char* header, semaphore::status status,
