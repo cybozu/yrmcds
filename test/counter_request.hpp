@@ -1,10 +1,10 @@
-#include "../src/semaphore/semaphore.hpp"
+#include "../src/counter/counter.hpp"
 
 #include <cybozu/test.hpp>
 
 #include <cstring>
 
-using namespace yrmcds::semaphore;
+using namespace yrmcds::counter;
 
 #define REQ(n, data) \
     const char i##n[] = data; \

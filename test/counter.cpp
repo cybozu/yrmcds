@@ -1,6 +1,6 @@
 #define TEST_DISABLE_AUTO_RUN
-#include "../src/semaphore/semaphore.hpp"
-#include "semaphore_client.hpp"
+#include "../src/counter/counter.hpp"
+#include "counter_client.hpp"
 
 #include <cybozu/test.hpp>
 #include <cybozu/util.hpp>
@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <vector>
 
-using namespace semaphore_client;
+using namespace counter_client;
 
 const char* g_server = nullptr;
 uint16_t g_port = 11215;
@@ -38,8 +38,8 @@ int connect_server() {
 #define ASSERT_RESPONSE(c, r, s, cmd, st) do { \
         cybozu_assert( c.recv(r) ); \
         cybozu_assert( r.opaque() == s ); \
-        cybozu_assert( r.command() == yrmcds::semaphore::command::cmd ); \
-        cybozu_assert( r.status() == yrmcds::semaphore::status::st ); \
+        cybozu_assert( r.command() == yrmcds::counter::command::cmd ); \
+        cybozu_assert( r.status() == yrmcds::counter::status::st ); \
     } while( false )
 
 AUTOTEST(noop) {
@@ -217,8 +217,8 @@ AUTOTEST(dump) {
     int count = 0;
     for(;;) {
         cybozu_assert( c.recv(r) );
-        cybozu_assert( r.status() == yrmcds::semaphore::status::OK );
-        if( r.status() != yrmcds::semaphore::status::OK )
+        cybozu_assert( r.status() == yrmcds::counter::status::OK );
+        if( r.status() != yrmcds::counter::status::OK )
             break;
         if( r.body_length() == 0 )
             break;
@@ -236,7 +236,7 @@ AUTOTEST(dump) {
 }
 
 void print_usage() {
-    std::cout << "Usage: semaphore.exe [SERVER [PORT]]\n"
+    std::cout << "Usage: counter.exe [SERVER [PORT]]\n"
                  "Environment options:\n"
                  "  YRMCDS_SERVER : the name of a yrmcds server.\n"
                  "                  used only when `SERVER` is unspecified.\n"

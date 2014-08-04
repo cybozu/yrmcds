@@ -1,8 +1,8 @@
-// The semaphore object.
+// The counter object.
 // (C) 2014 Cybozu.
 
-#ifndef YRMCDS_SEMAPHORE_OBJECT_HPP
-#define YRMCDS_SEMAPHORE_OBJECT_HPP
+#ifndef YRMCDS_COUNTER_OBJECT_HPP
+#define YRMCDS_COUNTER_OBJECT_HPP
 
 #include "../config.hpp"
 #include "../global.hpp"
@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <cstdint>
 
-namespace yrmcds { namespace semaphore {
+namespace yrmcds { namespace counter {
 
 class object {
 public:
@@ -70,7 +70,7 @@ private:
     }
 
     static std::time_t nearest_boundary(std::time_t t) {
-        unsigned int interval = g_config.semaphore().consumption_stats_interval();
+        unsigned int interval = g_config.counter().consumption_stats_interval();
         return (t / interval) * interval;
     }
 
@@ -79,6 +79,6 @@ private:
     std::time_t m_last_updated;
 };
 
-}} // namespace yrmcds::semaphore
+}} // namespace yrmcds::counter
 
-#endif // YRMCDS_SEMAPHORE_OBJECT_HPP
+#endif // YRMCDS_COUNTER_OBJECT_HPP

@@ -1,15 +1,15 @@
 // Garbage object collection.
 // (C) 2014 Cybozu.
 
-#ifndef YRMCDS_SEMAPHORE_GC_HPP
-#define YRMCDS_SEMAPHORE_GC_HPP
+#ifndef YRMCDS_COUNTER_GC_HPP
+#define YRMCDS_COUNTER_GC_HPP
 
 #include "object.hpp"
 
 #include <cybozu/thread.hpp>
 #include <cybozu/hash_map.hpp>
 
-namespace yrmcds { namespace semaphore {
+namespace yrmcds { namespace counter {
 
 class gc_thread final: public cybozu::thread_base<gc_thread> {
 public:
@@ -37,6 +37,6 @@ private:
     int m_objects_in_bucket = 0;
 };
 
-}} // namespace yrmcds::semaphore
+}} // namespace yrmcds::counter
 
-#endif // YRMCDS_SEMAPHORE_GC_HPP
+#endif // YRMCDS_COUNTER_GC_HPP

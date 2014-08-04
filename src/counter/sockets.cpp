@@ -10,9 +10,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-namespace yrmcds { namespace semaphore {
+namespace yrmcds { namespace counter {
 
-semaphore_socket::semaphore_socket(int fd,
+counter_socket::counter_socket(int fd,
                                    const std::function<cybozu::worker*()>& finder,
                                    cybozu::hash_map<object>& hash)
     : cybozu::tcp_socket(fd),
@@ -58,7 +58,7 @@ semaphore_socket::semaphore_socket(int fd,
             const char* head = buf.data();
             std::size_t len = buf.size();
             while( len > 0 ) {
-                semaphore::request parser(head, len);
+                counter::request parser(head, len);
                 std::size_t c = parser.length();
                 if( c == 0 ) break;
                 head += c;
@@ -89,12 +89,12 @@ semaphore_socket::semaphore_socket(int fd,
     };
 }
 
-semaphore_socket::~semaphore_socket() {
+counter_socket::~counter_socket() {
     // the destructor is the safe place to release remaining resources
     release_all();
 }
 
-bool semaphore_socket::on_readable() {
+bool counter_socket::on_readable() {
     if( m_busy.load(std::memory_order_acquire) ) {
         m_reactor->add_readable(*this);
         return true;
@@ -112,7 +112,7 @@ bool semaphore_socket::on_readable() {
     return true;
 }
 
-bool semaphore_socket::on_writable() {
+bool counter_socket::on_writable() {
     cybozu::worker* w = m_finder();
     if( w == nullptr ) {
         // if there is no idle worker, fallback to the default.
@@ -123,10 +123,10 @@ bool semaphore_socket::on_writable() {
     return true;
 }
 
-void semaphore_socket::execute(const semaphore::request& cmd) {
-    semaphore::response r(*this, cmd);
+void counter_socket::execute(const counter::request& cmd) {
+    counter::response r(*this, cmd);
 
-    if( cmd.status() != semaphore::status::OK ) {
+    if( cmd.status() != counter::status::OK ) {
         r.error( cmd.status() );
         return;
     }
@@ -134,45 +134,45 @@ void semaphore_socket::execute(const semaphore::request& cmd) {
     g_stats.ops[(std::size_t)cmd.command()].fetch_add(1);
 
     switch( cmd.command() ) {
-    case semaphore::command::Noop:
+    case counter::command::Noop:
         r.success();
         break;
-    case semaphore::command::Get:
+    case counter::command::Get:
         cmd_get(cmd, r);
         break;
-    case semaphore::command::Acquire:
+    case counter::command::Acquire:
         cmd_acquire(cmd, r);
         break;
-    case semaphore::command::Release:
+    case counter::command::Release:
         cmd_release(cmd, r);
         break;
-    case semaphore::command::Stats:
+    case counter::command::Stats:
         r.stats();
         break;
-    case semaphore::command::Dump:
+    case counter::command::Dump:
         cmd_dump(r);
         break;
     default:
         cybozu::logger::info() << "not implemented";
-        r.error( semaphore::status::UnknownCommand );
+        r.error( counter::status::UnknownCommand );
     }
 }
 
-void semaphore_socket::cmd_get(const semaphore::request& cmd, semaphore::response& r) {
+void counter_socket::cmd_get(const counter::request& cmd, counter::response& r) {
     auto h = [this,&cmd,&r](const cybozu::hash_key& k, object& obj) -> bool {
         r.get(obj.consumption());
         return true;
     };
     if( ! m_hash.apply(cybozu::hash_key(cmd.name().p, cmd.name().len), h, nullptr) )
-        r.error( semaphore::status::NotFound );
+        r.error( counter::status::NotFound );
 }
 
-void semaphore_socket::cmd_acquire(const semaphore::request& cmd, semaphore::response& r) {
+void counter_socket::cmd_acquire(const counter::request& cmd, counter::response& r) {
     uint32_t resources = cmd.resources();
     uint32_t maximum = cmd.maximum();
     auto h = [this,resources,maximum,&r](const cybozu::hash_key& k, object& obj) -> bool {
         if( ! obj.acquire(resources, maximum) ) {
-            r.error( semaphore::status::ResourceNotAvailable );
+            r.error( counter::status::ResourceNotAvailable );
             return true;
         }
         on_acquire(k, resources);
@@ -187,25 +187,25 @@ void semaphore_socket::cmd_acquire(const semaphore::request& cmd, semaphore::res
     m_hash.apply(cybozu::hash_key(cmd.name().p, cmd.name().len), h, c);
 }
 
-void semaphore_socket::cmd_release(const semaphore::request& cmd, semaphore::response& r) {
+void counter_socket::cmd_release(const counter::request& cmd, counter::response& r) {
     uint32_t resources = cmd.resources();
     auto h = [this,resources,&r](const cybozu::hash_key& k, object& obj) -> bool {
         if( ! on_release(k, resources) ) {
-            r.error( semaphore::status::NotAcquired );
+            r.error( counter::status::NotAcquired );
             return true;
         }
         if( ! obj.release(resources) ) {
             cybozu::dump_stack();
-            throw std::logic_error("<semaphore_socket::cmd_release> bug");
+            throw std::logic_error("<counter_socket::cmd_release> bug");
         }
         r.success();
         return true;
     };
     if( ! m_hash.apply(cybozu::hash_key(cmd.name().p, cmd.name().len), h, nullptr) )
-        r.error( semaphore::status::NotFound );
+        r.error( counter::status::NotFound );
 }
 
-void semaphore_socket::cmd_dump(semaphore::response& r) {
+void counter_socket::cmd_dump(counter::response& r) {
     auto pred = [this,&r](const cybozu::hash_key& k, object& obj) {
         r.dump(k.data(), k.length(), obj.consumption(), obj.max_consumption());
     };
@@ -213,7 +213,7 @@ void semaphore_socket::cmd_dump(semaphore::response& r) {
     r.success();
 }
 
-void semaphore_socket::on_acquire(const cybozu::hash_key& k, std::uint32_t resources) {
+void counter_socket::on_acquire(const cybozu::hash_key& k, std::uint32_t resources) {
     auto it = m_acquired_resources.find(&k);
     if( it != m_acquired_resources.end() ) {
         it->second += resources;
@@ -222,7 +222,7 @@ void semaphore_socket::on_acquire(const cybozu::hash_key& k, std::uint32_t resou
     m_acquired_resources.emplace(&k, resources);
 }
 
-bool semaphore_socket::on_release(const cybozu::hash_key& k, std::uint32_t resources) {
+bool counter_socket::on_release(const cybozu::hash_key& k, std::uint32_t resources) {
     auto it = m_acquired_resources.find(&k);
     if( it == m_acquired_resources.end() )
         return false;
@@ -236,23 +236,23 @@ bool semaphore_socket::on_release(const cybozu::hash_key& k, std::uint32_t resou
     return true;
 }
 
-void semaphore_socket::release_all() {
+void counter_socket::release_all() {
     for( auto& res: m_acquired_resources ) {
         uint32_t count = res.second;
         auto h = [count](const cybozu::hash_key&, object& obj) -> bool {
             if( ! obj.release(count) ) {
                 cybozu::dump_stack();
-                throw std::logic_error("<semaphore_socket::release_all> release failed");
+                throw std::logic_error("<counter_socket::release_all> release failed");
             }
             return true;
         };
         if( ! m_hash.apply(*res.first, h, nullptr) ) {
             cybozu::dump_stack();
-            throw std::logic_error("<semaphore_socket::release_all> not found: "
+            throw std::logic_error("<counter_socket::release_all> not found: "
                                    + res.first->str());
         }
     }
     m_acquired_resources.clear();
 }
 
-}} // namespace yrmcds::semaphore
+}} // namespace yrmcds::counter

@@ -1,29 +1,27 @@
-#<cldoc:Semaphore support>
+#<cldoc:Counter support>
 
-Semaphore support
+Counter support
 
 Overview
 --------
 
-A *semaphore* is a variable used for controlling accesses by multiple processes.
+Counter extension provides distributed counters for the resource management.  Values of counters represent the consumption of some resouces.  Multiple clients can acquire/release the resources atomically.
 
-As an extension, yrmcds provides a distributed semaphore functions.
+Each counter has a non-empty name.  The maximum name is up to 65535 bytes.  The number of resources available for a counter is represented as a 4 byte unsigned integer; this means a counter can have up to 4294967295 resources.
 
-Each semaphore has a non-empty name.  The maximum name is up to 65535 bytes.  The number of resources available for a semaphore is represented as a 4 byte unsigned integer; this means a semaphore can have up to 4294967295 resources.
-
-- The semaphore extension is disabled by default.  It can be enabled by a configuration file.
-- TCP port used for the semaphore protocol is different from that of the memcache protocol.
-- The namespace of semaphore objects is different from that of the memcache objects.
-- When a connection is closed, all semaphore objects acquired by the connection are released automatically.
-- A semaphore is created dynamically at the first time the resources managed by the semaphore are acquired.
-- Semaphores will be deleted by the GC thread if all resources managed by them are released.
-- Semaphores are not replicated.
+- The counter extension is disabled by default.  It can be enabled by a configuration file.
+- TCP port used for the counter protocol is different from that of the memcache protocol.
+- The namespace of counter objects is different from that of the memcache objects.
+- When a connection is closed, all counter objects acquired by the connection are released automatically.
+- A counter is created dynamically at the first time the counter is acquired.
+- Counters will be deleted by the GC thread if all resources managed by them are released.
+- Counters are not replicated.
 
 
 Protocol
 --------
 
-The semaphore extension has its own binary protocol.
+The counter extension has its own binary protocol.
 
 ### General format of a packet
 
@@ -140,7 +138,7 @@ The request and response of `Noop` has no body.
 
 ### Acquire
 
-`Acquire` tries to acquire resources of a semaphore:
+`Acquire` tries to acquire resources of a counter.  If the consumption of resources after `Acquire` is less than or equal to the given maximum value, `Acquire` will success.  Otherwise, `Acquire` will fail and no resouces are acquired.
 
 Request body:
 
@@ -180,14 +178,14 @@ Successful response body:
 - `Name length` is a 2-byte unsigned integer number.
   If this is zero, `Invalid arguments` is returned.
 
-If the named semaphore does not exist, `Acquire` creates a new semaphore, sets its consumption to be `Resources`, and returns the success.
+If the named counter does not exist, `Acquire` creates a new counter, sets its consumption to be `Resources`, and returns the success.
 
 Otherwise, if `Consumption + Resources < Maximum` where `Consumption` is the current consumption of the resource, then this request will augment `Consumption` by `Resources`, and return the success.  Else, this returns `Resource not available` error.
 
 
 ### Release
 
-`Release` returns resources back to the semaphore.
+`Release` returns the acquired resources back.
 
 Request body:
 
@@ -210,15 +208,15 @@ A successful response has no body.
 - `Name length` is a 2-byte unsigned integer number.
   If this is zero, `Invalid arguments` is returned.
 
-If the named semaphore does not exist, `Release` returns `Not found` error.
+If the named counter does not exist, `Release` returns `Not found` error.
 If `Resources` is greater than the current number of acquired resources, `Release` returns `Not acquired` error.
 
-Otherwise, the operation succeeds and the value of the semaphore is increased by `Resources`.
+Otherwise, the operation succeeds and the value of the counter is increased by `Resources`.
 
 
 ### Get
 
-`Get` obtains the current value of the named semaphore.
+`Get` obtains the current consumption of a counter.
 
 Request body:
 
@@ -247,12 +245,12 @@ Success response body:
 - `Name length` is a 2-byte unsigned integer number.
   If this is zero, `Invalid arguments` is returned.
 
-If the named semaphore does not exist, `Get` returns `Not found` error.
+If the named counter does not exist, `Get` returns `Not found` error.
 
 
 ### Stats
 
-`Stats` obtains statistics information about semaphores.
+`Stats` obtains statistics information about counters.
 
 Request body: No body.
 
@@ -282,7 +280,7 @@ N+4| Name2 ... Value2 ...
 
 ### Dump
 
-`Dump` dumps all semaphores.
+`Dump` dumps all counters.
 
 Request body: No body.
 
@@ -290,7 +288,7 @@ Successful responses:
 
 `Dump` command returns multiple responses for one request.
 
-Each response contains the name of a semaphore and the current consumption of the resource.
+Each response contains the name of a counter and the current consumption of the resource.
 The response also contains the maximum consumption of resources in the interval given in the configuration file.
 
 The end of the series of responses are indicated by the response whose body length is zero.
@@ -315,23 +313,23 @@ The end of the series of responses are indicated by the response whose body leng
 Configurations
 --------------
 
-Some properties of the semaphore extension can be configured by the configuration file.
+Some properties of the counter extension can be configured by the configuration file.
 
 ```ini
-# If true, the semaphore extension is enabled. (default: false)
-semaphore.enable = false
+# If true, the counter extension is enabled. (default: false)
+counter.enable = false
 
-# TCP port used for the semaphore protocol. (default: 11215)
-semaphore.port = 11215
+# TCP port used for the counter protocol. (default: 11215)
+counter.port = 11215
 
-# The maximum number of connections in the semaphore protocol.
+# The maximum number of connections in the counter protocol.
 # 0 means unlimited. (default: 0)
-semaphore.max_connections = 0
+counter.max_connections = 0
 
-# The size of the semaphore hash table. (default: 1000000)
-semaphore.buckets = 1000000
+# The size of the counter hash table. (default: 1000000)
+counter.buckets = 1000000
 
 # The interval of measuring the maximum number of resource consumption
 # in seconds. (default: 86400)
-semaphore.consumption_stats.interval = 86400
+counter.consumption_stats.interval = 86400
 ```
