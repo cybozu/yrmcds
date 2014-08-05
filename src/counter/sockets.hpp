@@ -1,12 +1,12 @@
-// Defines semaphore sockets for yrmcds.
+// Defines counter sockets for yrmcds.
 // (C) 2014 Cybozu.
 
-#ifndef YRMCDS_SEMAPHORE_SOCKETS_HPP
-#define YRMCDS_SEMAPHORE_SOCKETS_HPP
+#ifndef YRMCDS_COUNTER_SOCKETS_HPP
+#define YRMCDS_COUNTER_SOCKETS_HPP
 
 #include "../constants.hpp"
 #include "object.hpp"
-#include "semaphore.hpp"
+#include "counter.hpp"
 #include "stats.hpp"
 
 #include <cybozu/dynbuf.hpp>
@@ -19,16 +19,16 @@
 #include <unordered_map>
 #include <vector>
 
-namespace yrmcds { namespace semaphore {
+namespace yrmcds { namespace counter {
 
-class semaphore_socket: public cybozu::tcp_socket {
+class counter_socket: public cybozu::tcp_socket {
 public:
-    semaphore_socket(int fd,
+    counter_socket(int fd,
                      const std::function<cybozu::worker*()>& finder,
                      cybozu::hash_map<object>& hash);
-    virtual ~semaphore_socket();
+    virtual ~counter_socket();
 
-    void execute(const semaphore::request& cmd);
+    void execute(const counter::request& cmd);
 
 private:
     alignas(CACHELINE_SIZE)
@@ -50,10 +50,10 @@ private:
     bool on_readable() override;
     bool on_writable() override;
 
-    void cmd_get(const semaphore::request& cmd, semaphore::response& r);
-    void cmd_acquire(const semaphore::request& cmd, semaphore::response& r);
-    void cmd_release(const semaphore::request& cmd, semaphore::response& r);
-    void cmd_dump(semaphore::response& r);
+    void cmd_get(const counter::request& cmd, counter::response& r);
+    void cmd_acquire(const counter::request& cmd, counter::response& r);
+    void cmd_release(const counter::request& cmd, counter::response& r);
+    void cmd_dump(counter::response& r);
 
     // `on_acquire` augments the number of resources this connection has acquired
     // recorded in `m_acquired_resources`.
@@ -68,6 +68,6 @@ private:
     void release_all();
 };
 
-}} // namespace yrmdcs::semaphore
+}} // namespace yrmdcs::counter
 
-#endif // YRMCDS_SEMAPHORE_SOCKETS_HPP
+#endif // YRMCDS_COUNTER_SOCKETS_HPP

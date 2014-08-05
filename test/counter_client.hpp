@@ -1,7 +1,7 @@
-#ifndef YRMCDS_TEST_SEMAPHORE_CLIENT_HPP
-#define YRMCDS_TEST_SEMAPHORE_CLIENT_HPP
+#ifndef YRMCDS_TEST_COUNTER_CLIENT_HPP
+#define YRMCDS_TEST_COUNTER_CLIENT_HPP
 
-#include "../src/semaphore/semaphore.hpp"
+#include "../src/counter/counter.hpp"
 
 #include <cybozu/util.hpp>
 #include <cybozu/test.hpp>
@@ -18,10 +18,10 @@
 #include <unistd.h>
 #include <vector>
 
-namespace semaphore_client {
+namespace counter_client {
 
 typedef std::uint32_t serial_t;
-using yrmcds::semaphore::string_slice;
+using yrmcds::counter::string_slice;
 
 const std::size_t HEADER_SIZE = 12;
 
@@ -47,12 +47,12 @@ public:
         return (uint8_t)m_header[0];
     }
 
-    yrmcds::semaphore::command command() const noexcept {
-        return (yrmcds::semaphore::command)m_header[1];
+    yrmcds::counter::command command() const noexcept {
+        return (yrmcds::counter::command)m_header[1];
     }
 
-    yrmcds::semaphore::status status() const noexcept {
-        return (yrmcds::semaphore::status)m_header[2];
+    yrmcds::counter::status status() const noexcept {
+        return (yrmcds::counter::status)m_header[2];
     }
 
     std::uint32_t body_length() const {
@@ -62,7 +62,7 @@ public:
     }
 
     const std::string name() const {
-        if( command() == yrmcds::semaphore::command::Dump ) {
+        if( command() == yrmcds::counter::command::Dump ) {
             uint16_t name_len;
             cybozu::ntoh(m_body.data() + 12, name_len);
             return std::string(m_body.data() + 14, name_len);
@@ -84,15 +84,8 @@ public:
         return r;
     }
 
-    std::uint32_t available() const {
+    std::uint32_t consumption() const {
         return resources();
-    }
-
-    std::uint32_t maximum() const {
-        cybozu_assert(m_body.size() >= 8);
-        uint32_t r;
-        cybozu::ntoh(m_body.data() + 4, r);
-        return r;
     }
 
     std::uint32_t max_consumption() const {
@@ -245,6 +238,6 @@ private:
     std::vector<char> m_send_buffer;
 };
 
-} // namespace semaphore_client
+} // namespace counter_client
 
-#endif // YRMCDS_TEST_SEMAPHORE_CLIENT_HPP
+#endif // YRMCDS_TEST_COUNTER_CLIENT_HPP

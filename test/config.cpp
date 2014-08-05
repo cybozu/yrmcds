@@ -18,9 +18,9 @@ AUTOTEST(config) {
     cybozu_assert(g_config.heap_data_limit() == (16 << 10));
     cybozu_assert(g_config.workers() == 10);
     cybozu_assert(g_config.gc_interval() == 20);
-    cybozu_assert(g_config.semaphore().enable() == true);
-    cybozu_assert(g_config.semaphore().port() == 11216);
-    cybozu_assert(g_config.semaphore().max_connections() == 100);
-    cybozu_assert(g_config.semaphore().buckets() == 1000001);
-    cybozu_assert(g_config.semaphore().consumption_stats_interval() == 12345);
+    cybozu_assert(g_config.counter().enable() == true);
+    cybozu_assert(g_config.counter().port() == 11216);
+    cybozu_assert(g_config.counter().max_connections() == 100);
+    cybozu_assert(g_config.counter().buckets() == 1000001);
+    cybozu_assert(g_config.counter().consumption_stats_interval() == 12345);
 }

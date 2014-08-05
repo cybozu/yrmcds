@@ -11,7 +11,7 @@ namespace yrmcds {
 
 const std::uint16_t DEFAULT_MEMCACHE_PORT  = 11211;
 const std::uint16_t DEFAULT_REPL_PORT      = 11213;
-const std::uint16_t DEFAULT_SEMAPHORE_PORT = 11215;
+const std::uint16_t DEFAULT_COUNTER_PORT = 11215;
 const unsigned int  DEFAULT_BUCKETS        = 1000000;
 const std::size_t   DEFAULT_MAX_DATA_SIZE  = static_cast<std::size_t>(1) << 20;
 const std::size_t   DEFAULT_HEAP_DATA_LIMIT= 256 << 10;

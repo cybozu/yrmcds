@@ -1,8 +1,8 @@
 // Semaphore protocol logics and data structures
 // (C) 2014 Cybozu.
 
-#ifndef YRMCDS_SEMAPHORE_HANDLER_HPP
-#define YRMCDS_SEMAPHORE_HANDLER_HPP
+#ifndef YRMCDS_COUNTER_HANDLER_HPP
+#define YRMCDS_COUNTER_HANDLER_HPP
 
 #include "../handler.hpp"
 #include "gc.hpp"
@@ -15,7 +15,7 @@
 #include <ctime>
 #include <functional>
 
-namespace yrmcds { namespace semaphore {
+namespace yrmcds { namespace counter {
 
 class handler: public protocol_handler {
 public:
@@ -29,7 +29,7 @@ public:
 
 private:
     bool gc_ready();
-    std::unique_ptr<cybozu::tcp_socket> make_semaphore_socket(int s);
+    std::unique_ptr<cybozu::tcp_socket> make_counter_socket(int s);
 
     std::function<cybozu::worker*()> m_finder;
     cybozu::reactor& m_reactor;
@@ -38,6 +38,6 @@ private:
     std::unique_ptr<gc_thread> m_gc_thread = nullptr;
 };
 
-}} // namespace yrmcds::semaphore
+}} // namespace yrmcds::counter
 
-#endif // YRMCDS_SEMAPHORE_HANDLER_HPP
+#endif // YRMCDS_COUNTER_HANDLER_HPP
