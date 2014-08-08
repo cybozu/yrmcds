@@ -70,7 +70,7 @@ private:
     }
 
     static std::time_t nearest_boundary(std::time_t t) {
-        unsigned int interval = g_config.counter().consumption_stats_interval();
+        unsigned int interval = g_config.counter().stat_interval();
         return (t / interval) * interval;
     }
 

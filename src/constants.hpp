@@ -19,7 +19,7 @@ const std::size_t   DEFAULT_MEMORY_LIMIT   = static_cast<std::size_t>(1) << 30;
 const int           DEFAULT_WORKER_THREADS = 8;
 const unsigned int  DEFAULT_GC_INTERVAL    = 10;
 const char          DEFAULT_TMPDIR[]       = "/var/tmp";
-const unsigned int  DEFAULT_CONSUMPTION_STATS_INTERVAL = 86400;
+const unsigned int  DEFAULT_STAT_INTERVAL  = 86400;
 
 const std::size_t   MAX_KEY_LENGTH      = 250; // 250 bytes
 const int           MASTER_CHECKS       = 50; // wait 50 * 100ms = 5 seconds

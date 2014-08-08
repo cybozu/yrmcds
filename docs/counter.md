@@ -5,16 +5,15 @@ Counter support
 Overview
 --------
 
-Counter extension provides distributed counters for the resource management.  Values of counters represent the consumption of some resouces.  Multiple clients can acquire/release the resources atomically.
+Counter extension provides distributed counters for resource management.  Values of counters represent how much a resource is consumed.  Multiple clients can acquire/release the resources simultaneously.
 
-Each counter has a non-empty name.  The maximum name is up to 65535 bytes.  The number of resources available for a counter is represented as a 4 byte unsigned integer; this means a counter can have up to 4294967295 resources.
+Each counter has a non-empty name.  The maximum name is up to 65535 bytes.  The number of resources available for a counter is represented as a 4 byte unsigned integer; this means a counter can manage up to 4294967295 resources.
 
-- The counter extension is disabled by default.  It can be enabled by a configuration file.
-- TCP port used for the counter protocol is different from that of the memcache protocol.
+- The counter extension is disabled by default.
+- TCP port used for the counter protocol need to be different from that of the memcache protocol.
 - The namespace of counter objects is different from that of the memcache objects.
-- When a connection is closed, all counter objects acquired by the connection are released automatically.
+- When a connection is closed, all resources acquired through the connection are released automatically.
 - A counter is created dynamically at the first time the counter is acquired.
-- Counters will be deleted by the GC thread if all resources managed by them are released.
 - Counters are not replicated.
 
 
@@ -138,7 +137,9 @@ The request and response of `Noop` has no body.
 
 ### Acquire
 
-`Acquire` tries to acquire resources of a counter.  If the consumption of resources after `Acquire` is less than or equal to the given maximum value, `Acquire` will success.  Otherwise, `Acquire` will fail and no resouces are acquired.
+`Acquire` acquires some resources associated to a counter.  In addition to the counter name, the command has two parameters; one is the number of resources to be acquired, and another is the number of total resources.
+
+Note that, unlike semaphores, counters do not keep the resource capacity; the capacity will be specified by the acquire command.  This way, users can change the resource capacity dynamically anytime.
 
 Request body:
 
@@ -172,15 +173,15 @@ Successful response body:
   This request will acquire this count of resources.
   If this is zero, `Invalid arguments` is returned.
 - `Maximum` is a 4-byte unsigned integer number.
-- This parameter represents the maximum number of resources.
+  This parameter represents the total number of resources.
   `Maximum` must be equal to or greater than `Resources`, otherwise
   `Invalid arguments` is returned.
 - `Name length` is a 2-byte unsigned integer number.
   If this is zero, `Invalid arguments` is returned.
 
-If the named counter does not exist, `Acquire` creates a new counter, sets its consumption to be `Resources`, and returns the success.
+If the named counter does not exist, `Acquire` creates a new counter, sets its consumption to `Resources`, and returns the success.
 
-Otherwise, if `Consumption + Resources < Maximum` where `Consumption` is the current consumption of the resource, then this request will augment `Consumption` by `Resources`, and return the success.  Else, this returns `Resource not available` error.
+Otherwise, if `Consumption + Resources <= Maximum` where `Consumption` is the current consumption of the resource, then this request will augment `Consumption` by `Resources`, and return the success.  Else, this returns `Resource not available` error.
 
 
 ### Release
@@ -300,20 +301,18 @@ The end of the series of responses are indicated by the response whose body leng
    +---------------+---------------+---------------+---------------+
   0| Current consumption                                           |
    +---------------+---------------+---------------+---------------+
-  4| Reserved                                                      |
+  4| Maximum consumption                                           |
    +---------------+---------------+---------------+---------------+
-  8| Maximum consumption                                           |
-   +---------------+---------------+---------------+---------------+
- 12| Name length                   | (Name data) ...
+  8| Name length                   | (Name data) ...
    +---------------+---------------+
-   Total 14 + (Name length) bytes
+   Total 10 + (Name length) bytes
 ```
 
 
 Configurations
 --------------
 
-Some properties of the counter extension can be configured by the configuration file.
+Following parameters can be specified in the configuration file:
 
 ```ini
 # If true, the counter extension is enabled. (default: false)
@@ -331,5 +330,5 @@ counter.buckets = 1000000
 
 # The interval of measuring the maximum number of resource consumption
 # in seconds. (default: 86400)
-counter.consumption_stats.interval = 86400
+counter.stats_interval = 86400
 ```

@@ -187,12 +187,11 @@ void response::acquire(std::uint32_t resources) {
 void response::dump(const char* name, std::uint16_t name_len,
                     std::uint32_t consumption, std::uint32_t max_conumption) {
     char header[HEADER_SIZE];
-    char body[14];
+    char body[10];
     fill_header(header, counter::status::OK, sizeof(body) + name_len);
     cybozu::hton(consumption, body);
-    cybozu::hton(0, body + 4);
-    cybozu::hton(max_conumption, body + 8);
-    cybozu::hton(name_len, body + 12);
+    cybozu::hton(max_conumption, body + 4);
+    cybozu::hton(name_len, body + 8);
     cybozu::tcp_socket::iovec iov[] = {
         {header, HEADER_SIZE},
         {body, sizeof(body)},

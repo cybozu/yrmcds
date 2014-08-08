@@ -22,5 +22,5 @@ AUTOTEST(config) {
     cybozu_assert(g_config.counter().port() == 11216);
     cybozu_assert(g_config.counter().max_connections() == 100);
     cybozu_assert(g_config.counter().buckets() == 1000001);
-    cybozu_assert(g_config.counter().consumption_stats_interval() == 12345);
+    cybozu_assert(g_config.counter().stat_interval() == 12345);
 }

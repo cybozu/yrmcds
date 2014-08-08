@@ -28,7 +28,7 @@ const char COUNTER_ENABLE[] = "counter.enable";
 const char COUNTER_PORT[] = "counter.port";
 const char COUNTER_MAX_CONNECTIONS[] = "counter.max_connections";
 const char COUNTER_BUCKETS[] = "counter.buckets";
-const char COUNTER_CONSUMPTION_STATS_INTERVAL[] = "counter.consumption_stats.interval";
+const char COUNTER_STAT_INTERVAL[] = "counter.stat_interval";
 
 std::unordered_map<std::string, cybozu::severity> THRESHOLDS {
     {"error", cybozu::severity::error},
@@ -92,11 +92,11 @@ void counter_config::load(const cybozu::config_parser& cp) {
         m_buckets = buckets;
     }
 
-    if( cp.exists(COUNTER_CONSUMPTION_STATS_INTERVAL) ) {
-        int n = cp.get_as_int(COUNTER_CONSUMPTION_STATS_INTERVAL);
+    if( cp.exists(COUNTER_STAT_INTERVAL) ) {
+        int n = cp.get_as_int(COUNTER_STAT_INTERVAL);
         if( n < 10 )
-            throw config::bad_config("counter.consumption_stat.interval must be >= 10");
-        m_consumption_stats_interval = n;
+            throw config::bad_config("counter.stat_interval must be >= 10");
+        m_stat_interval = n;
     }
 }
 

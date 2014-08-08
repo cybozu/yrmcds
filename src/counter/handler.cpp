@@ -33,7 +33,7 @@ bool handler::gc_ready() {
         m_gc_thread = nullptr;  // join
     }
 
-    unsigned int interval = g_config.counter().consumption_stats_interval();
+    unsigned int interval = g_config.counter().stat_interval();
     std::time_t boundary = (now / interval) * interval;
     return m_last_gc < boundary;
 }

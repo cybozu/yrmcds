@@ -64,8 +64,8 @@ public:
     const std::string name() const {
         if( command() == yrmcds::counter::command::Dump ) {
             uint16_t name_len;
-            cybozu::ntoh(m_body.data() + 12, name_len);
-            return std::string(m_body.data() + 14, name_len);
+            cybozu::ntoh(m_body.data() + 8, name_len);
+            return std::string(m_body.data() + 10, name_len);
         }
         cybozu_assert(false);
         return "";
@@ -89,9 +89,9 @@ public:
     }
 
     std::uint32_t max_consumption() const {
-        cybozu_assert(m_body.size() >= 12);
+        cybozu_assert(m_body.size() >= 8);
         uint32_t r;
-        cybozu::ntoh(m_body.data() + 8, r);
+        cybozu::ntoh(m_body.data() + 4, r);
         return r;
     }
 
