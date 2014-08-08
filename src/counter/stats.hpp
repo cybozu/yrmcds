@@ -1,16 +1,16 @@
 // Atomic counters for statistics.
 // (C) 2014 Cybozu.
 
-#ifndef YRMCDS_SEMAPHORE_STATS_HPP
-#define YRMCDS_SEMAPHORE_STATS_HPP
+#ifndef YRMCDS_COUNTER_STATS_HPP
+#define YRMCDS_COUNTER_STATS_HPP
 
-#include "semaphore.hpp"
+#include "counter.hpp"
 #include "../constants.hpp"
 
 #include <atomic>
 #include <cstdint>
 
-namespace yrmcds { namespace semaphore {
+namespace yrmcds { namespace counter {
 
 struct statistics {
     statistics() {
@@ -38,6 +38,6 @@ struct statistics {
 
 extern statistics g_stats;
 
-}} // namespace yrmcds::semaphore
+}} // namespace yrmcds::counter
 
-#endif // YRMCDS_SEMAPHORE_STATS_HPP
+#endif // YRMCDS_COUNTER_STATS_HPP

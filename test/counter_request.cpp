@@ -1,10 +1,10 @@
-#include "../src/semaphore/semaphore.hpp"
+#include "../src/counter/counter.hpp"
 
 #include <cybozu/test.hpp>
 
 #include <cstring>
 
-using namespace yrmcds::semaphore;
+using namespace yrmcds::counter;
 
 #define REQ(n, data) \
     const char i##n[] = data; \
@@ -98,7 +98,7 @@ AUTOTEST(acquire) {
     cybozu_assert( r1.status() == status::OK );
     cybozu_assert( r1.command() == command::Acquire );
     cybozu_assert( r1.resources() == 2 );
-    cybozu_assert( r1.initial() == 10 );
+    cybozu_assert( r1.maximum() == 10 );
     cybozu_assert( r1.name() == "x" );
 
     // valid request (initial - resources == 0)
@@ -113,7 +113,7 @@ AUTOTEST(acquire) {
     cybozu_assert( r2.status() == status::OK );
     cybozu_assert( r2.command() == command::Acquire );
     cybozu_assert( r2.resources() == 10 );
-    cybozu_assert( r2.initial() == 10 );
+    cybozu_assert( r2.maximum() == 10 );
     cybozu_assert( r2.name() == "x" );
 
     // invalid request (resources == 0)

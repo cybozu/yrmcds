@@ -24,11 +24,11 @@ const char HEAP_DATA_LIMIT[] = "heap_data_limit";
 const char MEMORY_LIMIT[] = "memory_limit";
 const char WORKERS[] = "workers";
 const char GC_INTERVAL[] = "gc_interval";
-const char SEMAPHORE_ENABLE[] = "semaphore.enable";
-const char SEMAPHORE_PORT[] = "semaphore.port";
-const char SEMAPHORE_MAX_CONNECTIONS[] = "semaphore.max_connections";
-const char SEMAPHORE_BUCKETS[] = "semaphore.buckets";
-const char SEMAPHORE_CONSUMPTION_STATS_INTERVAL[] = "semaphore.consumption_stats.interval";
+const char COUNTER_ENABLE[] = "counter.enable";
+const char COUNTER_PORT[] = "counter.port";
+const char COUNTER_MAX_CONNECTIONS[] = "counter.max_connections";
+const char COUNTER_BUCKETS[] = "counter.buckets";
+const char COUNTER_STAT_INTERVAL[] = "counter.stat_interval";
 
 std::unordered_map<std::string, cybozu::severity> THRESHOLDS {
     {"error", cybozu::severity::error},
@@ -65,26 +65,26 @@ inline std::size_t parse_unit(std::string& s, const char* cmd) {
 
 namespace yrmcds {
 
-void semaphore_config::load(const cybozu::config_parser& cp) {
-    if( cp.exists(SEMAPHORE_ENABLE) )
-        m_enable = cp.get_as_bool(SEMAPHORE_ENABLE);
+void counter_config::load(const cybozu::config_parser& cp) {
+    if( cp.exists(COUNTER_ENABLE) )
+        m_enable = cp.get_as_bool(COUNTER_ENABLE);
 
-    if( cp.exists(SEMAPHORE_PORT) ) {
-        int n = cp.get_as_int(SEMAPHORE_PORT);
+    if( cp.exists(COUNTER_PORT) ) {
+        int n = cp.get_as_int(COUNTER_PORT);
         if( n < 1 || n > 65535 )
-            throw config::bad_config("Bad port: " + cp.get(SEMAPHORE_PORT));
+            throw config::bad_config("Bad port: " + cp.get(COUNTER_PORT));
         m_port = static_cast<std::uint16_t>(n);
     }
 
-    if( cp.exists(SEMAPHORE_MAX_CONNECTIONS) ) {
-        int conns = cp.get_as_int(SEMAPHORE_MAX_CONNECTIONS);
+    if( cp.exists(COUNTER_MAX_CONNECTIONS) ) {
+        int conns = cp.get_as_int(COUNTER_MAX_CONNECTIONS);
         if( conns < 0 )
-            throw config::bad_config("semaphore.max_connections must be >= 0");
+            throw config::bad_config("counter.max_connections must be >= 0");
         m_max_connections = conns;
     }
 
-    if( cp.exists(SEMAPHORE_BUCKETS) ) {
-        int buckets = cp.get_as_int(SEMAPHORE_BUCKETS);
+    if( cp.exists(COUNTER_BUCKETS) ) {
+        int buckets = cp.get_as_int(COUNTER_BUCKETS);
         if( buckets < 1 )
             throw config::bad_config("buckets must be > 0");
         if( buckets < 10000 )
@@ -92,11 +92,11 @@ void semaphore_config::load(const cybozu::config_parser& cp) {
         m_buckets = buckets;
     }
 
-    if( cp.exists(SEMAPHORE_CONSUMPTION_STATS_INTERVAL) ) {
-        int n = cp.get_as_int(SEMAPHORE_CONSUMPTION_STATS_INTERVAL);
+    if( cp.exists(COUNTER_STAT_INTERVAL) ) {
+        int n = cp.get_as_int(COUNTER_STAT_INTERVAL);
         if( n < 10 )
-            throw config::bad_config("semaphore.consumption_stat.interval must be >= 10");
-        m_consumption_stats_interval = n;
+            throw config::bad_config("counter.stat_interval must be >= 10");
+        m_stat_interval = n;
     }
 }
 
@@ -205,7 +205,7 @@ void config::load(const std::string& path) {
         m_gc_interval = n;
     }
 
-    m_semaphore_config.load(cp);
+    m_counter_config.load(cp);
 }
 
 config g_config;

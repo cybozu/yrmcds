@@ -14,13 +14,13 @@ const enum std::memory_order relaxed = std::memory_order_relaxed;
 
 }
 
-namespace yrmcds { namespace semaphore {
+namespace yrmcds { namespace counter {
 
 handler::handler(const std::function<cybozu::worker*()>& finder,
                  cybozu::reactor& reactor)
     : m_finder(finder),
       m_reactor(reactor),
-      m_hash(g_config.semaphore().buckets()) {
+      m_hash(g_config.counter().buckets()) {
 }
 
 bool handler::gc_ready() {
@@ -33,7 +33,7 @@ bool handler::gc_ready() {
         m_gc_thread = nullptr;  // join
     }
 
-    unsigned int interval = g_config.semaphore().consumption_stats_interval();
+    unsigned int interval = g_config.counter().stat_interval();
     std::time_t boundary = (now / interval) * interval;
     return m_last_gc < boundary;
 }
@@ -41,21 +41,21 @@ bool handler::gc_ready() {
 void handler::on_master_start() {
     cybozu::tcp_server_socket::wrapper w =
         [this](int s, const cybozu::ip_address&) {
-            return make_semaphore_socket(s);
+            return make_counter_socket(s);
         };
     std::unique_ptr<cybozu::tcp_server_socket> ss =
-        cybozu::make_server_socket(nullptr, g_config.semaphore().port(), w);
+        cybozu::make_server_socket(nullptr, g_config.counter().port(), w);
     m_reactor.add_resource(std::move(ss), cybozu::reactor::EVENT_IN);
 }
 
-std::unique_ptr<cybozu::tcp_socket> handler::make_semaphore_socket(int s) {
-    unsigned int mc = g_config.semaphore().max_connections();
+std::unique_ptr<cybozu::tcp_socket> handler::make_counter_socket(int s) {
+    unsigned int mc = g_config.counter().max_connections();
     if( mc != 0 &&
         g_stats.curr_connections.load(relaxed) >= mc )
         return nullptr;
 
     return std::unique_ptr<cybozu::tcp_socket>(
-        new semaphore_socket(s, m_finder, m_hash) );
+        new counter_socket(s, m_finder, m_hash) );
 }
 
 void handler::on_master_interval() {
@@ -75,7 +75,7 @@ void handler::dump_stats() {
         ops += v.load(relaxed);
     }
     using logger = cybozu::logger;
-    logger::info() << "semaphore: "
+    logger::info() << "counter: "
                    << g_stats.objects.load(relaxed) << " objects, "
                    << g_stats.curr_connections.load(relaxed) << " clients, "
                    << ops << " total ops.";
@@ -87,4 +87,4 @@ void handler::clear() {
     g_stats.total_objects.store(0, relaxed);
 }
 
-}} // namespace yrmcds::semaphore
+}} // namespace yrmcds::counter
