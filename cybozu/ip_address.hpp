@@ -4,7 +4,7 @@
 #ifndef CYBOZU_IP_ADDRESS_HPP
 #define CYBOZU_IP_ADDRESS_HPP
 
-#include <arpa/inet.h>
+#include <netinet/in.h>
 #include <stdexcept>
 #include <string>
 
@@ -17,8 +17,8 @@ namespace cybozu {
 class ip_address {
     enum class addr_family {none, ipv4, ipv6} af = addr_family::none;
     union {
-        struct in_addr  ipv4_addr;
-        struct in6_addr ipv6_addr;
+        struct sockaddr_in  ipv4_addr;
+        struct sockaddr_in6 ipv6_addr;
     } addr;
 
 public:
@@ -27,7 +27,7 @@ public:
     explicit ip_address(const struct sockaddr* ifa_addr);
 
     struct bad_address: public std::runtime_error {
-        bad_address(const std::string& s): std::runtime_error(s) {}
+        explicit bad_address(const std::string& s): std::runtime_error(s) {}
     };
 
     // This may throw <bad_address> is `s` is not a valid IP address.
@@ -39,11 +39,17 @@ public:
     bool is_v6() const {
         return af == addr_family::ipv6;
     }
+    // 32 bit IPv4 address
     const struct in_addr* v4addr() const {
-        return &(addr.ipv4_addr);
+        return &(addr.ipv4_addr.sin_addr);
     }
+    // 128 bit IPv6 address
     const struct in6_addr* v6addr() const {
-        return &(addr.ipv6_addr);
+        return &(addr.ipv6_addr.sin6_addr);
+    }
+    // Link identifier for IPv6 link-local address.
+    std::uint32_t v6scope() const {
+        return addr.ipv6_addr.sin6_scope_id;
     }
     bool operator==(const ip_address& rhs) const;
     std::string str() const;
