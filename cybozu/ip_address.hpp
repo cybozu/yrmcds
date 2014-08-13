@@ -30,7 +30,7 @@ public:
         explicit bad_address(const std::string& s): std::runtime_error(s) {}
     };
 
-    // This may throw <bad_address> is `s` is not a valid IP address.
+    // This may throw <bad_address> if `s` is not a valid IP address.
     void parse(const std::string& s);
 
     bool is_v4() const {
@@ -52,6 +52,9 @@ public:
         return addr.ipv6_addr.sin6_scope_id;
     }
     bool operator==(const ip_address& rhs) const;
+    bool operator!=(const ip_address& rhs) const {
+        return ! (*this == rhs);
+    }
     std::string str() const;
 };
 

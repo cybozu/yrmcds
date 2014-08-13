@@ -41,6 +41,16 @@ AUTOTEST(ipv6) {
     cybozu_assert( ipv6.str() == "fd00:1234::dead:beaf" );
 }
 
+AUTOTEST(compare) {
+    using cybozu::ip_address;
+    cybozu_assert( ip_address("127.0.0.1") == ip_address("127.0.0.1") );
+    cybozu_assert( ip_address("127.0.0.1") != ip_address("162.193.0.1") );
+    cybozu_assert( ip_address("127.0.0.1") != ip_address("::1") );
+    cybozu_assert( ip_address("::1") == ip_address("::1") );
+    // cybozu_assert( ip_address("fe80::1%lo") == ip_address("fe80::1%lo") );
+    // cybozu_assert( ip_address("fe80::1%lo") != ip_address("fe80::1%eth0") );
+}
+
 AUTOTEST(has_ip_address) {
     for( int i = 0; i < 1000; ++i )
         cybozu::has_ip_address(cybozu::ip_address("11.11.11.11"));
