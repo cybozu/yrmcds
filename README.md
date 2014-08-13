@@ -83,6 +83,15 @@ Install
 On Ubuntu, `sudo make install` installs yrmcds under `/usr/local`.  
 An upstart script and a logrotate configuration file are installed too.
 
+About the name
+--------------
+
+The name yrmcds was taken from "Ymmt's Replicating MemCacheD for Sessions".  
+As it reads, yrmcds was developed mainly for session storage.
+
+The correct pronunciation sounds like: "Yo-Ru-Mac-Do" (夜マクド in Japanese).
+
+
 [memcached]: http://memcached.org/
 [bench]: https://github.com/cybozu/yrmcds/blob/master/docs/bench.md#results
 [repcached]: http://repcached.lab.klab.org/
