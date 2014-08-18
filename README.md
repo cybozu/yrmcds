@@ -38,8 +38,8 @@ Features
     * Automatic fail-over.
     * Automatic recovery of redundancy.
 
-Companion client libraries [libyrmcds][] / [libyrmcds-semaphore][], and
-a [PHP extension][php-yrmcds] are also available.
+A [companion client library][libyrmcds] and a [PHP extension][php-yrmcds]
+are also available.
 
 See also [usage guide](docs/usage.md), [future plans](docs/future.md),
 [differences from memcached](docs/diffs.md), [design notes](docs/design.md)
