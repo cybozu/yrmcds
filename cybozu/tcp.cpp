@@ -42,7 +42,9 @@ int tcp_connect(const char* node, std::uint16_t port, unsigned int timeout) {
     int e = getaddrinfo(node, s_port.c_str(), &hint, &res);
     if( e == EAI_FAMILY || e == EAI_ADDRFAMILY || e == EAI_NODATA ) {
         hint.ai_family = AF_INET6;
-        hint.ai_flags |= AI_V4MAPPED;
+        // intentionally drop AI_ADDRCONFIG to support IPv6 link-local address.
+        // see https://github.com/cybozu/yrmcds/issues/40
+        hint.ai_flags = AI_NUMERICSERV|AI_V4MAPPED;
         e = getaddrinfo(node, s_port.c_str(), &hint, &res);
     }
     if( e == EAI_SYSTEM ) {
