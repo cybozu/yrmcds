@@ -21,7 +21,7 @@ CXXFLAGS = -std=gnu++11 $(OPTFLAGS) $(DEBUGFLAGS) $(shell getconf LFS_CFLAGS) $(
 LDFLAGS = -L. $(shell getconf LFS_LDFLAGS)
 LIBTCMALLOC = -ltcmalloc_minimal
 LDLIBS = $(shell getconf LFS_LIBS) -lyrmcds $(LIBTCMALLOC) -latomic -lpthread
-CLDOC := LD_LIBRARY_PATH=$(shell llvm-config --libdir) cldoc
+CLDOC := LD_LIBRARY_PATH=$(shell llvm-config --libdir 2>/dev/null) cldoc
 
 HEADERS = $(wildcard src/*.hpp src/*/*.hpp cybozu/*.hpp)
 SOURCES = $(wildcard src/*.cpp src/*/*.cpp cybozu/*.cpp)
