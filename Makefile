@@ -57,7 +57,7 @@ src/main.o: COPYING.hpp
 $(OBJECTS): $(HEADERS)
 
 $(LIB): $(LIB_OBJECTS)
-	$(AR) rcus $@ $^
+	$(AR) rcs $@ $^
 
 $(EXE): src/main.o $(LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
