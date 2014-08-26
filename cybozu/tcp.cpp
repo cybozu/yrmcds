@@ -40,7 +40,8 @@ int tcp_connect(const char* node, std::uint16_t port, unsigned int timeout) {
     hint.ai_socktype = SOCK_STREAM;
     hint.ai_flags = AI_NUMERICSERV|AI_ADDRCONFIG;
     int e = getaddrinfo(node, s_port.c_str(), &hint, &res);
-    if( e == EAI_FAMILY || e == EAI_ADDRFAMILY || e == EAI_NODATA ) {
+    if( e == EAI_FAMILY || e == EAI_ADDRFAMILY ||
+        e == EAI_NODATA || e == EAI_NONAME ) {
         hint.ai_family = AF_INET6;
         // intentionally drop AI_ADDRCONFIG to support IPv6 link-local address.
         // see https://github.com/cybozu/yrmcds/issues/40
