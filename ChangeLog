@@ -1,3 +1,7 @@
+version 1.1.0
+
+	* update documents.
+
 version 1.1.0-rc2
 
 	* semaphores are renamed to (resource) counters.

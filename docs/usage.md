@@ -17,11 +17,10 @@ Usually, yrmcds is installed under `/usr/local`.
 * /usr/local/sbin/yrmcdsd  
     The program.
 
-Configuration
--------------
+Configuration (memcache)
+------------------------
 
-You can change any of these configuration options through the
-configuration file:
+These options are to configure memcache protocol:
 
 * `user` (Default: none)  
     If set, the program will try to `setuid` to the given user.
@@ -54,6 +53,28 @@ configuration file:
     The number of worker threads.
 * `gc_interval` (Default: 10)  
     The interval between garbage collections in seconds.
+
+Configuration (counter)
+------------------------
+
+yrmcds has an extra protocol called **counter** in addition to memcache
+protocol.  The counter protocol can be used to manage resource usage
+dynamically just like (distributed) semaphores.
+
+The counter protocol has these configuration options:
+
+* `counter.enable` (Default: `false`)
+    If `true`, the counter extension is enabled.
+* `counter.port` (Default: 11215)
+    TCP port number used for the counter protocol.
+* `counter.max_connections` (Default: 0)
+    The maximum number of connections for the counter protocol.
+    0 means unlimited.
+* `counter.buckets` (Default: 1000000)
+    The size of the counter hash table.
+* `counter.stat_interval` (Default: 86400)
+    The interval of measuring the maximum resource consumption.
+    The default is 86400 seconds = 1 day.
 
 Running yrmcdsd
 ---------------
@@ -104,6 +125,9 @@ not, the slave drops all objects then try to connect to the new master.
 Since the master node is elected dynamically by [keepalived][], each
 `yrmcdsd` should have the same configuration parameters.
 
+### counter protocol
+
+Resource counters are not replicated.
 
 [keepalived]: http://www.keepalived.org/
 [pacemaker]: http://clusterlabs.org/wiki/Main_Page

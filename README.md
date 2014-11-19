@@ -1,20 +1,23 @@
 yrmcds
 ======
 
-yrmcds is a memory object caching system with master/slave replication.
-Since its protocol is perfectly compatible with that of [memcached][],
-yrmcds can be used as a drop-in replacement for [memcached][].  In fact,
-yrmcds is [faster][bench] than memcached!
+yrmcds is a memory object caching system with master/slave replication
+and [server-side locking](docs/locking.md).
 
-The biggest benefit of yrmcds is its amazingly low cost replication system.
-The master server is elected dynamically from a group of servers, which
-eliminates static master/slave configurations.  By adopting virtual-IP
-based replication, no modifications to applications are required.
+Currently, yrmcds supports two protocols: the first is an enhanced
+[memcached][], and another is a protocol to implement
+[distributed resource counters](docs/counter.md).
 
-Unlike [repcached][], yrmcds is not a patch for memcached.  No code is
-shared between yrmcds and memcached.  yrmcds is developed for
-[cybozu.com][cybozu], a B2B cloud service widely adopted by companies in
-Japan.
+Since the memcached protocol is perfectly compatible with the
+[original implementation][memcached], yrmcds can be used as a drop-in
+replacement for memcached.  Thanks to its virtual-IP based replication
+system, existing applications can obtain high-available
+memcached-compatible service without any modifications.
+
+A companion client library [libyrmcds][] and a [PHP extension][php-yrmcds]
+are also available.
+
+yrmcds was developed originally for [kintone.com][kintone].
 
 License
 -------
@@ -28,14 +31,14 @@ Features
 --------
 
 * Memcached text and binary protocols.
-* [Server-side locking](docs/locking.md).
-* [Server-side semaphore](docs/semaphore.md).
+* [Server-side locking](docs/locking.md) extension to memcached protocol.
+* [Distributed resource counter](docs/counter.md) protocol.
 * Large objects can be stored in temporary files, not in memory.
 * Global LRU eviction / no slab distribution problem.
     * Unlike memcached, yrmcds is not involved with slabs problems.
       ([1][slab1], [2][slab2])
 * Virtual-IP based master-slave replication.
-    * Automatic fail-over.
+    * Automatic fail-over
     * Automatic recovery of redundancy.
 
 A [companion client library][libyrmcds] and a [PHP extension][php-yrmcds]
@@ -48,31 +51,15 @@ and some [benchmark results](docs/bench.md).
 Prerequisites
 -------------
 
-* Fairly recent Linux kernel.
 * C++11 compiler (gcc 4.8.1+ or clang 3.3+).
 * [TCMalloc][tcmalloc] from Google.
 * GNU make.
-
-The following may help Ubuntu users to compile gcc 4.8.1:
-```shell
-sudo apt-get install libgmp-dev libmpfr-dev libmpc-dev build-essential
-tar xjf gcc-4.8.1.tar.bz2
-mkdir gcc-4.8.1/build
-cd gcc-4.8.1/build
-../configure --prefix=/usr/local/gcc --disable-shared --disable-multilib \
-             --enable-threads --enable-__cxa_atexit --enable-languages=c,c++ \
-             --disable-nls
-make -j 4 BOOT_CFLAGS=-O2 bootstrap
-sudo make install
-make clean
-export PATH=/usr/local/gcc/bin:$PATH
-```
 
 Build
 -----
 
 1. Prepare TCMalloc.  
-  On Ubuntu, run `apt-get install libgoogle-perftools-dev`.
+    On Ubuntu, run `apt-get install libgoogle-perftools-dev`.
 2. Run `make`.
 
 You can build yrmcds without TCMalloc by editing Makefile.
@@ -93,16 +80,13 @@ The correct pronunciation sounds like: "Yo-Ru-Mac-Do" (夜マクド in Japanese)
 
 
 [memcached]: http://memcached.org/
-[bench]: https://github.com/cybozu/yrmcds/blob/master/docs/bench.md#results
-[repcached]: http://repcached.lab.klab.org/
 [bsd2]: http://opensource.org/licenses/BSD-2-Clause
 [SipHash]: https://131002.net/siphash/
 [csiphash]: https://github.com/majek/csiphash
 [mit]: http://opensource.org/licenses/MIT
 [libyrmcds]: http://cybozu.github.io/libyrmcds/
-[libyrmcds-semaphore]: https://github.com/cybozu/libyrmcds-semaphore/
 [php-yrmcds]: http://cybozu.github.io/php-yrmcds/
 [slab1]: http://nosql.mypopescu.com/post/13506116892/memcached-internals-memory-allocation-eviction
 [slab2]: https://groups.google.com/forum/#!topic/memcached/DuJNy5gbQ0o
-[cybozu]: https://www.cybozu.com/us/
+[kintone]: https://www.kintone.com/
 [tcmalloc]: http://goog-perftools.sourceforge.net/doc/tcmalloc.html
