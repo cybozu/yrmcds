@@ -4,6 +4,8 @@
 #ifndef CYBOZU_DYNBUF_HPP
 #define CYBOZU_DYNBUF_HPP
 
+#include "util.hpp"
+
 #ifdef USE_TCMALLOC
 #  include <google/tcmalloc.h>
 #else
@@ -30,18 +32,22 @@ public:
     // The constructor pre-allocates an internal buffer if `default_capacity`
     // is not 0.  Everytime <reset> is invoked, the internal buffer will be
     // shrunk to `default_capacity`.
-    explicit dynbuf(std::size_t default_capacity):
+    explicit dynbuf(std::size_t default_capacity, bool erase=false):
         m_p(default_capacity ? _malloc(default_capacity) : nullptr),
         m_default_capacity(default_capacity),
-        m_capacity(default_capacity) {}
+        m_capacity(default_capacity),
+        m_erase(erase) {}
     ~dynbuf() {
-        if( m_p != nullptr )
+        if( m_p != nullptr ) {
+            if( m_erase )
+                clear_memory(m_p, m_used);
             _free(m_p);
+        }
     }
     dynbuf(const dynbuf&) = delete;
     dynbuf(dynbuf&& rhs) noexcept:
         m_p(nullptr), m_default_capacity(rhs.m_default_capacity),
-        m_capacity(rhs.m_capacity), m_used(rhs.m_used)
+        m_capacity(rhs.m_capacity), m_erase(rhs.m_erase), m_used(rhs.m_used)
     {
         std::swap(m_p, rhs.m_p);
     }
@@ -56,6 +62,8 @@ public:
 
     // Clear the contents and reset the internal buffer.
     void reset() {
+        if( m_used && m_erase )
+            clear_memory(m_p, m_used);
         m_used = 0;
         if( m_default_capacity == m_capacity )
             return;
@@ -82,7 +90,7 @@ public:
     //
     // Erase contents from the head of the internal buffer.
     // Remaining data will be moved to the head.
-    void erase(std::size_t len) {
+    void erase(const std::size_t len) {
         if( m_used < len )
             throw std::invalid_argument("<cybozu::dynbuf::erase>");
         if( len == 0 ) return;
@@ -94,6 +102,8 @@ public:
         if( remain <= m_default_capacity && m_capacity != m_default_capacity ) {
             char* new_p = _malloc(m_default_capacity);
             std::memcpy(new_p, m_p+len, remain);
+            if( m_erase )
+                clear_memory(m_p, m_used);
             _free(m_p);
             m_p = new_p;
             m_capacity = m_default_capacity;
@@ -101,6 +111,8 @@ public:
             return;
         }
         std::memmove(m_p, m_p+len, remain);
+        if( m_erase )
+            clear_memory(m_p+remain, len);
         m_used = remain;
     }
 
@@ -143,6 +155,7 @@ private:
     char* m_p;
     const std::size_t m_default_capacity;
     std::size_t m_capacity;
+    const bool m_erase;
     std::size_t m_used = 0;
 
     std::size_t freebytes() const noexcept {
@@ -150,8 +163,17 @@ private:
     }
 
     void enlarge(std::size_t additional) {
+        if( additional == 0 )
+            return;
         const std::size_t new_capacity = m_capacity + additional;
-        m_p = _realloc(m_p, new_capacity);
+        char * const new_p = _malloc(new_capacity);
+        if( m_p ) {
+            std::memcpy(new_p, m_p, m_used);
+            if( m_erase )
+                clear_memory(m_p, m_used);
+            _free(m_p);
+        }
+        m_p = new_p;
         m_capacity = new_capacity;
     }
 
