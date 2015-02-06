@@ -166,14 +166,17 @@ private:
         if( additional == 0 )
             return;
         const std::size_t new_capacity = m_capacity + additional;
-        char * const new_p = _malloc(new_capacity);
-        if( m_p ) {
-            std::memcpy(new_p, m_p, m_used);
-            if( m_erase )
+        if( m_erase ) {
+            char * const new_p = _malloc(new_capacity);
+            if( m_p ) {
+                std::memcpy(new_p, m_p, m_used);
                 clear_memory(m_p, m_used);
-            _free(m_p);
+                _free(m_p);
+            }
+            m_p = new_p;
+        } else {
+            m_p = _realloc(m_p, new_capacity);
         }
-        m_p = new_p;
         m_capacity = new_capacity;
     }
 

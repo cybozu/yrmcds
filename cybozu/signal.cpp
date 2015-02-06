@@ -11,7 +11,7 @@ const char ABORT_MESSAGE[] = "got SIGABRT.\n";
 
 #pragma GCC diagnostic ignored "-Wunused-result"
 void handle_abort [[noreturn]] (int) {
-    (void)::write(STDERR_FILENO, ABORT_MESSAGE, sizeof(ABORT_MESSAGE) - 1);
+    ::write(STDERR_FILENO, ABORT_MESSAGE, sizeof(ABORT_MESSAGE) - 1);
     cybozu::dump_stack();
     std::abort();
 }
