@@ -25,15 +25,24 @@ demangler::demangler(const char* name) {
     }
 }
 
+#pragma GCC diagnostic ignored "-Wunused-result"
 void dump_stack() noexcept {
     char buf[32];
     std::time_t t = std::time(nullptr);
     std::size_t len = std::strlen(ctime_r(&t, buf));
-    write(STDERR_FILENO, buf, len);
+    ::write(STDERR_FILENO, buf, len);
 
     void* bt[100];
     int n = backtrace(bt, 100);
     backtrace_symbols_fd(bt, n, STDERR_FILENO);
 }
+#pragma GCC diagnostic pop
+
+void clear_memory_(void* s, std::size_t n) {
+    volatile unsigned char *p = (unsigned char*)s;
+    while( n-- ) *p++ = 0;
+}
+
+void (* const volatile clear_memory)(void* s, std::size_t n) = clear_memory_;
 
 } // namespace cybozu
