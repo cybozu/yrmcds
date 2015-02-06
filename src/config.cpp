@@ -22,6 +22,7 @@ const char BUCKETS[] = "buckets";
 const char MAX_DATA_SIZE[] = "max_data_size";
 const char HEAP_DATA_LIMIT[] = "heap_data_limit";
 const char MEMORY_LIMIT[] = "memory_limit";
+const char SECURE_ERASE[] = "secure_erase";
 const char WORKERS[] = "workers";
 const char GC_INTERVAL[] = "gc_interval";
 const char COUNTER_ENABLE[] = "counter.enable";
@@ -186,6 +187,10 @@ void config::load(const std::string& path) {
         if( t.empty() )
             throw bad_config("memory_limit must not be empty");
         m_memory_limit = parse_unit(t, MEMORY_LIMIT);
+    }
+
+    if( cp.exists(SECURE_ERASE) ) {
+        m_secure_erase = cp.get_as_bool(SECURE_ERASE);
     }
 
     if( cp.exists(WORKERS) ) {

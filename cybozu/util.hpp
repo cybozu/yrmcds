@@ -4,6 +4,7 @@
 #ifndef CYBOZU_UTIL_HPP
 #define CYBOZU_UTIL_HPP
 
+#include <cstddef>
 #include <cstring>
 #include <endian.h>
 #include <string>
@@ -94,6 +95,14 @@ inline void hton(UInt d, char* p) noexcept {
         return;
     }
 }
+
+
+// Clear memory securely just like memset_s in C11.
+// @s  A pointer to a memory region.
+// @n  The length of the memory region in bytes.
+extern void (* const volatile clear_memory)(void* s, std::size_t n);
+
+
 
 } // namespace cybozu
 

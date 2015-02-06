@@ -51,18 +51,27 @@ void seed_siphash() {
 
 bool load_config(const std::vector<std::string>& args) {
     auto it = std::find(args.begin(), args.end(), "-f");
+    using yrmcds::g_config;
     if( it != args.end() ) {
         ++it;
         if( it == args.end() ) {
             std::cerr << "missing filename after -f" << std::endl;
             return false;
         }
-        yrmcds::g_config.load(*it);
+        g_config.load(*it);
     } else {
         std::string config_path = EXPAND_AND_QUOTE(DEFAULT_CONFIG);
         struct stat st;
         if( cybozu::get_stat(config_path, st) )
-            yrmcds::g_config.load( config_path );
+            g_config.load( config_path );
+    }
+    if( g_config.secure_erase() &&
+        (g_config.max_data_size() > g_config.heap_data_limit()) ) {
+        std::cerr << "WARNING: " << std::endl
+                  << "   \"secure_erase\" is enabled but your data may be written out to disk."
+                  << std::endl
+                  << "   Consider setting \"max_data_size\" equal to \"heap_data_limit\"."
+                  << std::endl;
     }
     return true;
 }
