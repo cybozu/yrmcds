@@ -590,6 +590,8 @@ void text_response::stats_settings() {
     os << "STAT evictions on" << CRLF;
     os << "STAT cas_enabled on" << CRLF;
     os << "STAT locking on" << CRLF;
+    os << "STAT secure_erase "
+       << (g_config.secure_erase() ? "on" : "off") << CRLF;
     os << "STAT tmp_dir " << g_config.tempdir() << CRLF;
     os << "STAT buckets " << g_config.buckets() << CRLF;
     os << "STAT item_size_max " << g_config.max_data_size() << CRLF;
@@ -1042,6 +1044,7 @@ binary_response::stats_settings() {
     send_stat("evictions", "on");
     send_stat("cas_enabled", "on");
     send_stat("locking", "on");
+    send_stat("secure_erase", g_config.secure_erase() ? "on" : "off");
     send_stat("tmp_dir", g_config.tempdir());
     send_stat("buckets", std::to_string(g_config.buckets()));
     send_stat("item_size_max", std::to_string(g_config.max_data_size()));
