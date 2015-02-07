@@ -12,6 +12,15 @@
 #include <stdexcept>
 #include <unistd.h>
 
+namespace {
+
+void clear_memory_(void* s, std::size_t n) {
+    volatile unsigned char *p = (unsigned char*)s;
+    while( n-- ) *p++ = 0;
+}
+
+} // anonymous namespace
+
 namespace cybozu {
 
 demangler::demangler(const char* name) {
@@ -37,11 +46,6 @@ void dump_stack() noexcept {
     backtrace_symbols_fd(bt, n, STDERR_FILENO);
 }
 #pragma GCC diagnostic pop
-
-void clear_memory_(void* s, std::size_t n) {
-    volatile unsigned char *p = (unsigned char*)s;
-    while( n-- ) *p++ = 0;
-}
 
 void (* const volatile clear_memory)(void* s, std::size_t n) = clear_memory_;
 
