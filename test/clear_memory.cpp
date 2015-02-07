@@ -4,7 +4,7 @@
 AUTOTEST(clear_memory) {
     char hoge[] = "abcdef";
     cybozu::clear_memory(hoge, sizeof(hoge));
-    for( auto i = sizeof(hoge); i > 0; --i ) {
-        cybozu_assert(hoge[i] == '\0');
+    for( char c : hoge ) {
+        cybozu_assert(c == '\0');
     }
 }
