@@ -49,6 +49,8 @@ These options are to configure memcache protocol:
     Objects larger than this will be stored in temporary files.
 * `secure_erase` (Default: false)  
     If `true`, object memory will be cleared as soon as the object is removed.
+* `lock_memory` (Default: false)  
+    If `true`, prevent memory from being swapped using `mlockall`.
 * `memory_limit` (Default: 1024M)  
     The amount of memory allowed for yrmcdsd.
 * `workers` (Default: 8)  
@@ -146,8 +148,21 @@ Consider setting `max_data_size` equal to `heap_data_limit` when you
 enable this option to avoid writing confidential data into persistent
 storage.
 
+Locking memory
+--------------
+
+If `lock_memory` configuration option is enabled, `yrmcdsd` will lock
+memory with `mlockall` to prevent them from being swapped.
+
+**Use of this option may cause troubles**; locking enough memory for
+yrmcds will require the process having `CAP_IPC_LOCK` capability or
+sufficiently large `RLIMIT_MEMLOCK` resource limit.
+
+See [man page][mlockall] for details.
+
 
 [keepalived]: http://www.keepalived.org/
 [pacemaker]: http://clusterlabs.org/wiki/Main_Page
 [upstart]: http://upstart.ubuntu.com/
 [systemd]: http://www.freedesktop.org/wiki/Software/systemd/
+[mlockall]: http://manpages.ubuntu.com/manpages/trusty/en/man2/mlockall.2.html

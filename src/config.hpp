@@ -107,6 +107,9 @@ public:
     bool secure_erase() const noexcept {
         return m_secure_erase;
     }
+    bool lock_memory() const noexcept {
+        return m_lock_memory;
+    }
     unsigned int workers() const noexcept {
         return m_workers;
     }
@@ -138,6 +141,7 @@ private:
     std::size_t m_heap_data_limit = DEFAULT_HEAP_DATA_LIMIT;
     std::size_t m_memory_limit = DEFAULT_MEMORY_LIMIT;
     bool m_secure_erase = false;
+    bool m_lock_memory = false;
     unsigned int m_workers = DEFAULT_WORKER_THREADS;
     unsigned int m_gc_interval = DEFAULT_GC_INTERVAL;
     counter_config m_counter_config;

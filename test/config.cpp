@@ -14,6 +14,7 @@ AUTOTEST(config) {
     cybozu_assert(g_config.group() == "nogroup");
     cybozu_assert(g_config.memory_limit() == (1024 << 20));
     cybozu_assert(g_config.secure_erase() == true);
+    cybozu_assert(g_config.lock_memory() == true);
     cybozu_assert(g_config.threshold() == cybozu::severity::warning);
     cybozu_assert(g_config.max_data_size() == (5 << 20));
     cybozu_assert(g_config.heap_data_limit() == (16 << 10));
