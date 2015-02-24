@@ -30,16 +30,18 @@ The source code contains a [SipHash][] implementation borrowed from
 Features
 --------
 
-* Memcached text and binary protocols.
+* Complete memcached text and binary protocols.
 * [Server-side locking](docs/locking.md) extension to memcached protocol.
 * [Distributed resource counter](docs/counter.md) protocol.
+* [Optional memory security](docs/usage.md#secure_erase) to store
+  confidential information like SSL session data.
 * Large objects can be stored in temporary files, not in memory.
-* Global LRU eviction / no slab distribution problem.
-    * Unlike memcached, yrmcds is not involved with slabs problems.
-      ([1][slab1], [2][slab2])
 * Virtual-IP based master-slave replication.
     * Automatic fail-over
     * Automatic recovery of redundancy.
+* Global LRU eviction / no slab distribution problem.
+    * Unlike memcached, yrmcds is not involved with slabs problems.
+      ([1][slab1], [2][slab2])
 
 A [companion client library][libyrmcds] and a [PHP extension][php-yrmcds]
 are also available.

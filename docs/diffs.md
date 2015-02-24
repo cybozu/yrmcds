@@ -2,8 +2,8 @@
 
 Differences from memcached.
 
-Differences from memcached 1.4.15
----------------------------------
+Differences from memcached 1.4
+------------------------------
 
 * Implementations of binary protocol command `GaT` and `Get` are identical.  
   Both may have an optional expiration time.  Objects will be touched

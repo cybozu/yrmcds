@@ -47,6 +47,8 @@ These options are to configure memcache protocol:
     The maximum object size.
 * `heap_data_limit` (Default: 256K)  
     Objects larger than this will be stored in temporary files.
+* `secure_erase` (Default: false)  
+    If `true`, object memory will be cleared as soon as the object is removed.
 * `memory_limit` (Default: 1024M)  
     The amount of memory allowed for yrmcdsd.
 * `workers` (Default: 8)  
@@ -128,6 +130,22 @@ Since the master node is elected dynamically by [keepalived][], each
 ### counter protocol
 
 Resource counters are not replicated.
+
+<a name="secure_erase" />
+Erasing confidential data in memory
+-----------------------------------
+
+If `secure_erase` configuration option is enabled, `yrmcdsd` will erase
+memory used by objects as soon as they are removed or their lifetime
+expire.
+
+This ensures confidential data such as crypto keys will never be leaked
+after expiration.
+
+Consider setting `max_data_size` equal to `heap_data_limit` when you
+enable this option to avoid writing confidential data into persistent
+storage.
+
 
 [keepalived]: http://www.keepalived.org/
 [pacemaker]: http://clusterlabs.org/wiki/Main_Page
