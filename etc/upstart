@@ -9,6 +9,7 @@ respawn
 
 umask 077
 limit nofile 100000 100000
+limit memlock unlimited unlimited
 chdir /tmp
 
 pre-start script

@@ -23,6 +23,7 @@ const char MAX_DATA_SIZE[] = "max_data_size";
 const char HEAP_DATA_LIMIT[] = "heap_data_limit";
 const char MEMORY_LIMIT[] = "memory_limit";
 const char SECURE_ERASE[] = "secure_erase";
+const char LOCK_MEMORY[] = "lock_memory";
 const char WORKERS[] = "workers";
 const char GC_INTERVAL[] = "gc_interval";
 const char COUNTER_ENABLE[] = "counter.enable";
@@ -191,6 +192,10 @@ void config::load(const std::string& path) {
 
     if( cp.exists(SECURE_ERASE) ) {
         m_secure_erase = cp.get_as_bool(SECURE_ERASE);
+    }
+
+    if( cp.exists(LOCK_MEMORY) ) {
+        m_lock_memory = cp.get_as_bool(LOCK_MEMORY);
     }
 
     if( cp.exists(WORKERS) ) {

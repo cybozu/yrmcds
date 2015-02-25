@@ -10,11 +10,13 @@
 #include <cybozu/util.hpp>
 
 #include <algorithm>
+#include <cerrno>
 #include <grp.h>
 #include <iostream>
 #include <pwd.h>
 #include <random>
 #include <string>
+#include <sys/mman.h>
 #include <sys/prctl.h>
 #include <sys/types.h>
 #include <typeinfo>
@@ -100,6 +102,11 @@ int main(int argc, char** argv) {
     try {
         if( ! load_config(args) )
             return 1;
+
+        if( yrmcds::g_config.lock_memory() ) {
+            if( ::mlockall( MCL_CURRENT | MCL_FUTURE ) == -1 )
+                cybozu::throw_unix_error(errno, "mlockall");
+        }
 
         // first, set group id (as root)
         const std::string& g = yrmcds::g_config.group();
