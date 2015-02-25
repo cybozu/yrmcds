@@ -1,3 +1,8 @@
+version 1.1.1
+
+	* New config option "secure_erase" for confidential data.
+	* New config option "lock_memory" to prevent swapping.
+
 version 1.1.0
 
 	* update documents.
