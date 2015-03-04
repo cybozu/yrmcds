@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <iomanip>
 #include <limits>
 #include <stdlib.h>
 #include <sstream>
@@ -728,14 +729,15 @@ void text_response::stats_general(std::size_t n_slaves) {
         cybozu::throw_unix_error(errno, "getrusage");
 
     std::ostringstream os;
+    os << std::setfill('0');
     os << "STAT pid " << ::getpid() << CRLF;
     os << "STAT time " << g_current_time.load(relaxed) << CRLF;
     os << "STAT version " << VERSION << CRLF;
     os << "STAT pointer_size " << sizeof(void*)*8 << CRLF;
-    os << "STAT rusage_user " << ru.ru_utime.tv_sec << ":"
-       << ru.ru_utime.tv_usec << CRLF;
-    os << "STAT rusage_system " << ru.ru_stime.tv_sec << ":"
-       << ru.ru_stime.tv_usec << CRLF;
+    os << "STAT rusage_user " << ru.ru_utime.tv_sec << '.'
+       << std::setw(6) << ru.ru_utime.tv_usec << CRLF;
+    os << "STAT rusage_system " << ru.ru_stime.tv_sec << '.'
+       << std::setw(6) << ru.ru_stime.tv_usec << CRLF;
     os << "STAT curr_connections " << g_stats.curr_connections.load(relaxed) << CRLF;
     os << "STAT total_connections " << g_stats.total_connections.load(relaxed) << CRLF;
     os << "STAT curr_items " << g_stats.objects.load(relaxed) << CRLF;
@@ -1177,16 +1179,20 @@ binary_response::stats_general(std::size_t n_slaves) {
     if( ::getrusage(RUSAGE_SELF, &ru) == -1 )
         cybozu::throw_unix_error(errno, "getrusage");
 
+    std::ostringstream os_utime, os_stime;
+    os_utime << ru.ru_utime.tv_sec << '.'
+             << std::setfill('0') << std::setw(6)
+             << ru.ru_utime.tv_usec;
+    os_stime << ru.ru_stime.tv_sec << '.'
+             << std::setfill('0') << std::setw(6)
+             << ru.ru_stime.tv_usec;
+
     send_stat("pid", std::to_string(::getpid()));
     send_stat("time", std::to_string(g_current_time.load(relaxed)));
     send_stat("version", VERSION);
     send_stat("pointer_size", std::to_string(sizeof(void*)*8));
-    send_stat("rusage_user",
-              std::to_string(ru.ru_utime.tv_sec) + ":" +
-              std::to_string(ru.ru_utime.tv_usec));
-    send_stat("rusage_system",
-              std::to_string(ru.ru_stime.tv_sec) + ":" +
-              std::to_string(ru.ru_stime.tv_usec));
+    send_stat("rusage_user", os_utime.str());
+    send_stat("rusage_system", os_stime.str());
     send_stat("curr_connections",
               std::to_string(g_stats.curr_connections.load(relaxed)));
     send_stat("total_connections",
