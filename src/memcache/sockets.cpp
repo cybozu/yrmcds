@@ -712,10 +712,7 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
                     r.locked();
                 return true;
             }
-            if( obj.expired() ) {
-                g_stats.cas_misses.fetch_add(1, relaxed);
-                return false;
-            }
+            if( obj.expired() ) return false;
             if( obj.cas_unique() != cmd.cas_unique() ) {
                 if( ! cmd.no_reply() )
                     r.exists();
