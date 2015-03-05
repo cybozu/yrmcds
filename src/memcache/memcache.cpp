@@ -21,7 +21,7 @@
 namespace {
 
 using namespace yrmcds;
-const enum std::memory_order relaxed = std::memory_order_relaxed;
+const std::memory_order relaxed = std::memory_order_relaxed;
 
 const char CRLF[] = "\x0d\x0a";
 const char CR = '\x0d';
@@ -742,6 +742,11 @@ void text_response::stats_general(std::size_t n_slaves) {
     os << "STAT total_connections " << g_stats.total_connections.load(relaxed) << CRLF;
     os << "STAT curr_items " << g_stats.objects.load(relaxed) << CRLF;
     os << "STAT total_items " << g_stats.total_objects.load(relaxed) << CRLF;
+    os << "STAT get_hits " << g_stats.get_hits.load(relaxed) << CRLF;
+    os << "STAT get_misses " << g_stats.get_misses.load(relaxed) << CRLF;
+    os << "STAT cas_hits " << g_stats.cas_hits.load(relaxed) << CRLF;
+    os << "STAT cas_misses " << g_stats.cas_misses.load(relaxed) << CRLF;
+    os << "STAT cas_badval " << g_stats.cas_badval.load(relaxed) << CRLF;
     os << "STAT bytes " << g_stats.used_memory.load(relaxed) << CRLF;
     os << "STAT limit_maxbytes " << g_config.memory_limit() << CRLF;
     os << "STAT threads " << g_config.workers() << CRLF;
@@ -1200,6 +1205,11 @@ binary_response::stats_general(std::size_t n_slaves) {
     send_stat("curr_items", std::to_string(g_stats.objects.load(relaxed)));
     send_stat("total_items",
               std::to_string(g_stats.total_objects.load(relaxed)));
+    send_stat("get_hits", std::to_string(g_stats.get_hits.load(relaxed)));
+    send_stat("get_misses", std::to_string(g_stats.get_misses.load(relaxed)));
+    send_stat("cas_hits", std::to_string(g_stats.cas_hits.load(relaxed)));
+    send_stat("cas_misses", std::to_string(g_stats.cas_misses.load(relaxed)));
+    send_stat("cas_badval", std::to_string(g_stats.cas_badval.load(relaxed)));
     send_stat("bytes", std::to_string(g_stats.used_memory.load(relaxed)));
     send_stat("limit_maxbytes", std::to_string(g_config.memory_limit()));
     send_stat("threads", std::to_string(g_config.workers()));

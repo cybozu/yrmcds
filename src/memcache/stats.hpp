@@ -64,6 +64,11 @@ struct statistics {
     alignas(CACHELINE_SIZE)
     std::atomic<std::uint64_t> text_ops[(std::size_t)memcache::text_command::END_OF_COMMAND];
     std::atomic<std::uint64_t> bin_ops[(std::size_t)memcache::binary_command::END_OF_COMMAND];
+    std::atomic<std::uint64_t> get_hits;
+    std::atomic<std::uint64_t> get_misses;
+    std::atomic<std::uint64_t> cas_hits;
+    std::atomic<std::uint64_t> cas_misses;
+    std::atomic<std::uint64_t> cas_badval;
 };
 
 extern statistics g_stats;

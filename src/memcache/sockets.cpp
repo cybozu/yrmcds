@@ -20,6 +20,8 @@ namespace {
 const char NON_NUMERIC[] = "CLIENT_ERROR cannot increment or decrement non-numeric value\x0d\x0a";
 const char NOT_LOCKED[] = "CLIENT_ERROR object is not locked or not found\x0d\x0a";
 
+const std::memory_order relaxed = std::memory_order_relaxed;
+
 } // anonymous namespace
 
 namespace yrmcds { namespace memcache {
@@ -37,8 +39,8 @@ memcache_socket::memcache_socket(int fd,
       m_pending(0),
       m_slaves_origin(slaves) {
     m_slaves.reserve(MAX_SLAVES);
-    g_stats.curr_connections.fetch_add(1);
-    g_stats.total_connections.fetch_add(1);
+    g_stats.curr_connections.fetch_add(1, relaxed);
+    g_stats.total_connections.fetch_add(1, relaxed);
 
     m_recvjob = [this](cybozu::dynbuf& buf) {
         // set lock context for objects.
@@ -169,7 +171,7 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
         return;
     }
 
-    g_stats.bin_ops[(std::size_t)cmd.command()].fetch_add(1);
+    g_stats.bin_ops[(std::size_t)cmd.command()].fetch_add(1, relaxed);
 
     const char* p;
     std::size_t len;
@@ -221,8 +223,11 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
         };
         std::tie(p, len) = cmd.key();
         if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
+            g_stats.get_misses.fetch_add(1, relaxed);
             if( ! cmd.quiet() || cmd.command() == binary_command::LaGQ )
                 r.error( binary_status::NotFound );
+        } else {
+            g_stats.get_hits.fetch_add(1, relaxed);
         }
         break;
     case binary_command::Set:
@@ -249,6 +254,8 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                 if( cmd.cas_unique() != 0 ||
                     cmd.command() == binary_command::Replace ||
                     cmd.command() == binary_command::ReplaceQ ) {
+                    if( cmd.cas_unique() != 0 )
+                        g_stats.cas_misses.fetch_add(1, relaxed);
                     r.error( binary_status::NotFound );
                     return true;
                 }
@@ -259,6 +266,7 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
             }
             if( cmd.cas_unique() != 0 &&
                 cmd.cas_unique() != obj.cas_unique() ) {
+                g_stats.cas_badval.fetch_add(1, relaxed);
                 r.error( binary_status::Exists );
                 return true;
             }
@@ -268,6 +276,8 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
             obj.set(p2, len2, cmd.flags(), cmd.exptime());
             if( ! cmd.quiet() )
                 r.set( obj.cas_unique() );
+            if( cmd.cas_unique() != 0 )
+                g_stats.cas_hits.fetch_add(1, relaxed);
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj);
             return true;
@@ -287,8 +297,11 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                 return std::move(o);
             };
         }
-        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
+            if( cmd.cas_unique() != 0 )
+                g_stats.cas_misses.fetch_add(1, relaxed);
             r.error( binary_status::NotFound );
+        }
         break;
     case binary_command::RaU:
     case binary_command::RaUQ:
@@ -588,7 +601,7 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
         return;
     }
 
-    g_stats.text_ops[(std::size_t)cmd.command()].fetch_add(1);
+    g_stats.text_ops[(std::size_t)cmd.command()].fetch_add(1, relaxed);
 
     const char* p;
     std::size_t len;
@@ -699,10 +712,14 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
                     r.locked();
                 return true;
             }
-            if( obj.expired() ) return false;
+            if( obj.expired() ) {
+                g_stats.cas_misses.fetch_add(1, relaxed);
+                return false;
+            }
             if( obj.cas_unique() != cmd.cas_unique() ) {
                 if( ! cmd.no_reply() )
                     r.exists();
+                g_stats.cas_badval.fetch_add(1, relaxed);
                 return true;
             }
             const char* p2;
@@ -713,10 +730,14 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
                 r.stored();
             if( ! m_slaves.empty() )
                 repl_object(m_slaves, k, obj);
+            g_stats.cas_hits.fetch_add(1, relaxed);
             return true;
         };
-        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) && ! cmd.no_reply() )
-            r.not_found();
+        if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
+            g_stats.cas_misses.fetch_add(1, relaxed);
+            if( ! cmd.no_reply() )
+                r.not_found();
+        }
         break;
     case text_command::INCR:
         std::tie(p, len) = cmd.key();
@@ -859,7 +880,11 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
         for( mc::item it = cmd.first_key();
              it != mc::text_request::eos; it = cmd.next_key(it) ) {
             std::tie(p, len) = it;
-            m_hash.apply(cybozu::hash_key(p, len), h, nullptr);
+            if( m_hash.apply(cybozu::hash_key(p, len), h, nullptr) ) {
+                g_stats.get_hits.fetch_add(1, relaxed);
+            } else {
+                g_stats.get_misses.fetch_add(1, relaxed);
+            }
         }
         r.end();
         break;
