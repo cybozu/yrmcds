@@ -45,6 +45,11 @@ void statistics::reset() noexcept {
         v = 0;
     for( auto& v: bin_ops )
         v = 0;
+    get_hits = 0;
+    get_misses = 0;
+    cas_hits = 0;
+    cas_misses = 0;
+    cas_badval = 0;
 }
 
 }} // namespace yrmcds::memcache
