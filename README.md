@@ -31,7 +31,7 @@ Features
 --------
 
 * Complete memcached text and binary protocols.
-* [Server-side locking](docs/locking.md) extension to memcached protocol.
+    * [Server-side locking](docs/locking.md) extension to memcached protocol.
 * [Distributed resource counter](docs/counter.md) protocol.
 * [Optional memory security](docs/usage.md#secure_erase) to store
   confidential information like SSL session data.
