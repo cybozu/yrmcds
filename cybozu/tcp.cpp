@@ -4,7 +4,7 @@
 #include "logger.hpp"
 
 #ifdef USE_TCMALLOC
-#  include <google/tcmalloc.h>
+#  include <gperftools/tcmalloc.h>
 #  define MALLOC tc_malloc
 #  define FREE tc_free
 #else
