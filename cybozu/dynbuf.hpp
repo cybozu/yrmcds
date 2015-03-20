@@ -7,7 +7,7 @@
 #include "util.hpp"
 
 #ifdef USE_TCMALLOC
-#  include <google/tcmalloc.h>
+#  include <gperftools/tcmalloc.h>
 #else
 #  include <cstdlib>
 #endif
