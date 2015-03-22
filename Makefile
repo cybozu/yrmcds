@@ -12,14 +12,13 @@ endif
 CC = gcc
 CXX = g++
 CPPFLAGS = -I. -DCACHELINE_SIZE=$(CACHELINE_SIZE)
-CPPFLAGS += -DDEFAULT_CONFIG=$(DEFAULT_CONFIG) -DUSE_TCMALLOC
+CPPFLAGS += -DDEFAULT_CONFIG=$(DEFAULT_CONFIG)
 OPTFLAGS = -O2 #-flto
 DEBUGFLAGS = -gdwarf-3 #-fsanitize=address
 WARNFLAGS = -Wall -Wnon-virtual-dtor -Woverloaded-virtual
 CPUFLAGS = #-march=core2 -mtune=corei7
 CXXFLAGS = -std=gnu++11 $(OPTFLAGS) $(DEBUGFLAGS) $(shell getconf LFS_CFLAGS) $(WARNFLAGS) $(CPUFLAGS)
 LDFLAGS = -L. $(shell getconf LFS_LDFLAGS)
-LIBTCMALLOC = -ltcmalloc_minimal
 LDLIBS = $(shell getconf LFS_LIBS) -lyrmcds $(LIBTCMALLOC) -latomic -lpthread
 CLDOC := LD_LIBRARY_PATH=$(shell llvm-config --libdir 2>/dev/null) cldoc
 
@@ -32,6 +31,16 @@ TESTS = $(patsubst %.cpp,%,$(wildcard test/*.cpp))
 LIB = libyrmcds.a
 LIB_OBJECTS = $(filter-out src/main.o,$(OBJECTS))
 PACKAGES = build-essential libgoogle-perftools-dev python-pip
+
+ifndef HEADER
+  ifeq ($(shell $(MAKE) HEADER=gperftools/tcmalloc.h test_env), ok)
+    CPPFLAGS += -DUSE_TCMALLOC
+    LIBTCMALLOC = -ltcmalloc_minimal
+  else ifeq ($(shell $(MAKE) HEADER=google/tcmalloc.h test_env), ok)
+    CPPFLAGS += -DUSE_TCMALLOC -DTCMALLOC_IN_GOOGLE
+    LIBTCMALLOC = -ltcmalloc_minimal
+  endif
+endif
 
 all: $(EXE)
 lib: $(LIB)
@@ -85,4 +94,7 @@ setup:
 	sudo apt-get install -y --install-recommends $(PACKAGES)
 	sudo pip install cldoc --upgrade
 
-.PHONY: all strip lib tests install html serve clean setup $(TESTS)
+test_env:
+	@T=$$(mktemp --suffix=.cpp); echo "#include <$(HEADER)>" >$$T; if $(CXX) $(CPPFLAGS) -E $$T >/dev/null 2>&1; then echo "ok"; else echo "fail"; fi; rm -f $$T
+
+.PHONY: all strip lib tests install html serve clean setup test_env $(TESTS)
