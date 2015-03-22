@@ -54,17 +54,17 @@ Prerequisites
 -------------
 
 * C++11 compiler (gcc 4.8.1+ or clang 3.3+).
-* [TCMalloc][tcmalloc] from Google.
 * GNU make.
 
 Build
 -----
 
-1. Prepare TCMalloc.  
-    On Ubuntu, run `apt-get install libgoogle-perftools-dev`.
-2. Run `make`.
+Just run `make`.
 
-You can build yrmcds without TCMalloc by editing Makefile.
+yrmcds runs faster when linked with [TCMalloc](tcmalloc).
+On Debian/Ubuntu, install `libgoogle-perftools-dev` package to prepare TCMalloc.
+
+The makefile automatically detects TCMalloc if available.
 
 Install
 -------
