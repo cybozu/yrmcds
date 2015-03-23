@@ -53,6 +53,7 @@ and some [benchmark results](docs/bench.md).
 Prerequisites
 -------------
 
+* **Linux**.
 * C++11 compiler (gcc 4.8.1+ or clang 3.3+).
 * GNU make.
 
