@@ -1,5 +1,5 @@
 // memcached server-side protocol.
-// (C) 2013 Cybozu.
+// (C) 2013-2015 Cybozu.
 
 #ifndef YRMCDS_MEMCACHE_MEMCACHE_HPP
 #define YRMCDS_MEMCACHE_MEMCACHE_HPP
@@ -36,7 +36,7 @@ using item = std::tuple<const char*, std::size_t>;
 enum class text_command {
     UNKNOWN, SET, ADD, REPLACE, APPEND, PREPEND, CAS, GET, GETS, DELETE,
     INCR, DECR, TOUCH, LOCK, UNLOCK, UNLOCK_ALL, SLABS, STATS, FLUSH_ALL,
-    VERSION, VERBOSITY, QUIT,
+    VERSION, VERBOSITY, QUIT, KEYS,
     END_OF_COMMAND // must be defined the last
 };
 
@@ -141,6 +141,7 @@ private:
     void parse_stats(const char* b, const char* e) noexcept;
     void parse_incdec(const char* b, const char* e) noexcept;
     void parse_get(const char* b, const char* e) noexcept;
+    void parse_keys(const char* b, const char* e) noexcept;
 };
 
 
@@ -197,6 +198,7 @@ public:
                const cybozu::dynbuf& data);
     void value(const cybozu::hash_key& key, std::uint32_t flags,
                const cybozu::dynbuf& data, std::uint64_t cas);
+    void value(const cybozu::hash_key& key);
 
     void send(const char* p, std::size_t len, bool flush) {
         m_socket.send(p, len, flush);
@@ -262,6 +264,8 @@ enum class binary_command: unsigned char {
     LaGKQ      = '\x49',
     RaU        = '\x4a',
     RaUQ       = '\x4b',
+
+    Keys       = '\x50',
 
     Unknown,
     END_OF_COMMAND // must be defined the last
@@ -371,6 +375,7 @@ public:
     void get(std::uint32_t flags, const cybozu::dynbuf& data,
              std::uint64_t cas, bool flush,
              const char* key = nullptr, std::size_t key_len = 0);
+    void key(const char* key, std::size_t key_len);
     void set(std::uint64_t cas);
     void incdec(std::uint64_t value, std::uint64_t cas);
     void quit();
