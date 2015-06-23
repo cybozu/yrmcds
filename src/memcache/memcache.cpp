@@ -414,7 +414,9 @@ text_request::parse_keys(const char* b, const char* e) noexcept {
     m_valid = true;
     while( *b == SP ) ++b;
     if( b == e ) return;
-    m_key = item(b, e-b);
+    const char* key_end = cfind(b, SP, e-b);
+    if( key_end == nullptr ) key_end = e;
+    m_key = item(b, key_end-b);
 }
 
 void text_request::parse() noexcept {

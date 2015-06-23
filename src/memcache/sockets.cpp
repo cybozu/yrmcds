@@ -179,6 +179,7 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
     hash_map::creator c = nullptr;
     std::function<void(const cybozu::hash_key&)> repl = nullptr;
     std::function<bool(const cybozu::hash_key&, object&)> pred;
+    std::function<void(const cybozu::hash_key&, object&)> foreach_pred;
 
     switch( cmd.command() ) {
     case binary_command::Get:
@@ -587,6 +588,15 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
             r.stats_general(m_slaves.size());
         }
         break;
+    case binary_command::Keys:
+        std::tie(p, len) = cmd.key();
+        foreach_pred = [p,len,&r](const cybozu::hash_key& k, object&) {
+            if( (len == 0) || k.has_prefix(p, len) )
+                r.key(k.data(), k.length());
+        };
+        m_hash.foreach(foreach_pred);
+        r.success();
+        break;
     default:
         cybozu::logger::info() << "not implemented";
         r.error( binary_status::UnknownCommand );
@@ -608,6 +618,7 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
     hash_map::handler h = nullptr;
     hash_map::creator c = nullptr;
     std::function<bool(const cybozu::hash_key&, object&)> pred;
+    std::function<void(const cybozu::hash_key&, object&)> foreach_pred;
 
     switch( cmd.command() ) {
     case text_command::SET:
@@ -883,6 +894,15 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
                 g_stats.get_misses.fetch_add(1, relaxed);
             }
         }
+        r.end();
+        break;
+    case text_command::KEYS:
+        std::tie(p, len) = cmd.key();
+        foreach_pred = [p,len,&r](const cybozu::hash_key& k, object&) {
+            if( (len == 0) || k.has_prefix(p, len) )
+                r.value(k);
+        };
+        m_hash.foreach(foreach_pred);
         r.end();
         break;
     case text_command::SLABS:
