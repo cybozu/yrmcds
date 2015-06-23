@@ -415,6 +415,19 @@ AUTOTEST(flush_all) {
     cybozu_assert( t4.no_reply() );
 }
 
+AUTOTEST(keys) {
+    MEMCACHE_TEST(1, "keys\r\n");
+    cybozu_assert( t1.valid() );
+    cybozu_assert( t1.command() == text_command::KEYS );
+    cybozu_assert( std::get<1>(t1.key()) == 0 );
+
+    MEMCACHE_TEST(2, "keys abc \r\n");
+    cybozu_assert( t2.valid() );
+    cybozu_assert( t2.command() == text_command::KEYS );
+    cybozu_assert( std::get<1>(t2.key()) == 3 );
+    VERIFY(2, "abc", key);
+}
+
 AUTOTEST(singles) {
     MEMCACHE_TEST(1, "slabs 38338 \r\nabc");
     cybozu_assert( t1.valid() );

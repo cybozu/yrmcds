@@ -440,6 +440,13 @@ public:
         send(req.data(), req.length());
     }
 
+    void keys(const std::string& key) {
+        request req(binary_command::Keys,
+                    (std::uint16_t)key.size(), key.data(),
+                    0, nullptr, 0, nullptr);
+        send(req.data(), req.length());
+    }
+
     void quit(bool q) {
         request req(q ? binary_command::QuitQ : binary_command::Quit,
                     0, nullptr, 0, nullptr, 0, nullptr);
@@ -1160,6 +1167,78 @@ AUTOTEST(stat_ops) {
                   << std::string(std::get<0>(r.data()), std::get<1>(r.data()))
                   << std::endl;
     }
+}
+
+AUTOTEST(keys) {
+    client c;
+    response r;
+
+    c.flush_all(true, 0);
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    c.set("foo", "bar", true, 10, 0);
+    c.set("fo1", "bar", true, 10, 0);
+    c.set("zzzzzzzzz", "bar", true, 10, 0);
+
+    c.keys("");
+    int n = 0;
+    while( true ) {
+        cybozu_assert( c.get_response(r) );
+        ASSERT_COMMAND(r, Keys);
+        ASSERT_OK(r);
+        if( std::get<1>(r.key()) == 0 )
+            break;
+        ++n;
+    }
+    cybozu_assert( n == 3 );
+
+    n = 0;
+    c.keys("f");
+    while( true ) {
+        cybozu_assert( c.get_response(r) );
+        ASSERT_COMMAND(r, Keys);
+        ASSERT_OK(r);
+        if( std::get<1>(r.key()) == 0 )
+            break;
+        ++n;
+    }
+    cybozu_assert( n == 2 );
+
+    n = 0;
+    c.keys("foo");
+    while( true ) {
+        cybozu_assert( c.get_response(r) );
+        ASSERT_COMMAND(r, Keys);
+        ASSERT_OK(r);
+        if( std::get<1>(r.key()) == 0 )
+            break;
+        ++n;
+    }
+    cybozu_assert( n == 1 );
+
+    n = 0;
+    c.keys("zzzz");
+    while( true ) {
+        cybozu_assert( c.get_response(r) );
+        ASSERT_COMMAND(r, Keys);
+        ASSERT_OK(r);
+        if( std::get<1>(r.key()) == 0 )
+            break;
+        ++n;
+    }
+    cybozu_assert( n == 1 );
+
+    n = 0;
+    c.keys("b");
+    while( true ) {
+        cybozu_assert( c.get_response(r) );
+        ASSERT_COMMAND(r, Keys);
+        ASSERT_OK(r);
+        if( std::get<1>(r.key()) == 0 )
+            break;
+        ++n;
+    }
+    cybozu_assert( n == 0 );
 }
 
 void print_usage() {
