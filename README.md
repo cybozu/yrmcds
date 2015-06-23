@@ -1,8 +1,7 @@
 yrmcds
 ======
 
-yrmcds is a memory object caching system with master/slave replication
-and [server-side locking](docs/locking.md).
+yrmcds is a memory object caching system with master/slave replication.
 
 Currently, yrmcds supports two protocols: the first is an enhanced
 [memcached][], and another is a protocol to implement
@@ -30,8 +29,9 @@ The source code contains a [SipHash][] implementation borrowed from
 Features
 --------
 
-* Complete memcached text and binary protocols.
-    * [Server-side locking](docs/locking.md) extension to memcached protocol.
+* Complete memcached text and binary protocols with these extensions:
+    * [Server-side locking](docs/locking.md)
+    * [Dump keys](docs/keys.md)
 * [Distributed resource counter](docs/counter.md) protocol.
 * [Optional memory security](docs/usage.md#secure_erase) to store
   confidential information like SSL session data.
