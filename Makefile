@@ -11,7 +11,7 @@ endif
 
 CC = gcc
 CXX = g++
-CPPFLAGS = -I. -DCACHELINE_SIZE=$(CACHELINE_SIZE)
+CPPFLAGS = -I. -DCACHELINE_SIZE=$(CACHELINE_SIZE) $(TCMALLOC_FLAGS)
 CPPFLAGS += -DDEFAULT_CONFIG=$(DEFAULT_CONFIG)
 OPTFLAGS = -O2 #-flto
 DEBUGFLAGS = -gdwarf-3 #-fsanitize=address
@@ -34,11 +34,13 @@ PACKAGES = build-essential libgoogle-perftools-dev python-pip
 
 ifndef HEADER
   ifeq ($(shell $(MAKE) HEADER=gperftools/tcmalloc.h test_env), ok)
-    CPPFLAGS += -DUSE_TCMALLOC
+    TCMALLOC_FLAGS = -DUSE_TCMALLOC
     LIBTCMALLOC = -ltcmalloc_minimal
+    export TCMALLOC_FLAGS LIBTCMALLOC
   else ifeq ($(shell $(MAKE) HEADER=google/tcmalloc.h test_env), ok)
-    CPPFLAGS += -DUSE_TCMALLOC -DTCMALLOC_IN_GOOGLE
+    TCMALLOC_FLAGS = -DUSE_TCMALLOC -DTCMALLOC_IN_GOOGLE
     LIBTCMALLOC = -ltcmalloc_minimal
+    export TCMALLOC_FLAGS LIBTCMALLOC
   endif
 endif
 

@@ -1,4 +1,4 @@
-// (C) 2013-2014 Cybozu.
+// (C) 2013-2015 Cybozu.
 
 #include "../config.hpp"
 #include "../global.hpp"
@@ -409,6 +409,16 @@ text_request::parse_get(const char* b, const char* e) noexcept {
     m_valid = true;
 }
 
+inline void
+text_request::parse_keys(const char* b, const char* e) noexcept {
+    m_valid = true;
+    while( *b == SP ) ++b;
+    if( b == e ) return;
+    const char* key_end = cfind(b, SP, e-b);
+    if( key_end == nullptr ) key_end = e;
+    m_key = item(b, key_end-b);
+}
+
 void text_request::parse() noexcept {
     const char* eol = cfind(m_p, LF, m_len);
     if( eol == nullptr ) return; // incomplete
@@ -520,6 +530,11 @@ void text_request::parse() noexcept {
             m_valid = true;
             return;
         }
+        if( std::memcmp(cmd_start, "keys", 4) == 0 ) {
+            m_command = text_command::KEYS;
+            parse_keys(cmd_end, eol);
+            return;
+        }
     }
     if( cmd_len == 3 ) {
         if( std::memcmp(cmd_start, "set", 3) == 0 ) {
@@ -580,6 +595,15 @@ void text_response::value(const cybozu::hash_key& key, std::uint32_t flags,
     m_iov[3] = {data.data(), data.size()};
     m_iov[4] = {CRLF, sizeof(CRLF) - 1};
     m_socket.sendv(m_iov, 5, false);
+}
+
+void text_response::value(const cybozu::hash_key& key) {
+    if( key.length() > MAX_KEY_LENGTH )
+        throw std::logic_error("MAX_KEY_LENGTH over bug");
+    m_iov[0] = {VALUE, sizeof(VALUE) - 1};
+    m_iov[1] = {key.data(), key.length()};
+    m_iov[2] = {CRLF, sizeof(CRLF) - 1};
+    m_socket.sendv(m_iov, 3, false);
 }
 
 void text_response::stats_settings() {
@@ -668,6 +692,7 @@ void text_response::stats_ops() {
     SEND_TEXT_OPS("version", VERSION);
     SEND_TEXT_OPS("verbosity", VERBOSITY);
     SEND_TEXT_OPS("quit", QUIT);
+    SEND_TEXT_OPS("keys", KEYS);
 #undef SEND_TEXT_OPS
 
 #define SEND_BINARY_OPS(n)                                              \
@@ -717,6 +742,7 @@ void text_response::stats_ops() {
     SEND_BINARY_OPS(LaGKQ);
     SEND_BINARY_OPS(RaU);
     SEND_BINARY_OPS(RaUQ);
+    SEND_BINARY_OPS(Keys);
 #undef SEND_BINARY_OPS
 
     std::string s = os.str();
@@ -918,6 +944,10 @@ void binary_request::parse() noexcept {
             m_stats = stats_t::OPS;
         }
         break;
+    case binary_command::Keys:
+        if( extras_len != 0 || data_len > 0 )
+            return; // invalid
+        break;
     case binary_command::Quit:
     case binary_command::QuitQ:
     case binary_command::Version:
@@ -1010,6 +1040,15 @@ binary_response::get(std::uint32_t flags, const cybozu::dynbuf& data,
         m_iov[3] = {data.data(), data.size()};
         m_socket.sendv(m_iov, 4, flush);
     }
+}
+
+void
+binary_response::key(const char* key, std::size_t key_len) {
+    char header[BINARY_HEADER_SIZE];
+    fill_header(header, key_len, 0, 0, 0);
+    m_iov[0] = {header, BINARY_HEADER_SIZE};
+    m_iov[1] = {key, key_len};
+    m_socket.sendv(m_iov, 2, false);
 }
 
 void
@@ -1125,6 +1164,7 @@ binary_response::stats_ops() {
     SEND_TEXT_OPS("version", VERSION);
     SEND_TEXT_OPS("verbosity", VERBOSITY);
     SEND_TEXT_OPS("quit", QUIT);
+    SEND_TEXT_OPS("keys", KEYS);
 #undef SEND_TEXT_OPS
 
 #define SEND_BINARY_OPS(n)                                              \
@@ -1174,6 +1214,7 @@ binary_response::stats_ops() {
     SEND_BINARY_OPS(LaGKQ);
     SEND_BINARY_OPS(RaU);
     SEND_BINARY_OPS(RaUQ);
+    SEND_BINARY_OPS(Keys);
 #undef SEND_BINARY_OPS
     success();
 }

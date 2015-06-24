@@ -670,6 +670,29 @@ AUTOTEST(touch) {
     cybozu_assert( r2.status() == binary_status::Invalid );
 }
 
+AUTOTEST(keys) {
+    REQ(1, "\x80\x50\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x00\x00" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x00" // CAS
+        );
+    cybozu_assert( r1.length() != 0 );
+    cybozu_assert( r1.status() == binary_status::OK );
+    cybozu_assert( r1.command() == binary_command::Keys );
+    cybozu_assert( ! r1.quiet() );
+    cybozu_assert( std::get<1>(r1.key()) == 0 );
+    REQ(2, "\x80\x50\x00\x03\x00\x00\x00\x00"
+        "\x00\x00\x00\x03" // total body
+        "\x12\x34\x56\x78" // opaque
+        "\x00\x00\x00\x00\x00\x00\x00\x00" // CAS
+        "abc" // key
+        );
+    cybozu_assert( r2.length() == (24 + 3) );
+    cybozu_assert( r2.status() == binary_status::OK );
+    cybozu_assert( r2.command() == binary_command::Keys );
+    ITEMCMP(r2.key(), "abc");
+}
+
 AUTOTEST(misc) {
     REQ(1, "\x80\x07\x00\x00\x00\x00\x00\x00"
         "\x00\x00\x00\x00" // total body

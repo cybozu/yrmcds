@@ -70,6 +70,12 @@ public:
         return std::string(m_p, m_len);
     }
 
+    bool has_prefix(const char* p, std::size_t len) const {
+        if( m_len < len )
+            return false;
+        return std::memcmp(m_p, p, len) == 0;
+    }
+
 private:
     std::vector<char> m_v;
     const char* m_p;
