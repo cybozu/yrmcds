@@ -178,7 +178,8 @@ std::unique_ptr<cybozu::tcp_socket> handler::make_memcache_socket(int s) {
 std::unique_ptr<cybozu::tcp_socket> handler::make_repl_socket(int s) {
     if( m_slaves.size() == MAX_SLAVES )
         return nullptr;
-    std::unique_ptr<cybozu::tcp_socket> t( new repl_socket(s, m_finder) );
+    std::unique_ptr<cybozu::tcp_socket> t(
+        new repl_socket(s, g_config.repl_bufsize(), m_finder) );
     cybozu::tcp_socket* pt = t.get();
     m_slaves.push_back(pt);
     m_syncer.add_request(

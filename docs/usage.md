@@ -47,6 +47,8 @@ These options are to configure memcache protocol:
     The maximum object size.
 * `heap_data_limit` (Default: 256K)  
     Objects larger than this will be stored in temporary files.
+* `repl_buffer_size` (Default: 30)  
+    The replication buffer size.  Unit is MiB.
 * `secure_erase` (Default: false)  
     If `true`, object memory will be cleared as soon as the object is removed.
 * `lock_memory` (Default: false)  

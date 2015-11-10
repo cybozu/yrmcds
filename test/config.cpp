@@ -13,6 +13,7 @@ AUTOTEST(config) {
     cybozu_assert(g_config.user() == "nobody");
     cybozu_assert(g_config.group() == "nogroup");
     cybozu_assert(g_config.memory_limit() == (1024 << 20));
+    cybozu_assert(g_config.repl_bufsize() == 100);
     cybozu_assert(g_config.secure_erase() == true);
     cybozu_assert(g_config.lock_memory() == true);
     cybozu_assert(g_config.threshold() == cybozu::severity::warning);
