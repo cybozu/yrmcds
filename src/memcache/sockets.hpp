@@ -92,8 +92,9 @@ class object;
 
 class repl_socket: public cybozu::tcp_socket {
 public:
-    repl_socket(int fd, const std::function<cybozu::worker*()>& finder)
-        : cybozu::tcp_socket(fd, 30),
+    repl_socket(int fd, unsigned int bufcnt,
+                const std::function<cybozu::worker*()>& finder)
+        : cybozu::tcp_socket(fd, bufcnt),
           m_finder(finder),
           m_recvbuf(MAX_RECVSIZE)
     {
