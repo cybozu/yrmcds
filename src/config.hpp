@@ -104,6 +104,9 @@ public:
     std::size_t memory_limit() const noexcept {
         return m_memory_limit;
     }
+    unsigned int repl_bufsize() const noexcept {
+        return m_repl_bufsize;
+    }
     bool secure_erase() const noexcept {
         return m_secure_erase;
     }
@@ -140,6 +143,7 @@ private:
     std::size_t m_max_data_size = DEFAULT_MAX_DATA_SIZE;
     std::size_t m_heap_data_limit = DEFAULT_HEAP_DATA_LIMIT;
     std::size_t m_memory_limit = DEFAULT_MEMORY_LIMIT;
+    unsigned int m_repl_bufsize = DEFAULT_REPL_BUFSIZE;
     bool m_secure_erase = false;
     bool m_lock_memory = false;
     unsigned int m_workers = DEFAULT_WORKER_THREADS;
