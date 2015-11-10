@@ -20,12 +20,14 @@
 
 namespace yrmcds { namespace memcache {
 
+class repl_socket;
+
 class memcache_socket: public cybozu::tcp_socket {
 public:
     memcache_socket(int fd,
                     const std::function<cybozu::worker*()>& finder,
                     cybozu::hash_map<object>& hash,
-                    const std::vector<cybozu::tcp_socket*>& slaves);
+                    const std::vector<repl_socket*>& slaves);
     virtual ~memcache_socket();
 
     void add_lock(const cybozu::hash_key& k) {
@@ -70,8 +72,8 @@ private:
     const std::function<cybozu::worker*()>& m_finder;
     cybozu::hash_map<object>& m_hash;
     cybozu::dynbuf m_pending;
-    const std::vector<cybozu::tcp_socket*>& m_slaves_origin;
-    std::vector<cybozu::tcp_socket*> m_slaves;
+    const std::vector<repl_socket*>& m_slaves_origin;
+    std::vector<repl_socket*> m_slaves;
     cybozu::worker::job m_recvjob;
     cybozu::worker::job m_sendjob;
     std::vector<std::reference_wrapper<const cybozu::hash_key>> m_locks;
@@ -96,7 +98,8 @@ public:
                 const std::function<cybozu::worker*()>& finder)
         : cybozu::tcp_socket(fd, bufcnt),
           m_finder(finder),
-          m_recvbuf(MAX_RECVSIZE)
+          m_recvbuf(MAX_RECVSIZE),
+          m_last_heartbeat(g_current_time.load(std::memory_order_relaxed))
     {
         m_sendjob = [this](cybozu::dynbuf&) {
             if( ! write_pending_data() )
@@ -104,10 +107,16 @@ public:
         };
     }
 
+    bool timed_out() const {
+        std::time_t now = g_current_time.load(std::memory_order_relaxed);
+        return m_last_heartbeat + g_config.slave_timeout() <= now;
+    }
+
 private:
     const std::function<cybozu::worker*()>& m_finder;
     std::vector<char> m_recvbuf;
     cybozu::worker::job m_sendjob;
+    std::time_t m_last_heartbeat;
 
     virtual bool on_readable() override final;
     virtual bool on_writable() override final;

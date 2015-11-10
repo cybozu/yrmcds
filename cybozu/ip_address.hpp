@@ -62,6 +62,9 @@ public:
 // `true` if this machine has `addr`.  `false` otherwise.
 bool has_ip_address(const ip_address& addr);
 
+// Get the IP address of the connected socket peer.
+ip_address get_peer_ip_address(int sockfd);
+
 } // namespace cybozu
 
 #endif // CYBOZU_IP_ADDRESS_HPP

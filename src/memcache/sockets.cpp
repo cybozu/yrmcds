@@ -31,7 +31,7 @@ using hash_map = cybozu::hash_map<object>;
 memcache_socket::memcache_socket(int fd,
                                  const std::function<cybozu::worker*()>& finder,
                                  cybozu::hash_map<object>& hash,
-                                 const std::vector<cybozu::tcp_socket*>& slaves)
+                                 const std::vector<repl_socket*>& slaves)
     : cybozu::tcp_socket(fd),
       m_busy(false),
       m_finder(finder),
@@ -965,6 +965,7 @@ bool repl_socket::on_readable() {
         }
         if( n == 0 )
             return invalidate();
+        m_last_heartbeat = g_current_time.load(relaxed);
     }
     return true;
 }

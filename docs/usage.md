@@ -59,6 +59,9 @@ These options are to configure memcache protocol:
     The number of worker threads.
 * `gc_interval` (Default: 10)  
     The interval between garbage collections in seconds.
+* `slave_timeout` (Default: 10)  
+    slave_timeout specifies how many seconds to wait for heartbeats from slaves before the connection is forcibly closed.
+
 
 Configuration (counter)
 ------------------------

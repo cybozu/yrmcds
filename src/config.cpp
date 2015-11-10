@@ -27,6 +27,7 @@ const char SECURE_ERASE[] = "secure_erase";
 const char LOCK_MEMORY[] = "lock_memory";
 const char WORKERS[] = "workers";
 const char GC_INTERVAL[] = "gc_interval";
+const char SLAVE_TIMEOUT[] = "slave_timeout";
 const char COUNTER_ENABLE[] = "counter.enable";
 const char COUNTER_PORT[] = "counter.port";
 const char COUNTER_MAX_CONNECTIONS[] = "counter.max_connections";
@@ -221,6 +222,13 @@ void config::load(const std::string& path) {
         if( n < 1 )
             throw bad_config("gc_interval must be > 0");
         m_gc_interval = n;
+    }
+
+    if( cp.exists(SLAVE_TIMEOUT) ) {
+        int n = cp.get_as_int(SLAVE_TIMEOUT);
+        if( n < 1 )
+            throw bad_config("slave_timeout must be > 0");
+        m_slave_timeout = n;
     }
 
     m_counter_config.load(cp);

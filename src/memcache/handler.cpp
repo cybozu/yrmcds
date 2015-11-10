@@ -4,6 +4,7 @@
 #include "../constants.hpp"
 #include "../global.hpp"
 
+#include <cybozu/ip_address.hpp>
 #include <cybozu/logger.hpp>
 
 namespace {
@@ -83,11 +84,27 @@ void handler::on_master_start() {
 
 void handler::on_master_interval() {
     for( auto it = m_slaves.begin(); it != m_slaves.end(); ) {
-        if( ! (*it)->valid() ) {
+        repl_socket* slave = *it;
+        if( ! slave->valid() ) {
             it = m_slaves.erase(it);
-        } else {
-            ++it;
+            continue;
         }
+        if( slave->timed_out() ) {
+            std::string addr = "unknown address";
+            try {
+                addr = cybozu::get_peer_ip_address(slave->fileno()).str();
+            } catch (...) {
+                // ignore errors
+            }
+            cybozu::logger::info() << "No heartbeats from a slave (" << addr
+                                   << "). Close the replication socket.";
+            // close the socket and release resources
+            if( ! slave->invalidate() )
+                m_reactor.remove_resource(*slave);
+            it = m_slaves.erase(it);
+            continue;
+        }
+        ++it;
     }
 
     if( gc_ready(g_current_time.load(relaxed)) ) {
@@ -178,9 +195,9 @@ std::unique_ptr<cybozu::tcp_socket> handler::make_memcache_socket(int s) {
 std::unique_ptr<cybozu::tcp_socket> handler::make_repl_socket(int s) {
     if( m_slaves.size() == MAX_SLAVES )
         return nullptr;
-    std::unique_ptr<cybozu::tcp_socket> t(
+    std::unique_ptr<repl_socket> t(
         new repl_socket(s, g_config.repl_bufsize(), m_finder) );
-    cybozu::tcp_socket* pt = t.get();
+    repl_socket* pt = t.get();
     m_slaves.push_back(pt);
     m_syncer.add_request(
         std::unique_ptr<sync_request>(
