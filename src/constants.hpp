@@ -19,6 +19,7 @@ const std::size_t   DEFAULT_MEMORY_LIMIT   = static_cast<std::size_t>(1) << 30;
 const unsigned int  DEFAULT_REPL_BUFSIZE   = 30;
 const int           DEFAULT_WORKER_THREADS = 8;
 const unsigned int  DEFAULT_GC_INTERVAL    = 10;
+const unsigned int  DEFAULT_SLAVE_TIMEOUT  = 10;
 const char          DEFAULT_TMPDIR[]       = "/var/tmp";
 const unsigned int  DEFAULT_STAT_INTERVAL  = 86400;
 

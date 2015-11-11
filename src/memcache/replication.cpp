@@ -34,7 +34,7 @@ fill_header(char* buf, std::uint16_t key_len, std::uint8_t extras_len,
 
 namespace yrmcds { namespace memcache {
 
-void repl_object(const std::vector<cybozu::tcp_socket*>& slaves,
+void repl_object(const std::vector<repl_socket*>& slaves,
                  const cybozu::hash_key& key, const object& obj,
                  bool flush) {
     char header[BINARY_HEADER_SIZE];
@@ -54,7 +54,7 @@ void repl_object(const std::vector<cybozu::tcp_socket*>& slaves,
         s->sendv(iov, 4, flush);
 }
 
-void repl_delete(const std::vector<cybozu::tcp_socket*>& slaves,
+void repl_delete(const std::vector<repl_socket*>& slaves,
                  const cybozu::hash_key& key) {
     char header[BINARY_HEADER_SIZE];
     fill_header(header, key.length(), 0, 0, binary_command::DeleteQ);

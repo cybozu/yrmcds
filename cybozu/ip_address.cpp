@@ -118,4 +118,15 @@ bool has_ip_address(const ip_address& addr) {
     return ifw.find(addr);
 }
 
+ip_address get_peer_ip_address(int sockfd) {
+    union {
+        struct sockaddr sa;
+        struct sockaddr_storage ss;
+    } addr;
+    socklen_t addrlen = sizeof(addr);
+    if( ::getpeername(sockfd, &addr.sa, &addrlen) != 0 )
+        throw_unix_error(errno, "getpeername");
+    return ip_address(&addr.sa);
+}
+
 } // namespace cybozu

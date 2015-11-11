@@ -21,6 +21,7 @@ AUTOTEST(config) {
     cybozu_assert(g_config.heap_data_limit() == (16 << 10));
     cybozu_assert(g_config.workers() == 10);
     cybozu_assert(g_config.gc_interval() == 20);
+    cybozu_assert(g_config.slave_timeout() == 15);
     cybozu_assert(g_config.counter().enable() == true);
     cybozu_assert(g_config.counter().port() == 11216);
     cybozu_assert(g_config.counter().max_connections() == 100);

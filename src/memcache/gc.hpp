@@ -5,11 +5,11 @@
 #define YRMCDS_MEMCACHE_GC_HPP
 
 #include "object.hpp"
+#include "sockets.hpp"
 #include "stats.hpp"
 
 #include <cybozu/hash_map.hpp>
 #include <cybozu/logger.hpp>
-#include <cybozu/tcp.hpp>
 #include <cybozu/thread.hpp>
 
 #include <algorithm>
@@ -23,10 +23,10 @@ namespace yrmcds { namespace memcache {
 class gc_thread final: public cybozu::thread_base<gc_thread> {
 public:
     gc_thread(cybozu::hash_map<object>& m,
-              const std::vector<cybozu::tcp_socket*>& slaves,
-              const std::vector<cybozu::tcp_socket*>& new_slaves):
+              const std::vector<repl_socket*>& slaves,
+              const std::vector<repl_socket*>& new_slaves):
         m_hash(m), m_slaves(slaves), m_new_slaves(new_slaves) {
-        for( cybozu::tcp_socket* s: new_slaves ) {
+        for( repl_socket* s: new_slaves ) {
             if( std::find(slaves.begin(), slaves.end(), s) == slaves.end() )
                 m_slaves.push_back(s);
         }
@@ -44,8 +44,8 @@ private:
     void gc();
 
     cybozu::hash_map<object>& m_hash;
-    std::vector<cybozu::tcp_socket*> m_slaves;
-    std::vector<cybozu::tcp_socket*> m_new_slaves;
+    std::vector<repl_socket*> m_slaves;
+    std::vector<repl_socket*> m_new_slaves;
     std::uint32_t m_objects = 0;
     std::uint32_t m_objects_under_1k = 0;
     std::uint32_t m_objects_under_4k = 0;

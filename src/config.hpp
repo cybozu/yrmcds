@@ -119,6 +119,9 @@ public:
     unsigned int gc_interval() const noexcept {
         return m_gc_interval;
     }
+    unsigned int slave_timeout() const noexcept {
+        return m_slave_timeout;
+    }
 
     const counter_config& counter() const noexcept {
         return m_counter_config;
@@ -148,6 +151,7 @@ private:
     bool m_lock_memory = false;
     unsigned int m_workers = DEFAULT_WORKER_THREADS;
     unsigned int m_gc_interval = DEFAULT_GC_INTERVAL;
+    unsigned int m_slave_timeout = DEFAULT_SLAVE_TIMEOUT;
     counter_config m_counter_config;
 };
 
