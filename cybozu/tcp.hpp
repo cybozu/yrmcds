@@ -190,6 +190,12 @@ protected:
         m_cond_write.notify_all();
     }
 
+    // This method will be called everytime when <send>, <sendv>,
+    // <send_close>, or <sendv_close> is blocked because of internal buffer full.
+    //
+    // Subclasses can override this to handle the buffer full event.
+    virtual void on_buffer_full() {}
+
 private:
     std::vector<char*> m_free_buffers;
     // tuple of <pointer, data written, data sent>

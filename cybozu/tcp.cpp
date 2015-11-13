@@ -160,7 +160,10 @@ void tcp_socket::free_buffers() {
 }
 
 bool tcp_socket::_send(const char* p, std::size_t len, lock_guard& g) {
-    while( ! can_send(len) ) m_cond_write.wait(g);
+    while( ! can_send(len) ) {
+        on_buffer_full();
+        m_cond_write.wait(g);
+    }
     if( m_shutdown ) return false;
 
     if( m_pending.empty() ) {
@@ -228,7 +231,10 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
         total += iov[i].len;
     }
 
-    while( ! can_send(total) ) m_cond_write.wait(g);
+    while( ! can_send(total) ) {
+        on_buffer_full();
+        m_cond_write.wait(g);
+    }
     if( m_shutdown ) return false;
 
     ::iovec v[MAX_IOVCNT];
