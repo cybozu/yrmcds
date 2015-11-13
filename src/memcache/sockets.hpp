@@ -112,6 +112,12 @@ public:
         return m_last_heartbeat + g_config.slave_timeout() <= now;
     }
 
+    virtual void on_buffer_full() override {
+        cybozu::logger::warning()
+            << "Replication buffer is full. "
+            << "Please enlarge \"repl_buffer_size\" to avoid the hang up of yrmcds.";
+    }
+
 private:
     const std::function<cybozu::worker*()>& m_finder;
     std::vector<char> m_recvbuf;
