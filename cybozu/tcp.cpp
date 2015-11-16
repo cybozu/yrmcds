@@ -399,6 +399,7 @@ int setup_server_socket(const char* bind_addr, std::uint16_t port) {
     hint.ai_flags = AI_PASSIVE | AI_NUMERICSERV;
     int e = getaddrinfo(bind_addr, s_port.c_str(), &hint, &res);
     if( e == EAI_FAMILY || e == EAI_ADDRFAMILY || e == EAI_NODATA ) {
+      IPV4:
         logger::info() << "Binding to IPv6 fails, trying IPv4...";
         hint.ai_family = AF_INET;
         e = getaddrinfo(bind_addr, s_port.c_str(), &hint, &res);
@@ -415,6 +416,12 @@ int setup_server_socket(const char* bind_addr, std::uint16_t port) {
                      res->ai_protocol);
     if( s == -1 ) {
         freeaddrinfo(res);
+
+        // getaddrinfo may return IPv6 though the kernel disables IPv6.
+        // The following is the workaround for it.
+        if( hint.ai_family == AF_INET6 && errno == EAFNOSUPPORT )
+            goto IPV4;
+
         throw_unix_error(errno, "socket");
     }
 
