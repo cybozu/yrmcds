@@ -32,16 +32,15 @@ LIB = libyrmcds.a
 LIB_OBJECTS = $(filter-out src/main.o,$(OBJECTS))
 PACKAGES = build-essential libgoogle-perftools-dev python-pip
 
-ifndef HEADER
-  ifeq ($(shell $(MAKE) HEADER=gperftools/tcmalloc.h test_env), ok)
+TCMALLOC_HEADER := $(shell sh ./detect_tcmalloc.sh $(CXX) $(CPPFLAGS))
+ifeq ($(TCMALLOC_HEADER), gperftools/tcmalloc.h)
     TCMALLOC_FLAGS = -DUSE_TCMALLOC
     LIBTCMALLOC = -ltcmalloc_minimal
     export TCMALLOC_FLAGS LIBTCMALLOC
-  else ifeq ($(shell $(MAKE) HEADER=google/tcmalloc.h test_env), ok)
+else ifeq ($(TCMALLOC_HEADER), google/tcmalloc.h)
     TCMALLOC_FLAGS = -DUSE_TCMALLOC -DTCMALLOC_IN_GOOGLE
     LIBTCMALLOC = -ltcmalloc_minimal
     export TCMALLOC_FLAGS LIBTCMALLOC
-  endif
 endif
 
 all: $(EXE)
@@ -95,8 +94,5 @@ clean:
 setup:
 	sudo apt-get install -y --install-recommends $(PACKAGES)
 	sudo pip install cldoc --upgrade
-
-test_env:
-	@T=$$(mktemp --suffix=.cpp); echo "#include <$(HEADER)>" >$$T; if $(CXX) $(CPPFLAGS) -E $$T >/dev/null 2>&1; then echo "ok"; else echo "fail"; fi; rm -f $$T
 
 .PHONY: all strip lib tests install html serve clean setup test_env $(TESTS)
