@@ -83,14 +83,12 @@ void repl_delete(const std::vector<repl_socket*>& slaves,
 
 std::size_t repl_recv(const char* p, std::size_t len,
                       cybozu::hash_map<object>& hash) {
-    namespace mc = yrmcds::memcache;
-
     std::size_t consumed = 0;
     while( len > 0 ) {
-        if( ! mc::is_binary_request(p) )
+        if( ! is_binary_request(p) )
             throw std::runtime_error("Invalid replication data");
 
-        mc::binary_request parser(p, len);
+        binary_request parser(p, len);
         std::size_t n = parser.length();
         if( n == 0 ) break;
         p += n;
@@ -103,7 +101,7 @@ std::size_t repl_recv(const char* p, std::size_t len,
         cybozu::hash_map<object>::creator c = nullptr;
 
         switch( parser.command() ) {
-        case mc::binary_command::SetQ:
+        case binary_command::SetQ:
             h = [&parser](const cybozu::hash_key&, object& obj) -> bool {
                 const char* p2;
                 std::size_t len2;
@@ -124,7 +122,7 @@ std::size_t repl_recv(const char* p, std::size_t len,
                                     << std::string(key_data, key_len);
             hash.apply_nolock(cybozu::hash_key(key_data, key_len), h, c);
             break;
-        case mc::binary_command::Touch:
+        case binary_command::Touch:
             h = [&parser](const cybozu::hash_key&, object& obj) -> bool {
                 ++ g_stats.repl_updated;
                 obj.touch( parser.exptime() );
@@ -135,7 +133,7 @@ std::size_t repl_recv(const char* p, std::size_t len,
                                     << std::string(key_data, key_len);
             hash.apply_nolock(cybozu::hash_key(key_data, key_len), h, c);
             break;
-        case mc::binary_command::DeleteQ:
+        case binary_command::DeleteQ:
             std::tie(key_data, key_len) = parser.key();
             cybozu::logger::debug() << "repl: remove "
                                     << std::string(key_data, key_len);
