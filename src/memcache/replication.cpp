@@ -54,6 +54,21 @@ void repl_object(const std::vector<repl_socket*>& slaves,
         s->sendv(iov, 4, flush);
 }
 
+void repl_touch(const std::vector<repl_socket*>& slaves,
+                const cybozu::hash_key& key, const object& obj) {
+    char header[BINARY_HEADER_SIZE];
+    fill_header(header, key.length(), 4, 0, binary_command::Touch);
+    char extras[4];
+    cybozu::hton(obj.exptime(), extras);
+    cybozu::tcp_socket::iovec iov[3] = {
+        {header, sizeof(header)},
+        {extras, sizeof(extras)},
+        {key.data(), key.length()}
+    };
+    for( cybozu::tcp_socket* s: slaves )
+        s->sendv(iov, 3, true);
+}
+
 void repl_delete(const std::vector<repl_socket*>& slaves,
                  const cybozu::hash_key& key) {
     char header[BINARY_HEADER_SIZE];
@@ -106,6 +121,17 @@ std::size_t repl_recv(const char* p, std::size_t len,
             };
             std::tie(key_data, key_len) = parser.key();
             cybozu::logger::debug() << "repl: set "
+                                    << std::string(key_data, key_len);
+            hash.apply_nolock(cybozu::hash_key(key_data, key_len), h, c);
+            break;
+        case mc::binary_command::Touch:
+            h = [&parser](const cybozu::hash_key&, object& obj) -> bool {
+                ++ g_stats.repl_updated;
+                obj.touch( parser.exptime() );
+                return true;
+            };
+            std::tie(key_data, key_len) = parser.key();
+            cybozu::logger::debug() << "repl: touch "
                                     << std::string(key_data, key_len);
             hash.apply_nolock(cybozu::hash_key(key_data, key_len), h, c);
             break;
