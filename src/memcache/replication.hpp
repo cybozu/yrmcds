@@ -17,6 +17,9 @@ void repl_object(const std::vector<repl_socket*>& slaves,
                  const cybozu::hash_key& key, const object& obj,
                  bool flush = true);
 
+void repl_touch(const std::vector<repl_socket*>& slaves,
+                const cybozu::hash_key& key, const object& obj);
+
 void repl_delete(const std::vector<repl_socket*>& slaves,
                  const cybozu::hash_key& key);
 

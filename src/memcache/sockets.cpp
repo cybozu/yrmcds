@@ -205,8 +205,11 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                 add_lock(k);
             }
             if( obj.expired() ) return false;
-            if( cmd.exptime() != mc::binary_request::EXPTIME_NONE )
+            if( cmd.exptime() != mc::binary_request::EXPTIME_NONE ) {
                 obj.touch( cmd.exptime() );
+                if( ! m_slaves.empty() )
+                    repl_touch(m_slaves, k, obj);
+            }
             cybozu::dynbuf buf(0);
             const cybozu::dynbuf& data = obj.data(buf);
             if( cmd.command() == binary_command::Get ||
@@ -501,7 +504,7 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
             if( obj.expired() ) return false;
             obj.touch( cmd.exptime() );
             if( ! m_slaves.empty() )
-                repl_object(m_slaves, k, obj, false);
+                repl_touch(m_slaves, k, obj);
             r.set( obj.cas_unique() );
             return true;
         };
@@ -809,7 +812,7 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
             if( obj.expired() ) return false;
             obj.touch( cmd.exptime() );
             if( ! m_slaves.empty() )
-                repl_object(m_slaves, k, obj, false);
+                repl_touch(m_slaves, k, obj);
             return true;
         };
         if( m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
