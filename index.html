@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>yrmcds by cybozu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">yrmcds</h1>
+      <h2 class="project-tagline">memcached compatible KVS with master/slave replication</h2>
+      <a href="https://github.com/cybozu/yrmcds" class="btn">View on GitHub</a>
+      <a href="https://github.com/cybozu/yrmcds/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/cybozu/yrmcds/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p>yrmcds is a memory object caching system with master/slave replication.</p>
+
+<p>Currently, yrmcds supports two protocols: the first is an enhanced
+<a href="http://memcached.org/">memcached</a>, and another is a protocol to implement
+<a href="https://github.com/cybozu/yrmcds/tree/master/docs/counter.md">distributed resource counters</a>.</p>
+
+<p>Since the memcached protocol is perfectly compatible with the
+<a href="http://memcached.org/">original implementation</a>, yrmcds can be used as a drop-in
+replacement for memcached.  Thanks to its virtual-IP based replication
+system, existing applications can obtain high-available
+memcached-compatible service without any modifications.</p>
+
+<p>A companion client library <a href="http://cybozu.github.io/libyrmcds/">libyrmcds</a> and a <a href="http://cybozu.github.io/php-yrmcds/">PHP extension</a>
+are also available.</p>
+
+<p>yrmcds was developed originally for <a href="https://www.kintone.com/">kintone.com</a>.</p>
+
+<h2>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li>Complete memcached text and binary protocols with these extensions:
+
+<ul>
+<li><a href="https://github.com/cybozu/yrmcds/tree/master/docs/locking.md">Server-side locking</a></li>
+<li><a href="https://github.com/cybozu/yrmcds/tree/master/docs/keys.md">Dump keys</a></li>
+</ul>
+</li>
+<li>
+<a href="https://github.com/cybozu/yrmcds/tree/master/docs/counter.md">Distributed resource counter</a> protocol.</li>
+<li>
+<a href="docs/usage.md#secure_erase">Optional memory security</a> to store
+confidential information like SSL session data.</li>
+<li>Large objects can be stored in temporary files, not in memory.</li>
+<li>Virtual-IP based master-slave replication.
+
+<ul>
+<li>Automatic fail-over</li>
+<li>Automatic recovery of redundancy.</li>
+</ul>
+</li>
+<li>Global LRU eviction / no slab distribution problem.
+
+<ul>
+<li>Unlike memcached, yrmcds is not involved with slabs problems.
+(<a href="http://nosql.mypopescu.com/post/13506116892/memcached-internals-memory-allocation-eviction">1</a>, <a href="https://groups.google.com/forum/#!topic/memcached/DuJNy5gbQ0o">2</a>)</li>
+</ul>
+</li>
+</ul>
+
+<p>A <a href="http://cybozu.github.io/libyrmcds/">companion client library</a> and a <a href="http://cybozu.github.io/php-yrmcds/">PHP extension</a>
+are also available.</p>
+
+<p>See also <a href="https://github.com/cybozu/yrmcds/tree/master/docs/usage.md">usage guide</a>,
+<a href="https://github.com/cybozu/yrmcds/tree/master/docs/future.md">future plans</a>,
+<a href="https://github.com/cybozu/yrmcds/tree/master/docs/diffs.md">differences from memcached</a>,
+<a href="https://github.com/cybozu/yrmcds/tree/master/docs/design.md">design notes</a>
+and some <a href="https://github.com/cybozu/yrmcds/tree/master/docs/bench.md">benchmark results</a>.</p>
+
+<h2>
+<a id="about-the-name" class="anchor" href="#about-the-name" aria-hidden="true"><span class="octicon octicon-link"></span></a>About the name</h2>
+
+<p>The name yrmcds was taken from "Ymmt's Replicating MemCacheD for Sessions".<br>
+As it reads, yrmcds was developed mainly for session storage.</p>
+
+<p>The correct pronunciation sounds like: "Yo-Ru-Mac-Do" (夜マクド in Japanese).</p>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>yrmcds is licensed under <a href="http://opensource.org/licenses/BSD-2-Clause">the BSD 2-clause license</a>.</p>
+
+<p>The source code contains a <a href="https://131002.net/siphash/">SipHash</a> implementation borrowed from
+<a href="https://github.com/majek/csiphash">csiphash</a> which is licensed under <a href="http://opensource.org/licenses/MIT">the MIT license</a>.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/cybozu/yrmcds">yrmcds</a> is maintained by <a href="https://github.com/cybozu">cybozu</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-42201828-2");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
