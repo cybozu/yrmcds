@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::tcp_server_socket" name="tcp_server_socket" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass to accept new TCP connections.</brief>
+  <base access="public">
+    <type name="resource" ref="cybozu::resource#cybozu::resource" />
+    <brief>An abstraction of a file descriptor.</brief>
+  </base>
+  <constructor id="cybozu::tcp_server_socket::tcp_server_socket" name="tcp_server_socket">
+    <brief>Construct a server socket.</brief>
+    <doc>This creates a socket and bind it to the given address and port.
+If `bind_addr` is `NULL`, the socket will listen on any address.
+Both IPv4 and IPv6 addresses are supported.
+
+For each new connection, `w` is called to determine if the new
+connection need to be closed immediately or to be added to the
+reactor.  If `w` returns an empty &amp;lt;std::unique\_ptr&amp;gt;, the new
+connection is closed immediately.  Otherwise, the new connection
+is added to the reactor.</doc>
+    <argument id="cybozu::tcp_server_socket::tcp_server_socket::bind_addr" name="bind_addr">
+      <doc>A numeric IP address to be bound, or `NULL`.</doc>
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="cybozu::tcp_server_socket::tcp_server_socket::port" name="port">
+      <doc>TCP port number to be bound.</doc>
+      <type name="uint16_t" />
+    </argument>
+    <argument id="cybozu::tcp_server_socket::tcp_server_socket::w" name="w">
+      <type name="wrapper" />
+    </argument>
+  </constructor>
+  <destructor id="cybozu::tcp_server_socket::~tcp_server_socket" name="~tcp_server_socket" virtual="yes" />
+</class>

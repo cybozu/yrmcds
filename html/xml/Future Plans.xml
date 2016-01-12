@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<category id="Future Plans" name="Future Plans" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>List of future plans.</brief>
+  <doc>Future Plans
+------------
+
+* Replicate CAS unique values.  
+    Currently, yrmcds does not replicate CAS values, which may lead to
+    **false-positives** as well as (harmless) false-negatives.  
+    &amp;lt;p /&amp;gt;
+
+* Allow eviction to be disabled and honor the memory limit.  
+    This is a requirement for in-memory database.  
+    &amp;lt;p /&amp;gt;
+
+* Save/load cached objects at program exit/startup.  
+    This is another requirement for in-memory database.  
+    &amp;lt;p /&amp;gt;
+
+* Save snapshots periodically.  
+    This can be done by [forking][fork] a child process when all
+    worker threads are idle.
+
+
+[fork]: http://manpages.ubuntu.com/manpages/precise/en/man2/fork.2.html</doc>
+</category>

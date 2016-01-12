@@ -1,0 +1,197 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache::object" name="object" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Object in the hash table.</brief>
+  <doc>This class represents an object in the hash table.
+Large objects are stored in temporary files.</doc>
+  <struct name="not_a_number" ref="yrmcds::memcache::object::not_a_number#yrmcds::memcache::object::not_a_number">
+    <brief>Exception thrown by <ref ref="yrmcds::memcache::object#yrmcds::memcache::object::incr">yrmcds::memcache::object::incr</ref> or <ref ref="yrmcds::memcache::object#yrmcds::memcache::object::decr">yrmcds::memcache::object::decr</ref>.</brief>
+  </struct>
+  <constructor abstract="yes" id="yrmcds::memcache::object::object" name="object">
+    <argument id="yrmcds::memcache::object::object::p" name="p">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="yrmcds::memcache::object::object::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+    <argument id="yrmcds::memcache::object::object::flags_" name="flags_">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="yrmcds::memcache::object::object::exptime" name="exptime">
+      <type name="time_t" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::memcache::object::object" name="object">
+    <argument id="yrmcds::memcache::object::object::initial" name="initial">
+      <type name="uint64_t" />
+    </argument>
+    <argument id="yrmcds::memcache::object::object::exptime" name="exptime">
+      <type name="time_t" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::memcache::object::object" name="object">
+    <argument id="yrmcds::memcache::object::object::" name="">
+      <type name="object" qualifier=" const &amp;" ref="yrmcds::memcache::object#yrmcds::memcache::object" />
+    </argument>
+  </constructor>
+  <constructor id="yrmcds::memcache::object::object" name="object">
+    <argument id="yrmcds::memcache::object::object::rhs" name="rhs">
+      <type name="object &amp;&amp;" />
+    </argument>
+  </constructor>
+  <method id="yrmcds::memcache::object::age" name="age">
+    <return>
+      <type builtin="yes" name="unsigned int" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::object::append" name="append">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::memcache::object::append::p" name="p">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="yrmcds::memcache::object::append::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method id="yrmcds::memcache::object::cas_unique" name="cas_unique">
+    <return>
+      <type name="uint64_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::object::data" name="data">
+    <return>
+      <type name="cybozu::dynbuf" qualifier=" const &amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </return>
+    <argument id="yrmcds::memcache::object::data::buf" name="buf">
+      <type name="cybozu::dynbuf" qualifier=" &amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::object::decr" name="decr">
+    <return>
+      <type name="uint64_t" />
+    </return>
+    <argument id="yrmcds::memcache::object::decr::n" name="n">
+      <type name="uint64_t" />
+    </argument>
+  </method>
+  <method id="yrmcds::memcache::object::expired" name="expired">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::object::exptime" name="exptime">
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::object::flags" name="flags">
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::object::incr" name="incr">
+    <return>
+      <type name="uint64_t" />
+    </return>
+    <argument id="yrmcds::memcache::object::incr::n" name="n">
+      <type name="uint64_t" />
+    </argument>
+  </method>
+  <method id="yrmcds::memcache::object::lock" name="lock">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::object::locked" name="locked">
+    <brief>Return `true` if this object is locked.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::object::locked_by_other" name="locked_by_other">
+    <brief>Return `true` if this object is locked by another context.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::object::locked_by_self" name="locked_by_self">
+    <brief>Return `true` if this object is locked by the current context.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::object::operator=" name="operator=">
+    <return>
+      <type name="object" qualifier=" &amp;" ref="yrmcds::memcache::object#yrmcds::memcache::object" />
+    </return>
+    <argument id="yrmcds::memcache::object::operator=::" name="">
+      <type name="object" qualifier=" const &amp;" ref="yrmcds::memcache::object#yrmcds::memcache::object" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::object::operator=" name="operator=">
+    <return>
+      <type name="object" qualifier=" &amp;" ref="yrmcds::memcache::object#yrmcds::memcache::object" />
+    </return>
+    <argument id="yrmcds::memcache::object::operator=::" name="">
+      <type name="object &amp;&amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::object::prepend" name="prepend">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::memcache::object::prepend::p" name="p">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="yrmcds::memcache::object::prepend::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::object::set" name="set">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::memcache::object::set::p" name="p">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="yrmcds::memcache::object::set::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+    <argument id="yrmcds::memcache::object::set::flags_" name="flags_">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="yrmcds::memcache::object::set::exptime" name="exptime">
+      <type name="time_t" />
+    </argument>
+  </method>
+  <method id="yrmcds::memcache::object::size" name="size">
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::object::survive" name="survive">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::memcache::object::survive::flushers" name="flushers">
+      <type name="std::vector&lt;yrmcds::memcache::file_flusher, std::allocator&lt;yrmcds::memcache::file_flusher&gt; &gt;" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method id="yrmcds::memcache::object::touch" name="touch">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::memcache::object::touch::exptime" name="exptime">
+      <type name="time_t" />
+    </argument>
+  </method>
+  <method id="yrmcds::memcache::object::unlock" name="unlock">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::memcache::object::unlock::force" name="force">
+      <type builtin="yes" name="bool" />
+    </argument>
+  </method>
+</class>

@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::hash_key" name="hash_key" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Key class for <ref ref="cybozu::hash_map#cybozu::hash_map">cybozu::hash_map</ref>.</brief>
+  <constructor id="cybozu::hash_key::hash_key" name="hash_key">
+    <brief>Construct from a statically allocated memory.</brief>
+    <doc>Construct from a statically allocated memory.
+
+As long as the constructed object lives, the memory pointed by `p`
+must not be freed.</doc>
+    <argument id="cybozu::hash_key::hash_key::p" name="p">
+      <doc>Pointer to a statically allocated memory.</doc>
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="cybozu::hash_key::hash_key::len" name="len">
+      <doc>Length of the key.</doc>
+      <type name="std::size_t" />
+    </argument>
+  </constructor>
+  <constructor id="cybozu::hash_key::hash_key" name="hash_key">
+    <brief>Construct by moving a &amp;lt;std::vector&amp;gt;.</brief>
+    <doc>Construct by moving a &amp;lt;std::vector&amp;gt;.  Sample usage:
+```
+hash_key( std::vector&lt;char&gt;(p, p+len) )
+```</doc>
+    <argument id="cybozu::hash_key::hash_key::v" name="v">
+      <type name="std::vector&lt;char, std::allocator&lt;char&gt; &gt;" />
+    </argument>
+  </constructor>
+  <constructor id="cybozu::hash_key::hash_key" name="hash_key">
+    <brief>Copy constructor.</brief>
+    <argument id="cybozu::hash_key::hash_key::rhs" name="rhs">
+      <type name="hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="cybozu::hash_key::hash_key" name="hash_key">
+    <brief>Move contructor and assign operator.</brief>
+    <argument id="cybozu::hash_key::hash_key::rhs" name="rhs">
+      <type name="hash_key &amp;&amp;" />
+    </argument>
+  </constructor>
+  <method id="cybozu::hash_key::data" name="data">
+    <return>
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </return>
+  </method>
+  <method id="cybozu::hash_key::has_prefix" name="has_prefix">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::hash_key::has_prefix::p" name="p">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="cybozu::hash_key::has_prefix::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_key::hash" name="hash">
+    <return>
+      <type name="uint64_t" />
+    </return>
+  </method>
+  <method id="cybozu::hash_key::length" name="length">
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="cybozu::hash_key::operator=" name="operator=">
+    <return>
+      <type name="hash_key" qualifier=" &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </return>
+    <argument id="cybozu::hash_key::operator=::rhs" name="rhs">
+      <type name="hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+  </method>
+  <method abstract="yes" id="cybozu::hash_key::operator=" name="operator=">
+    <return>
+      <type name="hash_key" qualifier=" &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </return>
+    <argument id="cybozu::hash_key::operator=::rhs" name="rhs">
+      <type name="hash_key &amp;&amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_key::str" name="str">
+    <return>
+      <type name="std::string" />
+    </return>
+  </method>
+</class>

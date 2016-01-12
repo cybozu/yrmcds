@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='utf-8'?>
+<classtemplate id="cybozu::hash_map" name="hash_map" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Highly concurrent object hash map.</brief>
+  <doc>Keys for this hash map are <ref ref="cybozu::hash_key#cybozu::hash_key">cybozu::hash_key</ref> whereas objects are of type `T`.
+`T` must be either move-constructible or copyable.
+
+Each bucket in the hash map has its unique mutex to guard itself.
+This design reduces contensions between threads drastically in exchange
+for some functions such as dynamic resizing of the number of buckets.</doc>
+  <templatetypeparameter id="cybozu::hash_map::T" name="T" />
+  <typedef id="cybozu::hash_map::handler" name="handler">
+    <type name="std::function&lt;_Signature&gt;" />
+  </typedef>
+  <typedef id="cybozu::hash_map::creator" name="creator">
+    <type name="std::function&lt;_Signature&gt;" />
+  </typedef>
+  <class name="bucket" ref="cybozu::hash_map::bucket#cybozu::hash_map::bucket">
+    <brief>Hash map bucket.</brief>
+  </class>
+  <constructor id="cybozu::hash_map::hash_map&lt;T&gt;" name="hash_map&lt;T&gt;">
+    <argument id="cybozu::hash_map::hash_map&lt;T&gt;::buckets" name="buckets">
+      <type builtin="yes" name="unsigned int" />
+    </argument>
+  </constructor>
+  <method id="cybozu::hash_map::apply_nolock" name="apply_nolock">
+    <brief>Handle or insert an object.</brief>
+    <doc>This function can be used to handle an existing object, or
+to insert a new object when such an object does not exist.
+
+if `h` is `nullptr` and there is an existing object for `key`,
+`false` is returned.  If `c` is `nullptr` and there is no
+object for `key`, `false` is returned.
+
+If `h` is not `nullptr` and there is an existing object for
+`key`, then `h` is called and the return value of `h` is
+returned.  This means `h` can return `false` if it failed
+to handle the object.
+
+If `c` is not `nullptr` and there is no object for `key`,
+an object is created by calling `c` and stored, then `true`
+is returned.
+
+</doc>
+    <return>
+      <doc>`true` if succeeded, `false` otherwise.</doc>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::hash_map::apply_nolock::key" name="key">
+      <doc>The object's key.</doc>
+      <type name="hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="cybozu::hash_map::apply_nolock::h" name="h">
+      <doc>A function to handle an existing object.</doc>
+      <type name="hash_map&lt;T&gt;::handler" qualifier=" const &amp;" ref="cybozu::hash_map#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::hash_map::apply_nolock::c" name="c">
+      <doc>A function to create a new object.</doc>
+      <type name="hash_map&lt;T&gt;::creator" qualifier=" const &amp;" ref="cybozu::hash_map#cybozu::hash_map::creator" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::apply" name="apply">
+    <brief>Thread-safe <ref ref="cybozu::hash_map#cybozu::hash_map::apply_nolock">cybozu::hash_map::apply_nolock</ref>.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::hash_map::apply::key" name="key">
+      <type name="hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="cybozu::hash_map::apply::h" name="h">
+      <type name="hash_map&lt;T&gt;::handler" qualifier=" const &amp;" ref="cybozu::hash_map#cybozu::hash_map::handler" />
+    </argument>
+    <argument id="cybozu::hash_map::apply::c" name="c">
+      <type name="hash_map&lt;T&gt;::creator" qualifier=" const &amp;" ref="cybozu::hash_map#cybozu::hash_map::creator" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::foreach" name="foreach">
+    <brief>Apply `pred` for each object.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::hash_map::foreach::pred" name="pred">
+      <doc>Predicate function</doc>
+      <type name="std::function&lt;_Signature&gt;" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::remove_nolock" name="remove_nolock">
+    <brief>Remove an object for `key`.</brief>
+    <doc>This removes an object associated with `key`.  If there is no
+object associated with `key`, return `false`.  If `callback`
+is not `nullptr`, it is called when an object is removed.
+
+</doc>
+    <return>
+      <doc>`true` if successfully removed, `false` otherwise.</doc>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::hash_map::remove_nolock::key" name="key">
+      <doc>The object's key.</doc>
+      <type name="hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="cybozu::hash_map::remove_nolock::callback" name="callback">
+      <doc>A function called when an object is removed.</doc>
+      <type name="std::function&lt;void (const cybozu::hash_key &amp;)&gt;" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::remove" name="remove">
+    <brief>Thread-safe <ref ref="cybozu::hash_map#cybozu::hash_map::remove_nolock">cybozu::hash_map::remove_nolock</ref>.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::hash_map::remove::key" name="key">
+      <type name="hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="cybozu::hash_map::remove::callback" name="callback">
+      <type name="std::function&lt;void (const cybozu::hash_key &amp;)&gt;" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::remove_if" name="remove_if">
+    <brief>Remove an object for `key` if `pred` returns `true`.</brief>
+    <doc>This function removes an object assiciated with `key` if a
+predicate function returns `true`.  This function is thread-safe.
+
+</doc>
+    <return>
+      <doc>`true` if object existed, `false` otherwise.</doc>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::hash_map::remove_if::key" name="key">
+      <doc>The object's key.</doc>
+      <type name="hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="cybozu::hash_map::remove_if::pred" name="pred">
+      <doc>A predicate function.</doc>
+      <type name="std::function&lt;_Signature&gt;" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::bucket_count" name="bucket_count">
+    <brief>Return the number of buckets in this hash map.</brief>
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method id="cybozu::hash_map::get_bucket" name="get_bucket">
+    <return>
+      <type name="hash_map&lt;T&gt;::bucket" qualifier=" &amp;" ref="cybozu::hash_map::bucket#cybozu::hash_map::bucket" />
+    </return>
+    <argument id="cybozu::hash_map::get_bucket::key" name="key">
+      <type name="hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+  </method>
+  <method id="cybozu::hash_map::begin" name="begin">
+    <return>
+      <type name="hash_map&lt;T&gt;::iterator" />
+    </return>
+  </method>
+  <method id="cybozu::hash_map::end" name="end">
+    <return>
+      <type name="hash_map&lt;T&gt;::iterator" />
+    </return>
+  </method>
+</classtemplate>

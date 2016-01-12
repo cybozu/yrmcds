@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="yrmcds::sync_request" name="sync_request" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <constructor id="yrmcds::sync_request::sync_request" name="sync_request">
+    <argument id="yrmcds::sync_request::sync_request::callback" name="callback">
+      <type name="std::function&lt;void ()&gt;" />
+    </argument>
+  </constructor>
+  <method id="yrmcds::sync_request::check" name="check">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="yrmcds::sync_request::set" name="set">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::sync_request::set::n" name="n">
+      <type builtin="yes" name="int" />
+    </argument>
+  </method>
+</class>

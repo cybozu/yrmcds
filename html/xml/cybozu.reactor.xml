@@ -1,0 +1,139 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::reactor" name="reactor" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>The reactor.</brief>
+  <doc>This reactor internally uses epoll with edge-triggered mode.</doc>
+  <enum anonymous="yes" id="cybozu::reactor::reactor_event" name="reactor_event">
+    <brief>Events to poll.</brief>
+    <enumvalue id="cybozu::reactor::EVENT_IN" name="EVENT_IN" value="1" />
+    <enumvalue id="cybozu::reactor::EVENT_OUT" name="EVENT_OUT" value="4" />
+  </enum>
+  <constructor abstract="yes" id="cybozu::reactor::reactor" name="reactor" />
+  <destructor abstract="yes" id="cybozu::reactor::~reactor" name="~reactor" />
+  <method id="cybozu::reactor::add_readable" name="add_readable">
+    <brief>Add a resource to the readable resource list.</brief>
+    <doc>Only <ref ref="cybozu::resource#cybozu::resource::on_readable">cybozu::resource::on_readable</ref> may call this when it stops reading
+from a resource before it encounters `EAGAIN` or `EWOULDBLOCK`.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::reactor::add_readable::res" name="res">
+      <type name="resource" qualifier=" const &amp;" ref="cybozu::resource#cybozu::resource" />
+    </argument>
+  </method>
+  <method abstract="yes" id="cybozu::reactor::add_resource" name="add_resource">
+    <brief>Add a resource to the reactor.</brief>
+    <doc>Add a resource to the reactor.  The ownership of the resource
+will be moved to the reactor.  Only the reactor thread can use this.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::reactor::add_resource::res" name="res">
+      <type name="std::unique_ptr&lt;cybozu::resource, std::default_delete&lt;cybozu::resource&gt; &gt;" />
+    </argument>
+    <argument id="cybozu::reactor::add_resource::events" name="events">
+      <doc>`EVENT_IN`, `EVENT_OUT`, or bitwise OR of them.</doc>
+      <type builtin="yes" name="int" />
+    </argument>
+  </method>
+  <method id="cybozu::reactor::fix_garbage" name="fix_garbage">
+    <brief>Fix the garbage resources to be destructed at the next <ref ref="cybozu::reactor#cybozu::reactor::gc">cybozu::reactor::gc</ref>.</brief>
+    <doc>Fix the garbage resources to be destructed at the next <ref ref="cybozu::reactor#cybozu::reactor::gc">cybozu::reactor::gc</ref>.
+Only the reactor thread can use this.
+
+</doc>
+    <return>
+      <doc>`false` if there are no garbage resources, `true` otherwise.</doc>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="cybozu::reactor::gc" name="gc">
+    <brief>Destruct garbage resources fixed by <ref ref="cybozu::reactor#cybozu::reactor::fix_garbage">cybozu::reactor::fix_garbage</ref>.</brief>
+    <doc>Destruct garbage resources fixed by <ref ref="cybozu::reactor#cybozu::reactor::fix_garbage">cybozu::reactor::fix_garbage</ref>.
+Only the reactor thread can use this.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="cybozu::reactor::has_garbage" name="has_garbage">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="cybozu::reactor::invalidate" name="invalidate">
+    <brief>Invalidate all registered resources.</brief>
+    <doc>Invalidate all registered resources to unblock other threads.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="cybozu::reactor::modify_events" name="modify_events">
+    <brief>Modify epoll events for a resource.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::reactor::modify_events::res" name="res">
+      <type name="resource" qualifier=" const &amp;" ref="cybozu::resource#cybozu::resource" />
+    </argument>
+    <argument id="cybozu::reactor::modify_events::events" name="events">
+      <doc>`EVENT_IN`, `EVENT_OUT`, or bitwise OR of them.</doc>
+      <type builtin="yes" name="int" />
+    </argument>
+  </method>
+  <method id="cybozu::reactor::quit" name="quit">
+    <brief>Quit the run loop gracefully.</brief>
+    <doc>Call this to quit the run loop gracefully.
+Only the reactor thread can use this.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="cybozu::reactor::remove_resource" name="remove_resource">
+    <brief>Remove a registered resource.</brief>
+    <doc>This is only for the reactor thread.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::reactor::remove_resource::res" name="res">
+      <type name="resource" qualifier=" const &amp;" ref="cybozu::resource#cybozu::resource" />
+    </argument>
+  </method>
+  <method id="cybozu::reactor::request_removal" name="request_removal">
+    <brief>Add a removal request for a resource.</brief>
+    <doc>Resources can be shared with threads other than the reactor thread.
+When such a thread successfully invalidates a resource, the thread
+need to request the reactor thread to remove the resource by
+calling this.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::reactor::request_removal::res" name="res">
+      <type name="resource" qualifier=" const &amp;" ref="cybozu::resource#cybozu::resource" />
+    </argument>
+  </method>
+  <method abstract="yes" id="cybozu::reactor::run" name="run">
+    <brief>Run the reactor loop.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::reactor::run::callback" name="callback">
+      <doc>Function called at each interval.</doc>
+      <type name="std::function&lt;void (cybozu::reactor &amp;)&gt;" />
+    </argument>
+    <argument id="cybozu::reactor::run::interval" name="interval">
+      <doc>Interval between two callbacks in seconds.</doc>
+      <type builtin="yes" name="int" />
+    </argument>
+  </method>
+  <method id="cybozu::reactor::run_once" name="run_once">
+    <brief>Run the reactor once.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="cybozu::reactor::size" name="size">
+    <brief>Return the number of registered and still valid resources.</brief>
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+</class>

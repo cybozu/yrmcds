@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache::repl_socket" name="repl_socket" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="cybozu::tcp_socket" ref="cybozu::tcp_socket#cybozu::tcp_socket" />
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for connected TCP sockets.</brief>
+  </base>
+  <constructor id="yrmcds::memcache::repl_socket::repl_socket" name="repl_socket">
+    <argument id="yrmcds::memcache::repl_socket::repl_socket::fd" name="fd">
+      <type builtin="yes" name="int" />
+    </argument>
+    <argument id="yrmcds::memcache::repl_socket::repl_socket::bufcnt" name="bufcnt">
+      <type builtin="yes" name="unsigned int" />
+    </argument>
+    <argument id="yrmcds::memcache::repl_socket::repl_socket::finder" name="finder">
+      <type name="std::function&lt;cybozu::worker *()&gt;" qualifier=" const &amp;" />
+    </argument>
+  </constructor>
+  <method id="yrmcds::memcache::repl_socket::on_buffer_full" name="on_buffer_full" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="cybozu::tcp_socket::on_buffer_full" ref="cybozu::tcp_socket#cybozu::tcp_socket::on_buffer_full" />
+  </method>
+  <method id="yrmcds::memcache::repl_socket::timed_out" name="timed_out">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+</class>

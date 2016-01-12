@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache::binary_request" name="binary_request" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Binary request parser</brief>
+  <variable id="yrmcds::memcache::binary_request::EXPTIME_NONE" name="EXPTIME_NONE">
+    <brief>Special expiration time for increment/decrement.</brief>
+    <type name="time_t" qualifier=" const" />
+  </variable>
+  <constructor id="yrmcds::memcache::binary_request::binary_request" name="binary_request">
+    <argument id="yrmcds::memcache::binary_request::binary_request::p" name="p">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="yrmcds::memcache::binary_request::binary_request::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+  </constructor>
+  <method id="yrmcds::memcache::binary_request::cas_unique" name="cas_unique">
+    <brief>Return `cas unique` sent with CAS command.</brief>
+    <return>
+      <type name="uint64_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::command" name="command">
+    <brief>Return the command type.</brief>
+    <return>
+      <type name="binary_command" ref="yrmcds::memcache#yrmcds::memcache::binary_command" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::data" name="data">
+    <brief>Return data block sent with storage commands.</brief>
+    <return>
+      <type name="item" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::exptime" name="exptime">
+    <brief>Return `exptime`.</brief>
+    <return>
+      <type name="time_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::flags" name="flags">
+    <brief>Return `flags` sent with storage commands.</brief>
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::initial" name="initial">
+    <brief>Return an unsigned 64bit integer value to initialize an object.</brief>
+    <return>
+      <type name="uint64_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::key" name="key">
+    <brief>Return `key`.</brief>
+    <return>
+      <type name="item" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::length" name="length">
+    <brief>Return length of the request.</brief>
+    <doc>Return length of the request.
+If the request is incomplete, zero is returned.</doc>
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::opaque" name="opaque">
+    <brief>Return `opaque` sent with the request.</brief>
+    <return>
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::quiet" name="quiet">
+    <brief>The command is quiet or not.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::stats" name="stats">
+    <brief>Return memcache stats category sent with STATS.</brief>
+    <return>
+      <type name="stats_t" ref="yrmcds::memcache#yrmcds::memcache::stats_t" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::status" name="status">
+    <brief>Response status, if determined by the request.</brief>
+    <return>
+      <type name="binary_status" ref="yrmcds::memcache#yrmcds::memcache::binary_status" />
+    </return>
+  </method>
+  <method id="yrmcds::memcache::binary_request::value" name="value">
+    <brief>Return an unsigned 64bit integer value for increment or decrement.</brief>
+    <return>
+      <type name="uint64_t" />
+    </return>
+  </method>
+</class>

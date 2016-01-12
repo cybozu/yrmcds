@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::counter_config" name="counter_config" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Configurations for counter extension.</brief>
+  <method id="yrmcds::counter_config::buckets" name="buckets">
+    <return>
+      <type builtin="yes" name="unsigned int" />
+    </return>
+  </method>
+  <method id="yrmcds::counter_config::enable" name="enable">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::counter_config::load" name="load">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::counter_config::load::" name="">
+      <type name="cybozu::config_parser" qualifier=" const &amp;" ref="cybozu::config_parser#cybozu::config_parser" />
+    </argument>
+  </method>
+  <method id="yrmcds::counter_config::max_connections" name="max_connections">
+    <return>
+      <type builtin="yes" name="unsigned int" />
+    </return>
+  </method>
+  <method id="yrmcds::counter_config::port" name="port">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method id="yrmcds::counter_config::stat_interval" name="stat_interval">
+    <return>
+      <type builtin="yes" name="unsigned int" />
+    </return>
+  </method>
+</class>

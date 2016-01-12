@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::config_parser" name="config_parser" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Parse configuration files.</brief>
+  <struct name="illegal_value" ref="cybozu::config_parser::illegal_value#cybozu::config_parser::illegal_value">
+    <brief>exception for illegal value error.</brief>
+  </struct>
+  <struct name="not_found" ref="cybozu::config_parser::not_found#cybozu::config_parser::not_found">
+    <brief>exception for key not found error.</brief>
+  </struct>
+  <struct name="parse_error" ref="cybozu::config_parser::parse_error#cybozu::config_parser::parse_error">
+    <brief>exception for invalid file format.</brief>
+  </struct>
+  <constructor id="cybozu::config_parser::config_parser" name="config_parser">
+    <brief>Create an empty config_parser object.</brief>
+  </constructor>
+  <constructor id="cybozu::config_parser::config_parser" name="config_parser">
+    <brief>Create a <ref ref="cybozu::config_parser#cybozu::config_parser::config_parser">cybozu::config_parser::config_parser</ref> and <ref ref="cybozu::config_parser#cybozu::config_parser::config_parser">config_parser</ref> and load the file at `path`.</brief>
+    <doc>Create a <ref ref="cybozu::config_parser#cybozu::config_parser::config_parser">cybozu::config_parser::config_parser</ref> and <ref ref="cybozu::config_parser#cybozu::config_parser::config_parser">config_parser</ref> and load the file at `path`.
+Raise <ref ref="cybozu::config_parser::parse_error#cybozu::config_parser::parse_error">cybozu::config_parser::parse_error</ref> exception if the file contains an invalid line.</doc>
+    <argument id="cybozu::config_parser::config_parser::path" name="path">
+      <doc>The path to the configuration file.</doc>
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </constructor>
+  <method id="cybozu::config_parser::exists" name="exists">
+    <brief>Return `true` if `key` exists.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::config_parser::exists::key" name="key">
+      <doc>A configuration key.</doc>
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::config_parser::get" name="get">
+    <brief>Get a value associated with `key`.</brief>
+    <doc>Get a value associated with `key`.
+Raise <ref ref="cybozu::config_parser::not_found#cybozu::config_parser::not_found">cybozu::config_parser::not_found</ref> exception if the key is not found.
+
+</doc>
+    <return>
+      <doc>A reference to the &amp;lt;std::string&amp;gt; associated with `key`.</doc>
+      <type name="std::string" qualifier=" const &amp;" />
+    </return>
+    <argument id="cybozu::config_parser::get::key" name="key">
+      <doc>A configuration key.</doc>
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::config_parser::get_as_bool" name="get_as_bool">
+    <brief>Get a boolean converted from the value associated with `key`.</brief>
+    <doc>Get a boolean converted from the value associated with `key`.
+Raise <ref ref="cybozu::config_parser::not_found#cybozu::config_parser::not_found">cybozu::config_parser::not_found</ref> or <ref ref="cybozu::config_parser::illegal_value#cybozu::config_parser::illegal_value">cybozu::config_parser::illegal_value</ref>.
+
+</doc>
+    <return>
+      <doc>`true` or `false` converted from the associated value.</doc>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::config_parser::get_as_bool::key" name="key">
+      <doc>A configuration key.</doc>
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::config_parser::get_as_int" name="get_as_int">
+    <brief>Get an integer converted from the value associated with `key`.</brief>
+    <doc>Get an integer converted from the value associated with `key`.
+Raise <ref ref="cybozu::config_parser::not_found#cybozu::config_parser::not_found">cybozu::config_parser::not_found</ref> or <ref ref="cybozu::config_parser::illegal_value#cybozu::config_parser::illegal_value">cybozu::config_parser::illegal_value</ref>.
+
+</doc>
+    <return>
+      <doc>An integer converted from the associated value.</doc>
+      <type builtin="yes" name="int" />
+    </return>
+    <argument id="cybozu::config_parser::get_as_int::key" name="key">
+      <doc>A configuration key.</doc>
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="cybozu::config_parser::load" name="load">
+    <brief>Load a configuration file.</brief>
+    <doc>Load a configuration file.
+Raise <ref ref="cybozu::config_parser::parse_error#cybozu::config_parser::parse_error">cybozu::config_parser::parse_error</ref> exception if the file contains an invalid line.
+All previously loaded configurations will be cleared.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::config_parser::load::path" name="path">
+      <doc>The path to the configuration file.</doc>
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::config_parser::set" name="set">
+    <brief>Set a configuration value.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::config_parser::set::key" name="key">
+      <doc>A configuration key.</doc>
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+    <argument id="cybozu::config_parser::set::value" name="value">
+      <doc>The associated value.</doc>
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+</class>

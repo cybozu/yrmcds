@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="cybozu::config_parser::illegal_value" name="illegal_value" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>exception for illegal value error.</brief>
+  <base access="public">
+    <type name="std::runtime_error" />
+  </base>
+  <constructor id="cybozu::config_parser::illegal_value::illegal_value" name="illegal_value">
+    <argument id="cybozu::config_parser::illegal_value::illegal_value::key" name="key">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </constructor>
+</struct>

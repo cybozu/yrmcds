@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="yrmcds::memcache::handler" interface="true" name="handler" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="protocol_handler" ref="yrmcds::protocol_handler#yrmcds::protocol_handler" />
+    <brief>An interface for protocol-specific logics.</brief>
+  </base>
+  <constructor abstract="yes" id="yrmcds::memcache::handler::handler" name="handler">
+    <argument id="yrmcds::memcache::handler::handler::finder" name="finder">
+      <type name="std::function&lt;cybozu::worker *()&gt;" qualifier=" const &amp;" />
+    </argument>
+    <argument id="yrmcds::memcache::handler::handler::reactor" name="reactor">
+      <type name="cybozu::reactor" qualifier=" &amp;" ref="cybozu::reactor#cybozu::reactor" />
+    </argument>
+    <argument id="yrmcds::memcache::handler::handler::syncer" name="syncer">
+      <type name="syncer" qualifier=" &amp;" ref="yrmcds::syncer#yrmcds::syncer" />
+    </argument>
+  </constructor>
+  <method abstract="yes" id="yrmcds::memcache::handler::clear" name="clear" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="protocol_handler::clear" ref="yrmcds::protocol_handler#yrmcds::protocol_handler::clear" />
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::handler::dump_stats" name="dump_stats" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="protocol_handler::dump_stats" ref="yrmcds::protocol_handler#yrmcds::protocol_handler::dump_stats" />
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::handler::on_master_end" name="on_master_end" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="protocol_handler::on_master_end" ref="yrmcds::protocol_handler#yrmcds::protocol_handler::on_master_end" />
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::handler::on_master_interval" name="on_master_interval" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="protocol_handler::on_master_interval" ref="yrmcds::protocol_handler#yrmcds::protocol_handler::on_master_interval" />
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::handler::on_master_start" name="on_master_start" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="protocol_handler::on_master_start" ref="yrmcds::protocol_handler#yrmcds::protocol_handler::on_master_start" />
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::handler::on_slave_end" name="on_slave_end" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="protocol_handler::on_slave_end" ref="yrmcds::protocol_handler#yrmcds::protocol_handler::on_slave_end" />
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::handler::on_slave_interval" name="on_slave_interval" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="protocol_handler::on_slave_interval" ref="yrmcds::protocol_handler#yrmcds::protocol_handler::on_slave_interval" />
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::handler::on_slave_start" name="on_slave_start" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <override name="protocol_handler::on_slave_start" ref="yrmcds::protocol_handler#yrmcds::protocol_handler::on_slave_start" />
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::handler::on_start" name="on_start" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="protocol_handler::on_start" ref="yrmcds::protocol_handler#yrmcds::protocol_handler::on_start" />
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::handler::reactor_gc_ready" name="reactor_gc_ready" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <override name="protocol_handler::reactor_gc_ready" ref="yrmcds::protocol_handler#yrmcds::protocol_handler::reactor_gc_ready" />
+  </method>
+</class>

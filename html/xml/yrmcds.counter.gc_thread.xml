@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::counter::gc_thread" name="gc_thread" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="cybozu::thread_base&lt;yrmcds::counter::gc_thread, 1&gt;" />
+  </base>
+  <constructor id="yrmcds::counter::gc_thread::gc_thread" name="gc_thread">
+    <argument id="yrmcds::counter::gc_thread::gc_thread::hash" name="hash">
+      <type name="cybozu::hash_map&lt;yrmcds::counter::object&gt;" qualifier=" &amp;" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::counter::gc_thread::gc_thread" name="gc_thread">
+    <argument id="yrmcds::counter::gc_thread::gc_thread::" name="">
+      <type name="gc_thread" qualifier=" const &amp;" ref="yrmcds::counter::gc_thread#yrmcds::counter::gc_thread" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::counter::gc_thread::gc_thread" name="gc_thread">
+    <argument id="yrmcds::counter::gc_thread::gc_thread::" name="">
+      <type name="gc_thread &amp;&amp;" />
+    </argument>
+  </constructor>
+  <destructor id="yrmcds::counter::gc_thread::~gc_thread" name="~gc_thread" />
+  <method abstract="yes" id="yrmcds::counter::gc_thread::operator=" name="operator=">
+    <return>
+      <type name="gc_thread" qualifier=" &amp;" ref="yrmcds::counter::gc_thread#yrmcds::counter::gc_thread" />
+    </return>
+    <argument id="yrmcds::counter::gc_thread::operator=::" name="">
+      <type name="gc_thread" qualifier=" const &amp;" ref="yrmcds::counter::gc_thread#yrmcds::counter::gc_thread" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::counter::gc_thread::operator=" name="operator=">
+    <return>
+      <type name="gc_thread" qualifier=" &amp;" ref="yrmcds::counter::gc_thread#yrmcds::counter::gc_thread" />
+    </return>
+    <argument id="yrmcds::counter::gc_thread::operator=::" name="">
+      <type name="gc_thread &amp;&amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::counter::gc_thread::run" name="run">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

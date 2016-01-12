@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="cybozu::signal_reader" name="signal_reader" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for [`signalfd`](http://manpages.ubuntu.com/manpages/precise/en/man2/signalfd.2.html).</brief>
+  <base access="public">
+    <type name="resource" ref="cybozu::resource#cybozu::resource" />
+    <brief>An abstraction of a file descriptor.</brief>
+  </base>
+  <constructor id="cybozu::signal_reader::signal_reader" name="signal_reader">
+    <brief>Constructor.</brief>
+    <doc>Construct a signal reading resource.  Signals set in `mask`
+need to be blocked on all threads.</doc>
+    <argument id="cybozu::signal_reader::signal_reader::mask" name="mask">
+      <doc>A set of signals to be handled by this resource.</doc>
+      <type name="sigset_t" qualifier=" const *" />
+    </argument>
+    <argument id="cybozu::signal_reader::signal_reader::callback" name="callback">
+      <doc>Callback function to handle received signals.</doc>
+      <type name="callback_t" />
+    </argument>
+  </constructor>
+  <constructor id="cybozu::signal_reader::signal_reader" name="signal_reader">
+    <brief>Constructor.</brief>
+    <doc>Construct a signal reading resource.  Signals set in `mask`
+need to be blocked on all threads.  This constructor leaves
+the callback function empty.  Use `set_handler` to set one.</doc>
+    <argument id="cybozu::signal_reader::signal_reader::mask" name="mask">
+      <doc>A set of signals to be handled by this resource.</doc>
+      <type name="sigset_t" qualifier=" const *" />
+    </argument>
+  </constructor>
+  <destructor id="cybozu::signal_reader::~signal_reader" name="~signal_reader" virtual="yes" />
+  <method id="cybozu::signal_reader::set_handler" name="set_handler">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::signal_reader::set_handler::callback" name="callback">
+      <type name="callback_t" qualifier=" const &amp;" />
+    </argument>
+  </method>
+</class>

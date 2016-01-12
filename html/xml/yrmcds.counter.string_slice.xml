@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="yrmcds::counter::string_slice" name="string_slice" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <field id="yrmcds::counter::string_slice::p" name="p">
+    <type builtin="yes" name="char" qualifier=" const *" />
+  </field>
+  <field id="yrmcds::counter::string_slice::len" name="len">
+    <type name="std::size_t" />
+  </field>
+  <constructor id="yrmcds::counter::string_slice::string_slice" name="string_slice" />
+  <constructor id="yrmcds::counter::string_slice::string_slice" name="string_slice">
+    <argument id="yrmcds::counter::string_slice::string_slice::p" name="p">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="yrmcds::counter::string_slice::string_slice::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+  </constructor>
+</struct>

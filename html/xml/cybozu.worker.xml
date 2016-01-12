@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::worker" name="worker" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>General worker thread implementation.</brief>
+  <doc>Every worker thread has a pre-allocated internal memory buffer.
+A worker receives a new `job` through <ref ref="cybozu::worker#cybozu::worker::post_job">post_job</ref> as a callback function,
+then invokes the function with that buffer.
+
+To stop the worker, call <ref ref="cybozu::worker#cybozu::worker::stop">stop</ref>.</doc>
+  <base access="public">
+    <type name="thread_base&lt;cybozu::worker, 1&gt;" />
+  </base>
+  <constructor id="cybozu::worker::worker" name="worker">
+    <brief>Constructor.</brief>
+    <argument id="cybozu::worker::worker::bufsiz" name="bufsiz">
+      <doc>The size of the internal buffer.</doc>
+      <type name="std::size_t" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="cybozu::worker::worker" name="worker">
+    <brief>forbid copy &amp; assignment</brief>
+    <argument id="cybozu::worker::worker::" name="">
+      <type name="worker" qualifier=" const &amp;" ref="cybozu::worker#cybozu::worker" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="cybozu::worker::worker" name="worker">
+    <argument id="cybozu::worker::worker::" name="">
+      <type name="worker &amp;&amp;" />
+    </argument>
+  </constructor>
+  <destructor id="cybozu::worker::~worker" name="~worker" />
+  <method id="cybozu::worker::is_running" name="is_running">
+    <brief>Return `true` while this worker thread is busy for a job.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method abstract="yes" id="cybozu::worker::operator=" name="operator=">
+    <return>
+      <type name="worker" qualifier=" &amp;" ref="cybozu::worker#cybozu::worker" />
+    </return>
+    <argument id="cybozu::worker::operator=::" name="">
+      <type name="worker" qualifier=" const &amp;" ref="cybozu::worker#cybozu::worker" />
+    </argument>
+  </method>
+  <method abstract="yes" id="cybozu::worker::operator=" name="operator=">
+    <return>
+      <type name="worker" qualifier=" &amp;" ref="cybozu::worker#cybozu::worker" />
+    </return>
+    <argument id="cybozu::worker::operator=::" name="">
+      <type name="worker &amp;&amp;" />
+    </argument>
+  </method>
+  <method id="cybozu::worker::post_job" name="post_job">
+    <brief>Ask this worker thread to execute a new job.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::worker::post_job::job_" name="job_">
+      <doc>A callback function to be executed by the worker thread.</doc>
+      <type name="job" />
+    </argument>
+  </method>
+  <method id="cybozu::worker::run" name="run">
+    <brief>CRTP method for <ref ref="cybozu::thread_base#cybozu::thread_base">cybozu::thread_base</ref>.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="cybozu::worker::stop" name="stop">
+    <brief>Stop this worker thread.</brief>
+    <doc>The thread will be joined automatically.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::counter::request" name="request" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <constructor id="yrmcds::counter::request::request" name="request">
+    <argument id="yrmcds::counter::request::request::p" name="p">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="yrmcds::counter::request::request::len" name="len">
+      <type name="std::size_t" />
+    </argument>
+  </constructor>
+  <method id="yrmcds::counter::request::body_length" name="body_length">
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::request::command" name="command">
+    <return>
+      <type name="command" ref="yrmcds::counter#yrmcds::counter::command" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::request::flags" name="flags">
+    <return>
+      <type name="uint8_t" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::request::length" name="length">
+    <return>
+      <type name="std::size_t" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::request::maximum" name="maximum">
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::request::name" name="name">
+    <return>
+      <type name="string_slice" ref="yrmcds::counter::string_slice#yrmcds::counter::string_slice" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::request::opaque" name="opaque">
+    <return>
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::request::resources" name="resources">
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::request::status" name="status">
+    <return>
+      <type name="status" ref="yrmcds::counter#yrmcds::counter::status" />
+    </return>
+  </method>
+</class>

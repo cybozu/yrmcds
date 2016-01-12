@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<classtemplate id="cybozu::thread_base" name="thread_base" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>A CRTP template wrapping &amp;lt;std::thread&amp;gt;.</brief>
+  <doc>A curiously-recurring-template-pattern (CRTP) template to wrap
+&amp;lt;std::thread&amp;gt; with associated data structures.  Derived classes
+need to implement `void run()`.
+
+&amp;lt;std::system\_error&amp;gt; and &amp;lt;std::exception&amp;gt; will be caught and logged.
+If `exit_on_exception` is not 0, then `exit(exit_on_exception)` is
+called to terminate the program.</doc>
+  <templatetypeparameter id="cybozu::thread_base::Derived" name="Derived" />
+  <templatenontypeparameter default="1" id="cybozu::thread_base::exit_on_exception" name="exit_on_exception">
+    <type builtin="yes" name="int" />
+  </templatenontypeparameter>
+  <method id="cybozu::thread_base::start" name="start">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="cybozu::thread_base::run_in_try" name="run_in_try">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="cybozu::thread_base::done" name="done">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <field access="protected" id="cybozu::thread_base::m_done" name="m_done">
+    <type name="std::atomic&lt;bool&gt;" />
+  </field>
+  <field access="protected" id="cybozu::thread_base::m_thread" name="m_thread">
+    <type name="std::thread" />
+  </field>
+</classtemplate>

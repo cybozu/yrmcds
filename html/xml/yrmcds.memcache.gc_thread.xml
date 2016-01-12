@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache::gc_thread" name="gc_thread" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="cybozu::thread_base&lt;yrmcds::memcache::gc_thread, 1&gt;" />
+  </base>
+  <constructor id="yrmcds::memcache::gc_thread::gc_thread" name="gc_thread">
+    <argument id="yrmcds::memcache::gc_thread::gc_thread::m" name="m">
+      <type name="cybozu::hash_map&lt;yrmcds::memcache::object&gt;" qualifier=" &amp;" />
+    </argument>
+    <argument id="yrmcds::memcache::gc_thread::gc_thread::slaves" name="slaves">
+      <type name="std::vector&lt;yrmcds::memcache::repl_socket *, std::allocator&lt;yrmcds::memcache::repl_socket *&gt; &gt;" qualifier=" const &amp;" />
+    </argument>
+    <argument id="yrmcds::memcache::gc_thread::gc_thread::new_slaves" name="new_slaves">
+      <type name="std::vector&lt;yrmcds::memcache::repl_socket *, std::allocator&lt;yrmcds::memcache::repl_socket *&gt; &gt;" qualifier=" const &amp;" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::memcache::gc_thread::gc_thread" name="gc_thread">
+    <argument id="yrmcds::memcache::gc_thread::gc_thread::" name="">
+      <type name="gc_thread" qualifier=" const &amp;" ref="yrmcds::memcache::gc_thread#yrmcds::memcache::gc_thread" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::memcache::gc_thread::gc_thread" name="gc_thread">
+    <argument id="yrmcds::memcache::gc_thread::gc_thread::" name="">
+      <type name="gc_thread &amp;&amp;" />
+    </argument>
+  </constructor>
+  <destructor id="yrmcds::memcache::gc_thread::~gc_thread" name="~gc_thread" />
+  <method abstract="yes" id="yrmcds::memcache::gc_thread::operator=" name="operator=">
+    <return>
+      <type name="gc_thread" qualifier=" &amp;" ref="yrmcds::memcache::gc_thread#yrmcds::memcache::gc_thread" />
+    </return>
+    <argument id="yrmcds::memcache::gc_thread::operator=::" name="">
+      <type name="gc_thread" qualifier=" const &amp;" ref="yrmcds::memcache::gc_thread#yrmcds::memcache::gc_thread" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::gc_thread::operator=" name="operator=">
+    <return>
+      <type name="gc_thread" qualifier=" &amp;" ref="yrmcds::memcache::gc_thread#yrmcds::memcache::gc_thread" />
+    </return>
+    <argument id="yrmcds::memcache::gc_thread::operator=::" name="">
+      <type name="gc_thread &amp;&amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::gc_thread::run" name="run">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache::memcache_socket" name="memcache_socket" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="cybozu::tcp_socket" ref="cybozu::tcp_socket#cybozu::tcp_socket" />
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for connected TCP sockets.</brief>
+  </base>
+  <constructor abstract="yes" id="yrmcds::memcache::memcache_socket::memcache_socket" name="memcache_socket">
+    <argument id="yrmcds::memcache::memcache_socket::memcache_socket::fd" name="fd">
+      <type builtin="yes" name="int" />
+    </argument>
+    <argument id="yrmcds::memcache::memcache_socket::memcache_socket::finder" name="finder">
+      <type name="std::function&lt;cybozu::worker *()&gt;" qualifier=" const &amp;" />
+    </argument>
+    <argument id="yrmcds::memcache::memcache_socket::memcache_socket::hash" name="hash">
+      <type name="cybozu::hash_map&lt;yrmcds::memcache::object&gt;" qualifier=" &amp;" />
+    </argument>
+    <argument id="yrmcds::memcache::memcache_socket::memcache_socket::slaves" name="slaves">
+      <type name="std::vector&lt;yrmcds::memcache::repl_socket *, std::allocator&lt;yrmcds::memcache::repl_socket *&gt; &gt;" qualifier=" const &amp;" />
+    </argument>
+  </constructor>
+  <destructor abstract="yes" id="yrmcds::memcache::memcache_socket::~memcache_socket" name="~memcache_socket" virtual="yes" />
+  <method id="yrmcds::memcache::memcache_socket::add_lock" name="add_lock">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::memcache::memcache_socket::add_lock::k" name="k">
+      <type name="cybozu::hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::memcache_socket::cmd_bin" name="cmd_bin">
+    <brief>Process a binary request command.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::memcache::memcache_socket::cmd_bin::cmd" name="cmd">
+      <doc>A binary request.</doc>
+      <type name="binary_request" qualifier=" const &amp;" ref="yrmcds::memcache::binary_request#yrmcds::memcache::binary_request" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::memcache_socket::cmd_text" name="cmd_text">
+    <brief>Process a test request command.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::memcache::memcache_socket::cmd_text::cmd" name="cmd">
+      <doc>A binary request.</doc>
+      <type name="text_request" qualifier=" const &amp;" ref="yrmcds::memcache::text_request#yrmcds::memcache::text_request" />
+    </argument>
+  </method>
+  <method id="yrmcds::memcache::memcache_socket::remove_lock" name="remove_lock">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::memcache::memcache_socket::remove_lock::k" name="k">
+      <type name="cybozu::hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+  </method>
+  <method id="yrmcds::memcache::memcache_socket::unlock_all" name="unlock_all">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

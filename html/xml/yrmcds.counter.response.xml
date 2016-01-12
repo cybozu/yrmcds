@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::counter::response" name="response" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <constructor id="yrmcds::counter::response::response" name="response">
+    <argument id="yrmcds::counter::response::response::socket" name="socket">
+      <type name="cybozu::tcp_socket" qualifier=" &amp;" ref="cybozu::tcp_socket#cybozu::tcp_socket" />
+    </argument>
+    <argument id="yrmcds::counter::response::response::request" name="request">
+      <type name="request" qualifier=" const &amp;" ref="yrmcds::counter::request#yrmcds::counter::request" />
+    </argument>
+  </constructor>
+  <method abstract="yes" id="yrmcds::counter::response::acquire" name="acquire">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::counter::response::acquire::resources" name="resources">
+      <type name="uint32_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::counter::response::dump" name="dump">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::counter::response::dump::name" name="name">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="yrmcds::counter::response::dump::name_len" name="name_len">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="yrmcds::counter::response::dump::consumption" name="consumption">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="yrmcds::counter::response::dump::max_conumption" name="max_conumption">
+      <type name="uint32_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::counter::response::error" name="error">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::counter::response::error::status" name="status">
+      <type name="status" ref="yrmcds::counter#yrmcds::counter::status" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::counter::response::get" name="get">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::counter::response::get::consumption" name="consumption">
+      <type name="uint32_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::counter::response::stats" name="stats">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::counter::response::success" name="success">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

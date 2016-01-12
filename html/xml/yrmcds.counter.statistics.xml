@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct abstract="true" id="yrmcds::counter::statistics" name="statistics" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <field id="yrmcds::counter::statistics::objects" name="objects">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::counter::statistics::used_memory" name="used_memory">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::counter::statistics::conflicts" name="conflicts">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::counter::statistics::gc_count" name="gc_count">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::counter::statistics::last_gc_elapsed" name="last_gc_elapsed">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::counter::statistics::total_gc_elapsed" name="total_gc_elapsed">
+    <brief>micro seconds</brief>
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::counter::statistics::total_objects" name="total_objects">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::counter::statistics::curr_connections" name="curr_connections">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::counter::statistics::total_connections" name="total_connections">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::counter::statistics::ops" name="ops">
+    <type class="array" size="19">
+      <type name="std::atomic&lt;unsigned long&gt;" />
+    </type>
+  </field>
+  <constructor id="yrmcds::counter::statistics::statistics" name="statistics" />
+  <method abstract="yes" id="yrmcds::counter::statistics::reset" name="reset">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</struct>

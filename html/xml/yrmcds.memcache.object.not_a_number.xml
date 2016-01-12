@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="yrmcds::memcache::object::not_a_number" name="not_a_number" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Exception thrown by <ref ref="yrmcds::memcache::object#yrmcds::memcache::object::incr">yrmcds::memcache::object::incr</ref> or <ref ref="yrmcds::memcache::object#yrmcds::memcache::object::decr">yrmcds::memcache::object::decr</ref>.</brief>
+  <base access="public">
+    <type name="std::runtime_error" />
+  </base>
+  <constructor id="yrmcds::memcache::object::not_a_number::not_a_number" name="not_a_number" />
+</struct>

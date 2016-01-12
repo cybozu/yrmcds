@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::server" name="server" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>The yrmcds server</brief>
+  <constructor abstract="yes" id="yrmcds::server::server" name="server" />
+  <method id="yrmcds::server::is_master" name="is_master" static="yes">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::server::serve" name="serve">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

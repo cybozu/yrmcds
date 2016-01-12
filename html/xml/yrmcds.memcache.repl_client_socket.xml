@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache::repl_client_socket" name="repl_client_socket" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="cybozu::tcp_socket" ref="cybozu::tcp_socket#cybozu::tcp_socket" />
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for connected TCP sockets.</brief>
+  </base>
+  <constructor id="yrmcds::memcache::repl_client_socket::repl_client_socket" name="repl_client_socket">
+    <argument id="yrmcds::memcache::repl_client_socket::repl_client_socket::fd" name="fd">
+      <type builtin="yes" name="int" />
+    </argument>
+    <argument id="yrmcds::memcache::repl_client_socket::repl_client_socket::m" name="m">
+      <type name="cybozu::hash_map&lt;yrmcds::memcache::object&gt;" qualifier=" &amp;" />
+    </argument>
+  </constructor>
+</class>

@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='utf-8'?>
+<namespace id="yrmcds" name="yrmcds" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Implementing yrmcds.</brief>
+  <variable id="yrmcds::DEFAULT_BUCKETS" name="DEFAULT_BUCKETS">
+    <type builtin="yes" name="unsigned int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_COUNTER_PORT" name="DEFAULT_COUNTER_PORT">
+    <type name="uint16_t" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_GC_INTERVAL" name="DEFAULT_GC_INTERVAL">
+    <type builtin="yes" name="unsigned int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_HEAP_DATA_LIMIT" name="DEFAULT_HEAP_DATA_LIMIT">
+    <type name="std::size_t" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_MAX_DATA_SIZE" name="DEFAULT_MAX_DATA_SIZE">
+    <type name="std::size_t" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_MEMCACHE_PORT" name="DEFAULT_MEMCACHE_PORT">
+    <type name="uint16_t" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_MEMORY_LIMIT" name="DEFAULT_MEMORY_LIMIT">
+    <type name="std::size_t" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_REPL_BUFSIZE" name="DEFAULT_REPL_BUFSIZE">
+    <type builtin="yes" name="unsigned int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_REPL_PORT" name="DEFAULT_REPL_PORT">
+    <type name="uint16_t" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_SLAVE_TIMEOUT" name="DEFAULT_SLAVE_TIMEOUT">
+    <type builtin="yes" name="unsigned int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_STAT_INTERVAL" name="DEFAULT_STAT_INTERVAL">
+    <type builtin="yes" name="unsigned int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_TMPDIR" name="DEFAULT_TMPDIR">
+    <type name="const char []" />
+  </variable>
+  <variable id="yrmcds::DEFAULT_WORKER_THREADS" name="DEFAULT_WORKER_THREADS">
+    <type builtin="yes" name="int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::FLUSH_AGE" name="FLUSH_AGE">
+    <brief>wait 50 * 100ms = 5 seconds</brief>
+    <type builtin="yes" name="int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::g_config" name="g_config">
+    <brief>Global configuration object.</brief>
+    <type name="config" ref="yrmcds::config#yrmcds::config" />
+  </variable>
+  <variable id="yrmcds::g_current_time" name="g_current_time">
+    <type name="std::atomic&lt;long&gt;" />
+  </variable>
+  <variable id="yrmcds::MASTER_CHECKS" name="MASTER_CHECKS">
+    <brief>250 bytes</brief>
+    <type builtin="yes" name="int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::MAX_CONSECUTIVE_GCS" name="MAX_CONSECUTIVE_GCS">
+    <type builtin="yes" name="int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::MAX_KEY_LENGTH" name="MAX_KEY_LENGTH">
+    <type name="std::size_t" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::MAX_RECVSIZE" name="MAX_RECVSIZE">
+    <type name="std::size_t" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::MAX_REQUEST_LENGTH" name="MAX_REQUEST_LENGTH">
+    <type name="std::size_t" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::MAX_SLAVES" name="MAX_SLAVES">
+    <brief>30 MiB</brief>
+    <type builtin="yes" name="int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::MAX_WORKERS" name="MAX_WORKERS">
+    <brief>5 MiB</brief>
+    <type builtin="yes" name="int" qualifier=" const" />
+  </variable>
+  <variable id="yrmcds::VERSION" name="VERSION">
+    <type name="const char []" />
+  </variable>
+  <variable id="yrmcds::WORKER_BUFSIZE" name="WORKER_BUFSIZE">
+    <brief>2 MiB</brief>
+    <type name="std::size_t" qualifier=" const" />
+  </variable>
+  <namespace name="counter" ref="yrmcds::counter#yrmcds::counter" />
+  <namespace name="memcache" ref="yrmcds::memcache#yrmcds::memcache" />
+  <class name="config" ref="yrmcds::config#yrmcds::config">
+    <brief>Configurations for yrmcds.</brief>
+  </class>
+  <class name="counter_config" ref="yrmcds::counter_config#yrmcds::counter_config">
+    <brief>Configurations for counter extension.</brief>
+  </class>
+  <class name="protocol_handler" ref="yrmcds::protocol_handler#yrmcds::protocol_handler">
+    <brief>An interface for protocol-specific logics.</brief>
+  </class>
+  <class name="server" ref="yrmcds::server#yrmcds::server">
+    <brief>The yrmcds server</brief>
+  </class>
+  <class name="sync_request" ref="yrmcds::sync_request#yrmcds::sync_request" />
+  <class name="syncer" ref="yrmcds::syncer#yrmcds::syncer" />
+  <class name="tempfile" ref="yrmcds::tempfile#yrmcds::tempfile">
+    <brief>A temporary file abstraction.</brief>
+  </class>
+  <function id="yrmcds::mkstemp_wrap" name="mkstemp_wrap">
+    <brief>A helper function for <ref ref="yrmcds::tempfile#yrmcds::tempfile">yrmcds::tempfile</ref>.</brief>
+    <return>
+      <type builtin="yes" name="int" />
+    </return>
+    <argument id="yrmcds::mkstemp_wrap::tempdir" name="tempdir">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </function>
+</namespace>

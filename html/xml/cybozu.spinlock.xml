@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="cybozu::spinlock" name="spinlock" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>A simple spinlock.</brief>
+  <constructor id="cybozu::spinlock::spinlock" name="spinlock" />
+  <method id="cybozu::spinlock::lock" name="lock">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="cybozu::spinlock::unlock" name="unlock">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

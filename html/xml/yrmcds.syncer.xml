@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="yrmcds::syncer" name="syncer" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <constructor id="yrmcds::syncer::syncer" name="syncer">
+    <argument id="yrmcds::syncer::syncer::workers" name="workers">
+      <type name="std::vector&lt;std::unique_ptr&lt;cybozu::worker, std::default_delete&lt;cybozu::worker&gt; &gt;, std::allocator&lt;std::unique_ptr&lt;cybozu::worker, std::default_delete&lt;cybozu::worker&gt; &gt; &gt; &gt;" qualifier=" const &amp;" />
+    </argument>
+  </constructor>
+  <method id="yrmcds::syncer::add_request" name="add_request">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::syncer::add_request::req" name="req">
+      <type name="std::unique_ptr&lt;yrmcds::sync_request, std::default_delete&lt;yrmcds::sync_request&gt; &gt;" />
+    </argument>
+  </method>
+  <method id="yrmcds::syncer::check" name="check">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="yrmcds::syncer::empty" name="empty">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+</class>

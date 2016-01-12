@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="cybozu::tcp_socket::iovec" name="iovec" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>struct for <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::sendv">cybozu::tcp_socket::sendv</ref> and <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::sendv_close">cybozu::tcp_socket::sendv_close</ref>.</brief>
+  <field id="cybozu::tcp_socket::iovec::p" name="p">
+    <type builtin="yes" name="char" qualifier=" const *" />
+  </field>
+  <field id="cybozu::tcp_socket::iovec::len" name="len">
+    <type name="std::size_t" />
+  </field>
+</struct>

@@ -1,0 +1,337 @@
+<?xml version='1.0' encoding='utf-8'?>
+<namespace id="cybozu" name="cybozu" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>General utilities.</brief>
+  <variable id="cybozu::clear_memory" name="clear_memory">
+    <brief>Clear memory securely just like memset_s in C11.</brief>
+    <type class="function" qualifier=" const *">
+      <result>
+        <type builtin="yes" name="void" />
+      </result>
+      <arguments>
+        <type builtin="yes" name="void" qualifier="*" />
+        <type builtin="yes" name="unsigned long" />
+      </arguments>
+    </type>
+  </variable>
+  <functiontemplate id="cybozu::hton" name="hton">
+    <brief>Convert an integer into the network byte order.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::hton::d" name="d">
+      <doc>An integer to be converted.</doc>
+      <type name="UInt" />
+    </argument>
+    <argument id="cybozu::hton::p" name="p">
+      <doc>Pointer to a memory region for the converted integer.</doc>
+      <type builtin="yes" name="char" qualifier="*" />
+    </argument>
+    <templatetypeparameter id="cybozu::hton::UInt" name="UInt" />
+  </functiontemplate>
+  <functiontemplate id="cybozu::ntoh" name="ntoh">
+    <brief>Convert an integer from the network byte order.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::ntoh::p" name="p">
+      <doc>Pointer to a memory region.</doc>
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="cybozu::ntoh::n" name="n">
+      <doc>Reference to an integer to store the converted value.</doc>
+      <type name="UInt" qualifier=" &amp;" />
+    </argument>
+    <templatetypeparameter id="cybozu::ntoh::UInt" name="UInt" />
+  </functiontemplate>
+  <namespace name="test" ref="cybozu::test#cybozu::test" />
+  <class name="config_parser" ref="cybozu::config_parser#cybozu::config_parser">
+    <brief>Parse configuration files.</brief>
+  </class>
+  <class name="demangler" ref="cybozu::demangler#cybozu::demangler">
+    <brief>Demangle C++ symbol names.</brief>
+  </class>
+  <class name="dynbuf" ref="cybozu::dynbuf#cybozu::dynbuf">
+    <brief>A fast, dynamic-sized char buffer.</brief>
+  </class>
+  <class name="hash_key" ref="cybozu::hash_key#cybozu::hash_key">
+    <brief>Key class for <ref ref="cybozu::hash_map#cybozu::hash_map">cybozu::hash_map</ref>.</brief>
+  </class>
+  <classtemplate name="hash_map" ref="cybozu::hash_map#cybozu::hash_map">
+    <brief>Highly concurrent object hash map.</brief>
+    <templatetypeparameter id="cybozu::hash_map::T" name="T" />
+  </classtemplate>
+  <class name="ip_address" ref="cybozu::ip_address#cybozu::ip_address">
+    <brief>Abstract IP address.</brief>
+  </class>
+  <class name="logger" ref="cybozu::logger#cybozu::logger">
+    <brief>A thread-safe logger.</brief>
+  </class>
+  <class name="logstream" ref="cybozu::logstream#cybozu::logstream">
+    <brief>Output stream to the logger.</brief>
+  </class>
+  <class name="reactor" ref="cybozu::reactor#cybozu::reactor">
+    <brief>The reactor.</brief>
+  </class>
+  <class name="resource" ref="cybozu::resource#cybozu::resource">
+    <brief>An abstraction of a file descriptor.</brief>
+  </class>
+  <class name="signal_reader" ref="cybozu::signal_reader#cybozu::signal_reader">
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for [`signalfd`](http://manpages.ubuntu.com/manpages/precise/en/man2/signalfd.2.html).</brief>
+  </class>
+  <class name="spinlock" ref="cybozu::spinlock#cybozu::spinlock">
+    <brief>A simple spinlock.</brief>
+  </class>
+  <class name="tcp_server_socket" ref="cybozu::tcp_server_socket#cybozu::tcp_server_socket">
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass to accept new TCP connections.</brief>
+  </class>
+  <class name="tcp_socket" ref="cybozu::tcp_socket#cybozu::tcp_socket">
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for connected TCP sockets.</brief>
+  </class>
+  <classtemplate name="thread_base" ref="cybozu::thread_base#cybozu::thread_base">
+    <brief>A CRTP template wrapping &amp;lt;std::thread&amp;gt;.</brief>
+    <templatetypeparameter id="cybozu::thread_base::Derived" name="Derived" />
+    <templatenontypeparameter default="1" id="cybozu::thread_base::exit_on_exception" name="exit_on_exception">
+      <type builtin="yes" name="int" />
+    </templatenontypeparameter>
+  </classtemplate>
+  <class name="worker" ref="cybozu::worker#cybozu::worker">
+    <brief>General worker thread implementation.</brief>
+  </class>
+  <enum class="yes" id="cybozu::severity" name="severity">
+    <brief>Severity used for <ref ref="cybozu::logger#cybozu::logger">cybozu::logger</ref>.</brief>
+    <enumvalue id="cybozu::severity::error" name="error" value="0" />
+    <enumvalue id="cybozu::severity::warning" name="warning" value="1" />
+    <enumvalue id="cybozu::severity::info" name="info" value="2" />
+    <enumvalue id="cybozu::severity::debug" name="debug" value="3" />
+  </enum>
+  <function id="cybozu::dump_stack" name="dump_stack">
+    <brief>Dump stack trace to the standard error.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </function>
+  <function id="cybozu::get_peer_ip_address" name="get_peer_ip_address">
+    <brief>Get the IP address of the connected socket peer.</brief>
+    <return>
+      <type name="ip_address" ref="cybozu::ip_address#cybozu::ip_address" />
+    </return>
+    <argument id="cybozu::get_peer_ip_address::sockfd" name="sockfd">
+      <type builtin="yes" name="int" />
+    </argument>
+  </function>
+  <function id="cybozu::get_stat" name="get_stat">
+    <brief>stat(2) wrapper.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::get_stat::path" name="path">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+    <argument id="cybozu::get_stat::st" name="st">
+      <type name="stat" qualifier=" &amp;" />
+    </argument>
+  </function>
+  <function id="cybozu::has_ip_address" name="has_ip_address">
+    <brief>`true` if this machine has `addr`.  `false` otherwise.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::has_ip_address::addr" name="addr">
+      <type name="ip_address" qualifier=" const &amp;" ref="cybozu::ip_address#cybozu::ip_address" />
+    </argument>
+  </function>
+  <function id="cybozu::is_dir" name="is_dir">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::is_dir::path" name="path">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </function>
+  <function id="cybozu::is_readable" name="is_readable">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::is_readable::path" name="path">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </function>
+  <function id="cybozu::is_writable" name="is_writable">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::is_writable::path" name="path">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </function>
+  <function id="cybozu::make_server_socket" name="make_server_socket">
+    <brief>Utility function to create a &amp;lt;std::unique\_ptr&amp;gt; of <ref ref="cybozu::tcp_server_socket#cybozu::tcp_server_socket">cybozu::tcp_server_socket</ref>.</brief>
+    <return>
+      <type name="std::unique_ptr&lt;cybozu::tcp_server_socket, std::default_delete&lt;cybozu::tcp_server_socket&gt; &gt;" />
+    </return>
+    <argument id="cybozu::make_server_socket::bind_addr" name="bind_addr">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="cybozu::make_server_socket::port" name="port">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="cybozu::make_server_socket::w" name="w">
+      <type name="tcp_server_socket::wrapper" />
+    </argument>
+  </function>
+  <function id="cybozu::nearest_prime" name="nearest_prime">
+    <brief>Return the nearest prime number.</brief>
+    <return>
+      <type builtin="yes" name="unsigned int" />
+    </return>
+    <argument id="cybozu::nearest_prime::n" name="n">
+      <type builtin="yes" name="unsigned int" />
+    </argument>
+  </function>
+  <function id="cybozu::operator==" name="operator==">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::operator==::lhs" name="lhs">
+      <type name="dynbuf" qualifier=" const &amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+    <argument id="cybozu::operator==::rhs" name="rhs">
+      <type name="dynbuf" qualifier=" const &amp;" ref="cybozu::dynbuf#cybozu::dynbuf" />
+    </argument>
+  </function>
+  <function id="cybozu::operator==" name="operator==">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::operator==::lhs" name="lhs">
+      <type name="hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+    <argument id="cybozu::operator==::rhs" name="rhs">
+      <type name="hash_key" qualifier=" const &amp;" ref="cybozu::hash_key#cybozu::hash_key" />
+    </argument>
+  </function>
+  <function id="cybozu::setup_server_socket" name="setup_server_socket">
+    <brief>A helper function to create a server socket.</brief>
+    <doc>This is a helper function for <ref ref="cybozu::tcp_server_socket#cybozu::tcp_server_socket">cybozu::tcp_server_socket</ref> template.
+The socket is set non-blocking before return.
+
+</doc>
+    <return>
+      <doc>A UNIX file descriptor of a listening socket.</doc>
+      <type builtin="yes" name="int" />
+    </return>
+    <argument id="cybozu::setup_server_socket::bind_addr" name="bind_addr">
+      <doc>A numeric IP address to be bound, or `NULL`.</doc>
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="cybozu::setup_server_socket::port" name="port">
+      <doc>TCP port number to be bound.</doc>
+      <type name="uint16_t" />
+    </argument>
+  </function>
+  <function id="cybozu::signal_setup" name="signal_setup">
+    <brief>Block signals and create <ref ref="cybozu::signal_reader#cybozu::signal_reader">cybozu::signal_reader</ref> for blocked signals.</brief>
+    <doc>This function blocks given signals and creates a <ref ref="cybozu::signal_reader#cybozu::signal_reader">cybozu::signal_reader</ref>
+prepared to read blocked signals.  In addition, this configures
+`SIGPIPE` to be ignored, and `SIGABRT` produces the stack trace.
+
+This function should be called from the main thread before any
+other threads are created.</doc>
+    <return>
+      <type name="std::unique_ptr&lt;cybozu::signal_reader, std::default_delete&lt;cybozu::signal_reader&gt; &gt;" />
+    </return>
+    <argument id="cybozu::signal_setup::sigs" name="sigs">
+      <doc>List of signals to be blocked.</doc>
+      <type name="std::initializer_list&lt;int&gt;" />
+    </argument>
+  </function>
+  <function id="cybozu::siphash24" name="siphash24">
+    <brief>Calculate 64bit keyed secure hash using SipHash algorithm.</brief>
+    <doc>This function calculates a 64bit hash value using
+[SipHash](https://131002.net/siphash/) algorithm.
+
+</doc>
+    <return>
+      <doc>64bit hash value.</doc>
+      <type name="uint64_t" />
+    </return>
+    <argument id="cybozu::siphash24::src" name="src">
+      <doc>Pointer to a memory region.</doc>
+      <type builtin="yes" name="void" qualifier=" const *" />
+    </argument>
+    <argument id="cybozu::siphash24::src_sz" name="src_sz">
+      <doc>Region size in bytes.</doc>
+      <type name="std::size_t" />
+    </argument>
+  </function>
+  <function id="cybozu::siphash24_seed" name="siphash24_seed">
+    <brief>Seed <ref ref="cybozu#cybozu::siphash24">cybozu::siphash24</ref>.</brief>
+    <doc>This function presets a 128bit key for <ref ref="cybozu#cybozu::siphash24">cybozu::siphash24</ref>.
+Call this once before using <ref ref="cybozu#cybozu::siphash24">cybozu::siphash24</ref>.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::siphash24_seed::key" name="key">
+      <type class="array" size="16">
+        <type builtin="yes" name="char" qualifier=" const" />
+      </type>
+    </argument>
+  </function>
+  <function id="cybozu::tcp_connect" name="tcp_connect">
+    <brief>Create a TCP socket and connect to `node:port`.</brief>
+    <doc>This creates a TCP socket and connect to a remote node.
+The returned socket is set non-blocking.  If `timeout` is 0,
+this will wait until the kernel gives up.  If `node` is `NULL`,
+this will try to connect to the local loopback interface.
+
+This function may return `-1` when it cannot establish a connection
+within `timeout` seconds or when the peer node denies connection.
+For other (serious) errors, exceptions will be thrown.
+
+</doc>
+    <return>
+      <doc>A valid UNIX file descriptor, or `-1` for non-fatal errors.</doc>
+      <type builtin="yes" name="int" />
+    </return>
+    <argument id="cybozu::tcp_connect::node" name="node">
+      <doc>The node name or IP address to connect.</doc>
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="cybozu::tcp_connect::port" name="port">
+      <doc>The TCP port number to connect.</doc>
+      <type name="uint16_t" />
+    </argument>
+    <argument id="cybozu::tcp_connect::timeout" name="timeout">
+      <doc>Seconds before timeout.</doc>
+      <type builtin="yes" name="unsigned int" />
+    </argument>
+  </function>
+  <function id="cybozu::throw_unix_error" name="throw_unix_error">
+    <brief>Throw &amp;lt;std::system\_error&amp;gt; for an `errno`.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::throw_unix_error::e" name="e">
+      <doc>`errno` value.</doc>
+      <type builtin="yes" name="int" />
+    </argument>
+    <argument id="cybozu::throw_unix_error::func" name="func">
+      <doc>System call name that returns the error number.</doc>
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+  </function>
+  <function id="cybozu::throw_unix_error" name="throw_unix_error">
+    <brief>Throw &amp;lt;std::system\_error&amp;gt; for an `errno`.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::throw_unix_error::e" name="e">
+      <doc>`errno` value.</doc>
+      <type builtin="yes" name="int" />
+    </argument>
+    <argument id="cybozu::throw_unix_error::s" name="s">
+      <doc>A detailed string to describe the context of the error.</doc>
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </function>
+</namespace>

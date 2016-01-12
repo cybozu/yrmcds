@@ -1,0 +1,192 @@
+<?xml version='1.0' encoding='utf-8'?>
+<index xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Index.</brief>
+  <doc>yrmcds documents
+----------------
+
+yrmcds is an object cache system featuring master-slave replication.
+</doc>
+  <category name="ExtKeys" ref="ExtKeys#ExtKeys">
+    <brief>Key dump extesion</brief>
+  </category>
+  <category name="Future Plans" ref="Future Plans#Future Plans">
+    <brief>List of future plans.</brief>
+  </category>
+  <category name="Benchmark Results" ref="Benchmark Results#Benchmark Results">
+    <brief>Benchmark results.</brief>
+  </category>
+  <category name="Counter support" ref="Counter support#Counter support">
+    <brief>Counter support</brief>
+  </category>
+  <category name="Differences from memcached" ref="Differences from memcached#Differences from memcached">
+    <brief>Differences from memcached.</brief>
+  </category>
+  <category name="Server-side locking" ref="Server-side locking#Server-side locking">
+    <brief>Server-side locking support.</brief>
+  </category>
+  <category name="Design Notes" ref="Design Notes#Design Notes">
+    <brief>Design Notes</brief>
+  </category>
+  <category name="Usage" ref="Usage#Usage">
+    <brief>Configuration and execution of `yrmcdsd`.</brief>
+  </category>
+  <namespace name="cybozu" ref="cybozu#cybozu">
+    <brief>General utilities.</brief>
+    <namespace name="test" ref="cybozu::test#cybozu::test">
+      <class name="AutoRun" ref="cybozu::test::AutoRun#cybozu::test::AutoRun" />
+    </namespace>
+    <class name="config_parser" ref="cybozu::config_parser#cybozu::config_parser">
+      <brief>Parse configuration files.</brief>
+      <struct name="illegal_value" ref="cybozu::config_parser::illegal_value#cybozu::config_parser::illegal_value">
+        <brief>exception for illegal value error.</brief>
+      </struct>
+      <struct name="not_found" ref="cybozu::config_parser::not_found#cybozu::config_parser::not_found">
+        <brief>exception for key not found error.</brief>
+      </struct>
+      <struct name="parse_error" ref="cybozu::config_parser::parse_error#cybozu::config_parser::parse_error">
+        <brief>exception for invalid file format.</brief>
+      </struct>
+    </class>
+    <class name="demangler" ref="cybozu::demangler#cybozu::demangler">
+      <brief>Demangle C++ symbol names.</brief>
+    </class>
+    <class name="dynbuf" ref="cybozu::dynbuf#cybozu::dynbuf">
+      <brief>A fast, dynamic-sized char buffer.</brief>
+    </class>
+    <class name="hash_key" ref="cybozu::hash_key#cybozu::hash_key">
+      <brief>Key class for <ref ref="cybozu::hash_map#cybozu::hash_map">cybozu::hash_map</ref>.</brief>
+    </class>
+    <classtemplate name="hash_map" ref="cybozu::hash_map#cybozu::hash_map">
+      <brief>Highly concurrent object hash map.</brief>
+      <templatetypeparameter id="cybozu::hash_map::T" name="T" />
+      <class name="bucket" ref="cybozu::hash_map::bucket#cybozu::hash_map::bucket">
+        <brief>Hash map bucket.</brief>
+      </class>
+    </classtemplate>
+    <class name="ip_address" ref="cybozu::ip_address#cybozu::ip_address">
+      <brief>Abstract IP address.</brief>
+      <struct name="bad_address" ref="cybozu::ip_address::bad_address#cybozu::ip_address::bad_address" />
+    </class>
+    <class name="logger" ref="cybozu::logger#cybozu::logger">
+      <brief>A thread-safe logger.</brief>
+    </class>
+    <class name="logstream" ref="cybozu::logstream#cybozu::logstream">
+      <brief>Output stream to the logger.</brief>
+    </class>
+    <class name="reactor" ref="cybozu::reactor#cybozu::reactor">
+      <brief>The reactor.</brief>
+    </class>
+    <class name="resource" ref="cybozu::resource#cybozu::resource">
+      <brief>An abstraction of a file descriptor.</brief>
+    </class>
+    <class name="signal_reader" ref="cybozu::signal_reader#cybozu::signal_reader">
+      <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for [`signalfd`](http://manpages.ubuntu.com/manpages/precise/en/man2/signalfd.2.html).</brief>
+    </class>
+    <class name="spinlock" ref="cybozu::spinlock#cybozu::spinlock">
+      <brief>A simple spinlock.</brief>
+    </class>
+    <class name="tcp_server_socket" ref="cybozu::tcp_server_socket#cybozu::tcp_server_socket">
+      <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass to accept new TCP connections.</brief>
+    </class>
+    <class name="tcp_socket" ref="cybozu::tcp_socket#cybozu::tcp_socket">
+      <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for connected TCP sockets.</brief>
+      <struct name="iovec" ref="cybozu::tcp_socket::iovec#cybozu::tcp_socket::iovec">
+        <brief>struct for <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::sendv">cybozu::tcp_socket::sendv</ref> and <ref ref="cybozu::tcp_socket#cybozu::tcp_socket::sendv_close">cybozu::tcp_socket::sendv_close</ref>.</brief>
+      </struct>
+    </class>
+    <classtemplate name="thread_base" ref="cybozu::thread_base#cybozu::thread_base">
+      <brief>A CRTP template wrapping &amp;lt;std::thread&amp;gt;.</brief>
+      <templatetypeparameter id="cybozu::thread_base::Derived" name="Derived" />
+      <templatenontypeparameter default="1" id="cybozu::thread_base::exit_on_exception" name="exit_on_exception">
+        <type builtin="yes" name="int" />
+      </templatenontypeparameter>
+    </classtemplate>
+    <class name="worker" ref="cybozu::worker#cybozu::worker">
+      <brief>General worker thread implementation.</brief>
+    </class>
+  </namespace>
+  <namespace name="yrmcds" ref="yrmcds#yrmcds">
+    <brief>Implementing yrmcds.</brief>
+    <namespace name="counter" ref="yrmcds::counter#yrmcds::counter">
+      <class name="counter_socket" ref="yrmcds::counter::counter_socket#yrmcds::counter::counter_socket" />
+      <class name="gc_thread" ref="yrmcds::counter::gc_thread#yrmcds::counter::gc_thread" />
+      <class name="handler" ref="yrmcds::counter::handler#yrmcds::counter::handler" />
+      <class name="object" ref="yrmcds::counter::object#yrmcds::counter::object" />
+      <class name="request" ref="yrmcds::counter::request#yrmcds::counter::request" />
+      <class name="response" ref="yrmcds::counter::response#yrmcds::counter::response" />
+      <struct name="statistics" ref="yrmcds::counter::statistics#yrmcds::counter::statistics" />
+      <struct name="string_slice" ref="yrmcds::counter::string_slice#yrmcds::counter::string_slice" />
+    </namespace>
+    <namespace name="memcache" ref="yrmcds::memcache#yrmcds::memcache">
+      <class name="binary_request" ref="yrmcds::memcache::binary_request#yrmcds::memcache::binary_request">
+        <brief>Binary request parser</brief>
+      </class>
+      <class name="binary_response" ref="yrmcds::memcache::binary_response#yrmcds::memcache::binary_response">
+        <brief>Binary response sender.</brief>
+      </class>
+      <class name="file_flusher" ref="yrmcds::memcache::file_flusher#yrmcds::memcache::file_flusher">
+        <brief>Purge temporary file contents from the page cache at dtor.</brief>
+      </class>
+      <class name="gc_thread" ref="yrmcds::memcache::gc_thread#yrmcds::memcache::gc_thread" />
+      <class name="handler" ref="yrmcds::memcache::handler#yrmcds::memcache::handler" />
+      <class name="memcache_socket" ref="yrmcds::memcache::memcache_socket#yrmcds::memcache::memcache_socket" />
+      <class name="object" ref="yrmcds::memcache::object#yrmcds::memcache::object">
+        <brief>Object in the hash table.</brief>
+        <struct name="not_a_number" ref="yrmcds::memcache::object::not_a_number#yrmcds::memcache::object::not_a_number">
+          <brief>Exception thrown by <ref ref="yrmcds::memcache::object#yrmcds::memcache::object::incr">yrmcds::memcache::object::incr</ref> or <ref ref="yrmcds::memcache::object#yrmcds::memcache::object::decr">yrmcds::memcache::object::decr</ref>.</brief>
+        </struct>
+      </class>
+      <class name="repl_client_socket" ref="yrmcds::memcache::repl_client_socket#yrmcds::memcache::repl_client_socket" />
+      <class name="repl_socket" ref="yrmcds::memcache::repl_socket#yrmcds::memcache::repl_socket" />
+      <struct name="statistics" ref="yrmcds::memcache::statistics#yrmcds::memcache::statistics">
+        <brief>statistics counters.</brief>
+      </struct>
+      <class name="text_request" ref="yrmcds::memcache::text_request#yrmcds::memcache::text_request">
+        <brief>Text request parser.</brief>
+      </class>
+      <class name="text_response" ref="yrmcds::memcache::text_response#yrmcds::memcache::text_response">
+        <brief>Text response sender.</brief>
+      </class>
+    </namespace>
+    <class name="config" ref="yrmcds::config#yrmcds::config">
+      <brief>Configurations for yrmcds.</brief>
+      <struct name="bad_config" ref="yrmcds::config::bad_config#yrmcds::config::bad_config" />
+    </class>
+    <class name="counter_config" ref="yrmcds::counter_config#yrmcds::counter_config">
+      <brief>Configurations for counter extension.</brief>
+    </class>
+    <class name="protocol_handler" ref="yrmcds::protocol_handler#yrmcds::protocol_handler">
+      <brief>An interface for protocol-specific logics.</brief>
+    </class>
+    <class name="server" ref="yrmcds::server#yrmcds::server">
+      <brief>The yrmcds server</brief>
+    </class>
+    <class name="sync_request" ref="yrmcds::sync_request#yrmcds::sync_request" />
+    <class name="syncer" ref="yrmcds::syncer#yrmcds::syncer" />
+    <class name="tempfile" ref="yrmcds::tempfile#yrmcds::tempfile">
+      <brief>A temporary file abstraction.</brief>
+    </class>
+  </namespace>
+  <function id="main" name="main">
+    <return>
+      <type builtin="yes" name="int" />
+    </return>
+    <argument id="main::argc" name="argc">
+      <type builtin="yes" name="int" />
+    </argument>
+    <argument id="main::argv" name="argv">
+      <type builtin="yes" name="char" qualifier="**" />
+    </argument>
+  </function>
+  <function id="null_parser" name="null_parser">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="null_parser::argc" name="argc">
+      <type builtin="yes" name="int" />
+    </argument>
+    <argument id="null_parser::argv" name="argv">
+      <type builtin="yes" name="char" qualifier="**" />
+    </argument>
+  </function>
+</index>

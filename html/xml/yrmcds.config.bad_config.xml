@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="yrmcds::config::bad_config" name="bad_config" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="std::runtime_error" />
+  </base>
+  <constructor id="yrmcds::config::bad_config::bad_config" name="bad_config">
+    <argument id="yrmcds::config::bad_config::bad_config::s" name="s">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </constructor>
+</struct>

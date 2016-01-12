@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::memcache::file_flusher" name="file_flusher" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Purge temporary file contents from the page cache at dtor.</brief>
+  <constructor id="yrmcds::memcache::file_flusher::file_flusher" name="file_flusher">
+    <argument id="yrmcds::memcache::file_flusher::file_flusher::fd" name="fd">
+      <type builtin="yes" name="int" />
+    </argument>
+  </constructor>
+  <constructor id="yrmcds::memcache::file_flusher::file_flusher" name="file_flusher">
+    <argument id="yrmcds::memcache::file_flusher::file_flusher::rhs" name="rhs">
+      <type name="file_flusher &amp;&amp;" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="yrmcds::memcache::file_flusher::file_flusher" name="file_flusher">
+    <argument id="yrmcds::memcache::file_flusher::file_flusher::" name="">
+      <type name="file_flusher" qualifier=" const &amp;" ref="yrmcds::memcache::file_flusher#yrmcds::memcache::file_flusher" />
+    </argument>
+  </constructor>
+  <destructor abstract="yes" id="yrmcds::memcache::file_flusher::~file_flusher" name="~file_flusher" />
+  <method abstract="yes" id="yrmcds::memcache::file_flusher::operator=" name="operator=">
+    <return>
+      <type name="file_flusher" qualifier=" &amp;" ref="yrmcds::memcache::file_flusher#yrmcds::memcache::file_flusher" />
+    </return>
+    <argument id="yrmcds::memcache::file_flusher::operator=::" name="">
+      <type name="file_flusher &amp;&amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="yrmcds::memcache::file_flusher::operator=" name="operator=">
+    <return>
+      <type name="file_flusher" qualifier=" &amp;" ref="yrmcds::memcache::file_flusher#yrmcds::memcache::file_flusher" />
+    </return>
+    <argument id="yrmcds::memcache::file_flusher::operator=::" name="">
+      <type name="file_flusher" qualifier=" const &amp;" ref="yrmcds::memcache::file_flusher#yrmcds::memcache::file_flusher" />
+    </argument>
+  </method>
+</class>

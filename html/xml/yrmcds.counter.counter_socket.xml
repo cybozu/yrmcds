@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::counter::counter_socket" name="counter_socket" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="cybozu::tcp_socket" ref="cybozu::tcp_socket#cybozu::tcp_socket" />
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for connected TCP sockets.</brief>
+  </base>
+  <constructor abstract="yes" id="yrmcds::counter::counter_socket::counter_socket" name="counter_socket">
+    <argument id="yrmcds::counter::counter_socket::counter_socket::fd" name="fd">
+      <type builtin="yes" name="int" />
+    </argument>
+    <argument id="yrmcds::counter::counter_socket::counter_socket::finder" name="finder">
+      <type name="std::function&lt;cybozu::worker *()&gt;" qualifier=" const &amp;" />
+    </argument>
+    <argument id="yrmcds::counter::counter_socket::counter_socket::hash" name="hash">
+      <type name="cybozu::hash_map&lt;yrmcds::counter::object&gt;" qualifier=" &amp;" />
+    </argument>
+  </constructor>
+  <destructor abstract="yes" id="yrmcds::counter::counter_socket::~counter_socket" name="~counter_socket" virtual="yes" />
+  <method abstract="yes" id="yrmcds::counter::counter_socket::execute" name="execute">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="yrmcds::counter::counter_socket::execute::cmd" name="cmd">
+      <type name="request" qualifier=" const &amp;" ref="yrmcds::counter::request#yrmcds::counter::request" />
+    </argument>
+  </method>
+</class>

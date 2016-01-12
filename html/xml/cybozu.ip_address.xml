@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::ip_address" name="ip_address" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Abstract IP address.</brief>
+  <doc>Abstract IP address.
+Both IPv4 and IPv6 addresses can be stored transparently.</doc>
+  <struct name="bad_address" ref="cybozu::ip_address::bad_address#cybozu::ip_address::bad_address" />
+  <constructor id="cybozu::ip_address::ip_address" name="ip_address" />
+  <constructor abstract="yes" id="cybozu::ip_address::ip_address" name="ip_address">
+    <argument id="cybozu::ip_address::ip_address::s" name="s">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="cybozu::ip_address::ip_address" name="ip_address">
+    <argument id="cybozu::ip_address::ip_address::ifa_addr" name="ifa_addr">
+      <type name="sockaddr" qualifier=" const *" />
+    </argument>
+  </constructor>
+  <method id="cybozu::ip_address::is_v4" name="is_v4">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="cybozu::ip_address::is_v6" name="is_v6">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="cybozu::ip_address::operator!=" name="operator!=">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::ip_address::operator!=::rhs" name="rhs">
+      <type name="ip_address" qualifier=" const &amp;" ref="cybozu::ip_address#cybozu::ip_address" />
+    </argument>
+  </method>
+  <method abstract="yes" id="cybozu::ip_address::operator==" name="operator==">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="cybozu::ip_address::operator==::rhs" name="rhs">
+      <type name="ip_address" qualifier=" const &amp;" ref="cybozu::ip_address#cybozu::ip_address" />
+    </argument>
+  </method>
+  <method abstract="yes" id="cybozu::ip_address::parse" name="parse">
+    <brief>This may throw <ref ref="cybozu::ip_address::bad_address#cybozu::ip_address::bad_address">cybozu::ip_address::bad_address</ref> if `s` is not a valid IP address.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="cybozu::ip_address::parse::s" name="s">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="cybozu::ip_address::str" name="str">
+    <return>
+      <type name="std::string" />
+    </return>
+  </method>
+  <method id="cybozu::ip_address::v4addr" name="v4addr">
+    <brief>32 bit IPv4 address</brief>
+    <return>
+      <type name="in_addr" qualifier=" const *" />
+    </return>
+  </method>
+  <method id="cybozu::ip_address::v6addr" name="v6addr">
+    <brief>128 bit IPv6 address</brief>
+    <return>
+      <type name="in6_addr" qualifier=" const *" />
+    </return>
+  </method>
+  <method id="cybozu::ip_address::v6scope" name="v6scope">
+    <brief>Link identifier for IPv6 link-local address.</brief>
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+</class>

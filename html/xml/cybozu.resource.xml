@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::resource" name="resource" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>An abstraction of a file descriptor.</brief>
+  <doc>An abstraction of a file descriptor for use with <ref ref="cybozu::reactor#cybozu::reactor">cybozu::reactor</ref>.
+The file descriptor should be set non-blocking.
+
+All member functions except for <ref ref="cybozu::resource#cybozu::resource::invalidate_and_close">invalidate_and_close</ref> are for the
+reactor thread.  Sub classes can add methods for the other threads.</doc>
+  <subclass access="public" name="tcp_server_socket" ref="cybozu::tcp_server_socket#cybozu::tcp_server_socket">
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass to accept new TCP connections.</brief>
+  </subclass>
+  <subclass access="public" name="signal_reader" ref="cybozu::signal_reader#cybozu::signal_reader">
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for [`signalfd`](http://manpages.ubuntu.com/manpages/precise/en/man2/signalfd.2.html).</brief>
+  </subclass>
+  <subclass access="public" name="tcp_socket" ref="cybozu::tcp_socket#cybozu::tcp_socket">
+    <brief>A <ref ref="cybozu::resource#cybozu::resource">cybozu::resource</ref> subclass for connected TCP sockets.</brief>
+  </subclass>
+  <constructor id="cybozu::resource::resource" name="resource">
+    <brief>Constructor.</brief>
+    <argument id="cybozu::resource::resource::fd" name="fd">
+      <doc>A UNIX file descriptor.</doc>
+      <type builtin="yes" name="int" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="cybozu::resource::resource" name="resource">
+    <argument id="cybozu::resource::resource::" name="">
+      <type name="resource" qualifier=" const &amp;" ref="cybozu::resource#cybozu::resource" />
+    </argument>
+  </constructor>
+  <destructor id="cybozu::resource::~resource" name="~resource" virtual="yes">
+    <brief>Close the file descriptor.</brief>
+  </destructor>
+  <method id="cybozu::resource::fileno" name="fileno">
+    <brief>Return the UNIX file descriptor for this resource.</brief>
+    <return>
+      <type builtin="yes" name="int" />
+    </return>
+  </method>
+  <method id="cybozu::resource::invalidate" name="invalidate">
+    <brief>Invalidate this resource.</brief>
+    <doc>This is for the reactor thread only.
+You may call this from within <ref ref="cybozu::resource#cybozu::resource::on_readable">cybozu::resource::on_readable</ref> or <ref ref="cybozu::resource#cybozu::resource::on_writable">cybozu::resource::on_writable</ref>.</doc>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="cybozu::resource::invalidate_and_close" name="invalidate_and_close">
+    <brief>Invalidate this resource then request the reactor to remove this.</brief>
+    <doc>This method invalidates this resource then requests the reactor
+thread to remove this resource from the reactor.
+
+**Do not use this in the reactor thread**.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="cybozu::resource::on_error" name="on_error" virtual="yes">
+    <brief>Called when the reactor finds an error on this resource.</brief>
+    <doc>This method is called when the reactor detects some error.</doc>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="cybozu::resource::on_hangup" name="on_hangup" virtual="yes">
+    <brief>Called when the reactor finds this resource has hanged up.</brief>
+    <doc>This method is called when the reactor detects unexpected hangup.</doc>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="cybozu::resource::on_invalidate" name="on_invalidate" virtual="yes">
+    <brief>A template method called from within invalidate.</brief>
+    <doc>A template method called from within invalidate.
+Subclasses can override this to clean up something.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="cybozu::resource::on_readable" name="on_readable" virtual="yes">
+    <brief>Called when the reactor finds this resource is readable.</brief>
+    <doc>This method is called when the reactor finds reading from this
+resource will not block.
+
+`on_readable` is allowed to stop reading from `m_fd` before `EAGAIN`
+or `EWOULDBLOCK` for fairness.  If you stop reading, make sure
+to call `m_reactor-&gt;add_readable(*this)` from within `on_readable`.
+
+If some error happened, execute `return invalidate();`.
+
+`invalidate()` can be called when `recv` or `read` returns 0,
+but it is up to you (or your application's protocol).  In general,
+the client may still be waiting for the response.
+
+</doc>
+    <return>
+      <doc>`true` or return value of <ref ref="cybozu::resource#cybozu::resource::invalidate">cybozu::resource::invalidate</ref>.</doc>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method abstract="yes" id="cybozu::resource::on_writable" name="on_writable" virtual="yes">
+    <brief>Called when the reactor finds this resource is writable.</brief>
+    <doc>This method is called when the reactor finds this resource gets
+writable.  Unlike <ref ref="cybozu::resource#cybozu::resource::on_readable">cybozu::resource::on_readable</ref>, `on_writable` must try to write
+all pending data until it encounters `EAGAIN` or `EWOULDBLOCK`.
+
+If some error happened, execute `return invalidate();`.
+
+</doc>
+    <return>
+      <doc>`true` or return value of <ref ref="cybozu::resource#cybozu::resource::invalidate">cybozu::resource::invalidate</ref>.</doc>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method abstract="yes" id="cybozu::resource::operator=" name="operator=">
+    <return>
+      <type name="resource" qualifier=" &amp;" ref="cybozu::resource#cybozu::resource" />
+    </return>
+    <argument id="cybozu::resource::operator=::" name="">
+      <type name="resource" qualifier=" const &amp;" ref="cybozu::resource#cybozu::resource" />
+    </argument>
+  </method>
+  <method id="cybozu::resource::valid" name="valid">
+    <brief>`true` if this resource is still valid.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <field access="protected" id="cybozu::resource::m_fd" name="m_fd">
+    <type builtin="yes" name="int" qualifier=" const" />
+  </field>
+  <field access="protected" id="cybozu::resource::m_reactor" name="m_reactor">
+    <type name="reactor" qualifier="*" ref="cybozu::reactor#cybozu::reactor" />
+  </field>
+</class>

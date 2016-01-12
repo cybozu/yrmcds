@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<namespace id="yrmcds::counter" name="counter" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <variable id="yrmcds::counter::g_stats" name="g_stats">
+    <type name="statistics" ref="yrmcds::counter::statistics#yrmcds::counter::statistics" />
+  </variable>
+  <class name="counter_socket" ref="yrmcds::counter::counter_socket#yrmcds::counter::counter_socket" />
+  <class name="gc_thread" ref="yrmcds::counter::gc_thread#yrmcds::counter::gc_thread" />
+  <class name="handler" ref="yrmcds::counter::handler#yrmcds::counter::handler" />
+  <class name="object" ref="yrmcds::counter::object#yrmcds::counter::object" />
+  <class name="request" ref="yrmcds::counter::request#yrmcds::counter::request" />
+  <class name="response" ref="yrmcds::counter::response#yrmcds::counter::response" />
+  <struct name="statistics" ref="yrmcds::counter::statistics#yrmcds::counter::statistics" />
+  <struct name="string_slice" ref="yrmcds::counter::string_slice#yrmcds::counter::string_slice" />
+  <enum class="yes" id="yrmcds::counter::command" name="command">
+    <enumvalue id="yrmcds::counter::command::Noop" name="Noop" value="0" />
+    <enumvalue id="yrmcds::counter::command::Get" name="Get" value="1" />
+    <enumvalue id="yrmcds::counter::command::Acquire" name="Acquire" value="2" />
+    <enumvalue id="yrmcds::counter::command::Release" name="Release" value="3" />
+    <enumvalue id="yrmcds::counter::command::Stats" name="Stats" value="16" />
+    <enumvalue id="yrmcds::counter::command::Dump" name="Dump" value="17" />
+    <enumvalue id="yrmcds::counter::command::Unknown" name="Unknown" value="18" />
+    <enumvalue id="yrmcds::counter::command::END_OF_COMMAND" name="END_OF_COMMAND" value="19" />
+  </enum>
+  <enum class="yes" id="yrmcds::counter::status" name="status">
+    <enumvalue id="yrmcds::counter::status::OK" name="OK" value="0" />
+    <enumvalue id="yrmcds::counter::status::NotFound" name="NotFound" value="1" />
+    <enumvalue id="yrmcds::counter::status::Invalid" name="Invalid" value="4" />
+    <enumvalue id="yrmcds::counter::status::ResourceNotAvailable" name="ResourceNotAvailable" value="33" />
+    <enumvalue id="yrmcds::counter::status::NotAcquired" name="NotAcquired" value="34" />
+    <enumvalue id="yrmcds::counter::status::UnknownCommand" name="UnknownCommand" value="-127" />
+    <enumvalue id="yrmcds::counter::status::OutOfMemory" name="OutOfMemory" value="-126" />
+  </enum>
+</namespace>

@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="yrmcds::counter::object" name="object" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <constructor id="yrmcds::counter::object::object" name="object">
+    <argument id="yrmcds::counter::object::object::consumption" name="consumption">
+      <type name="uint32_t" />
+    </argument>
+  </constructor>
+  <method id="yrmcds::counter::object::acquire" name="acquire">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="yrmcds::counter::object::acquire::resources" name="resources">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="yrmcds::counter::object::acquire::maximum" name="maximum">
+      <type name="uint32_t" />
+    </argument>
+  </method>
+  <method id="yrmcds::counter::object::consumption" name="consumption">
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::object::deletable" name="deletable">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::object::max_consumption" name="max_consumption">
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method id="yrmcds::counter::object::release" name="release">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="yrmcds::counter::object::release::resources" name="resources">
+      <type name="uint32_t" />
+    </argument>
+  </method>
+</class>

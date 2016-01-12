@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="yrmcds::protocol_handler" name="protocol_handler" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>An interface for protocol-specific logics.</brief>
+  <subclass access="public" name="memcache::handler" ref="yrmcds::memcache::handler#yrmcds::memcache::handler" />
+  <subclass access="public" name="counter::handler" ref="yrmcds::counter::handler#yrmcds::counter::handler" />
+  <destructor id="yrmcds::protocol_handler::~protocol_handler" name="~protocol_handler" virtual="yes" />
+  <method id="yrmcds::protocol_handler::clear" name="clear" virtual="yes">
+    <brief>Called when the server discards all stored data.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="yrmcds::protocol_handler::dump_stats" name="dump_stats" virtual="yes">
+    <brief>Called to dump the statistics.</brief>
+    <doc>Implementations should use `cybozu::logger::info()` to emit stats.</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="yrmcds::protocol_handler::on_exit" name="on_exit" virtual="yes">
+    <brief>Called when the server exits.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="yrmcds::protocol_handler::on_master_end" name="on_master_end" virtual="yes">
+    <brief>Called when the server leaves the master mode.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="yrmcds::protocol_handler::on_master_interval" name="on_master_interval" virtual="yes">
+    <brief>Called when the intervals of the reactor loop.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="yrmcds::protocol_handler::on_master_start" name="on_master_start" virtual="yes">
+    <brief>Called when the server enters the master mode.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="yrmcds::protocol_handler::on_slave_end" name="on_slave_end" virtual="yes">
+    <brief>Called when the server leaves the slave mode.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="yrmcds::protocol_handler::on_slave_interval" name="on_slave_interval" virtual="yes">
+    <brief>Called when the intervals of the reactor loop.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="yrmcds::protocol_handler::on_slave_start" name="on_slave_start" virtual="yes">
+    <brief>Called when the server enters the slave mode.</brief>
+    <doc>If this function succeeded, returns `true`.
+Otherwise, returns `false`.</doc>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="yrmcds::protocol_handler::on_start" name="on_start" virtual="yes">
+    <brief>Called when the server starts.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="yrmcds::protocol_handler::reactor_gc_ready" name="reactor_gc_ready" virtual="yes">
+    <brief>If this protocol handler is ready for the reactor GC,</brief>
+    <doc>returns true. Otherwise, return false.</doc>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+</class>

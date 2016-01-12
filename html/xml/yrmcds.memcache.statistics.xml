@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct abstract="true" id="yrmcds::memcache::statistics" name="statistics" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>statistics counters.</brief>
+  <field id="yrmcds::memcache::statistics::objects" name="objects">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::objects_under_1k" name="objects_under_1k">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::objects_under_4k" name="objects_under_4k">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::objects_under_16k" name="objects_under_16k">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::objects_under_64k" name="objects_under_64k">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::objects_under_256k" name="objects_under_256k">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::objects_under_1m" name="objects_under_1m">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::objects_under_4m" name="objects_under_4m">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::objects_huge" name="objects_huge">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::used_memory" name="used_memory">
+    <brief>bucket statistics.  Updated at every GC.</brief>
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::conflicts" name="conflicts">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::gc_count" name="gc_count">
+    <brief>GC statistics. Updated at every GC, of course.</brief>
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::oldest_age" name="oldest_age">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::largest_object_size" name="largest_object_size">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::last_expirations" name="last_expirations">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::last_evictions" name="last_evictions">
+    <type name="std::atomic&lt;unsigned int&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::total_evictions" name="total_evictions">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::last_gc_elapsed" name="last_gc_elapsed">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::total_gc_elapsed" name="total_gc_elapsed">
+    <brief>micro seconds</brief>
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::repl_created" name="repl_created">
+    <brief>Replication statistics - non atomic.</brief>
+    <type name="uint64_t" />
+  </field>
+  <field id="yrmcds::memcache::statistics::repl_updated" name="repl_updated">
+    <type name="uint64_t" />
+  </field>
+  <field id="yrmcds::memcache::statistics::repl_removed" name="repl_removed">
+    <type name="uint64_t" />
+  </field>
+  <field id="yrmcds::memcache::statistics::total_objects" name="total_objects">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::flush_time" name="flush_time">
+    <type name="std::atomic&lt;long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::curr_connections" name="curr_connections">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::total_connections" name="total_connections">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::text_ops" name="text_ops">
+    <type class="array" size="23">
+      <type name="std::atomic&lt;unsigned long&gt;" />
+    </type>
+  </field>
+  <field id="yrmcds::memcache::statistics::bin_ops" name="bin_ops">
+    <type class="array" size="82">
+      <type name="std::atomic&lt;unsigned long&gt;" />
+    </type>
+  </field>
+  <field id="yrmcds::memcache::statistics::get_hits" name="get_hits">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::get_misses" name="get_misses">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::cas_hits" name="cas_hits">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::cas_misses" name="cas_misses">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <field id="yrmcds::memcache::statistics::cas_badval" name="cas_badval">
+    <type name="std::atomic&lt;unsigned long&gt;" />
+  </field>
+  <constructor id="yrmcds::memcache::statistics::statistics" name="statistics" />
+  <method abstract="yes" id="yrmcds::memcache::statistics::reset" name="reset">
+    <brief>Reset all counters.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</struct>

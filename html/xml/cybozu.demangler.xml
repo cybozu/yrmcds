@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::demangler" name="demangler" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Demangle C++ symbol names.</brief>
+  <constructor abstract="yes" id="cybozu::demangler::demangler" name="demangler">
+    <brief>Constructor.</brief>
+    <argument id="cybozu::demangler::demangler::name" name="name">
+      <doc>Mangled symbol name.</doc>
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+  </constructor>
+  <method id="cybozu::demangler::name" name="name">
+    <brief>Return the demangled symbol name.</brief>
+    <return>
+      <type name="std::string" qualifier=" const &amp;" />
+    </return>
+  </method>
+</class>

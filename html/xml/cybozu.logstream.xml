@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="cybozu::logstream" name="logstream" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Output stream to the logger.</brief>
+  <doc>Just like other output streams, you can output a variety of objects
+by `&lt;&lt;` operator.  The log is written in a line from within the
+destructor.</doc>
+  <methodtemplate id="cybozu::logstream::operator&lt;&lt;" name="operator&lt;&lt;">
+    <return>
+      <type name="logstream" qualifier=" &amp;" ref="cybozu::logstream#cybozu::logstream" />
+    </return>
+    <argument id="cybozu::logstream::operator&lt;&lt;::arg" name="arg">
+      <type name="const T" qualifier=" const &amp;" />
+    </argument>
+    <templatetypeparameter id="cybozu::logstream::operator&lt;&lt;::T" name="T" />
+  </methodtemplate>
+  <constructor id="cybozu::logstream::logstream" name="logstream">
+    <argument id="cybozu::logstream::logstream::valid_" name="valid_">
+      <type builtin="yes" name="bool" />
+    </argument>
+    <argument id="cybozu::logstream::logstream::level" name="level">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+  </constructor>
+  <constructor id="cybozu::logstream::logstream" name="logstream">
+    <argument id="cybozu::logstream::logstream::rhs" name="rhs">
+      <type name="logstream &amp;&amp;" />
+    </argument>
+  </constructor>
+  <constructor abstract="yes" id="cybozu::logstream::logstream" name="logstream">
+    <argument id="cybozu::logstream::logstream::" name="">
+      <type name="logstream" qualifier=" const &amp;" ref="cybozu::logstream#cybozu::logstream" />
+    </argument>
+  </constructor>
+  <destructor id="cybozu::logstream::~logstream" name="~logstream" />
+  <method abstract="yes" id="cybozu::logstream::operator=" name="operator=">
+    <return>
+      <type name="logstream" qualifier=" &amp;" ref="cybozu::logstream#cybozu::logstream" />
+    </return>
+    <argument id="cybozu::logstream::operator=::" name="">
+      <type name="logstream" qualifier=" const &amp;" ref="cybozu::logstream#cybozu::logstream" />
+    </argument>
+  </method>
+  <method abstract="yes" id="cybozu::logstream::output" name="output">
+    <brief>Output the log line.  The stream gets invalidated.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="cybozu::logstream::valid" name="valid">
+    <brief>`true` if this stream is valid for logging.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+</class>
