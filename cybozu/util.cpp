@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <execinfo.h>
+#include <iostream>
 #include <sstream>
 #include <string.h>
 #include <stdexcept>
@@ -46,6 +47,27 @@ void dump_stack() noexcept {
     backtrace_symbols_fd(bt, n, STDERR_FILENO);
 }
 #pragma GCC diagnostic pop
+
+std::vector<std::string> tokenize(const std::string& s, char c) {
+    auto end = s.cend();
+    auto start = end;
+
+    std::vector<std::string> v;
+    for( auto it = s.cbegin(); it != end; ++it ) {
+        if( *it != c ) {
+            if( start == end )
+                start = it;
+            continue;
+        }
+        if( start != end ) {
+            v.emplace_back(start, it);
+            start = end;
+        }
+    }
+    if( start != end )
+        v.emplace_back(start, end);
+    return std::move(v);
+}
 
 void (* const volatile clear_memory)(void* s, std::size_t n) = clear_memory_;
 
