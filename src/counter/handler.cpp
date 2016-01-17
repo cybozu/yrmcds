@@ -39,13 +39,27 @@ bool handler::gc_ready() {
 }
 
 void handler::on_master_start() {
+    using cybozu::make_server_socket;
     cybozu::tcp_server_socket::wrapper w =
         [this](int s, const cybozu::ip_address&) {
             return make_counter_socket(s);
         };
-    std::unique_ptr<cybozu::tcp_server_socket> ss =
-        cybozu::make_server_socket(nullptr, g_config.counter().port(), w);
-    m_reactor.add_resource(std::move(ss), cybozu::reactor::EVENT_IN);
+    auto port = g_config.counter().port();
+
+    if( g_config.bind_ip().empty() ) {
+        m_reactor.add_resource(
+            make_server_socket(nullptr, port, w),
+            cybozu::reactor::EVENT_IN);
+    } else {
+        m_reactor.add_resource(
+            make_server_socket(g_config.vip(), port, w, true),
+            cybozu::reactor::EVENT_IN);
+        for( auto& s: g_config.bind_ip() ) {
+            m_reactor.add_resource(
+                make_server_socket(s, port, w),
+                cybozu::reactor::EVENT_IN);
+        }
+    }
 }
 
 std::unique_ptr<cybozu::tcp_socket> handler::make_counter_socket(int s) {
