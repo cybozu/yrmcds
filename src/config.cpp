@@ -12,6 +12,7 @@ namespace {
 const char VIRTUAL_IP[] = "virtual_ip";
 const char PORT[] = "port";
 const char REPL_PORT[] = "repl_port";
+const char BIND_IP[] = "bind_ip";
 const char MAX_CONNECTIONS[] = "max_connections";
 const char TEMP_DIR[] = "temp_dir";
 const char USER[] = "user";
@@ -122,6 +123,12 @@ void config::load(const std::string& path) {
         if( n < 1 || n > 65535 )
             throw bad_config("Bad repl port: " + cp.get(REPL_PORT));
         m_repl_port = static_cast<std::uint16_t>(n);
+    }
+
+    if( cp.exists(BIND_IP) ) {
+        for( auto& s: cybozu::tokenize(cp.get(BIND_IP), ' ') ) {
+            m_bind_ip.emplace_back(s);
+        }
     }
 
     if( cp.exists(MAX_CONNECTIONS) ) {

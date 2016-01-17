@@ -12,6 +12,7 @@
 
 #include <stdexcept>
 #include <cstdint>
+#include <vector>
 
 namespace yrmcds {
 
@@ -73,6 +74,9 @@ public:
     }
     std::uint16_t repl_port() const noexcept {
         return m_repl_port;
+    }
+    const std::vector<cybozu::ip_address>& bind_ip() const noexcept {
+        return m_bind_ip;
     }
     unsigned int max_connections() const noexcept {
         return m_max_connections;
@@ -136,6 +140,7 @@ private:
     cybozu::ip_address m_vip;
     std::uint16_t m_port = DEFAULT_MEMCACHE_PORT;
     std::uint16_t m_repl_port = DEFAULT_REPL_PORT;
+    std::vector<cybozu::ip_address> m_bind_ip;
     unsigned int m_max_connections = 0;
     std::string m_tempdir;
     std::string m_user;

@@ -33,6 +33,9 @@ These options are to configure memcache protocol:
     memcache protocol port number.
 * `repl_port` (Default: 11213)  
     The replication protocol port number.
+* `bind_ip` (Default: none)  
+    Space delimited IP addresses to listen on.  
+    Default is to listen on all addresses.
 * `max_connections` (Default: 0)  
     Maximum number of client connections.  0 means unlimited.
 * `temp_dir` (Default: /var/tmp)  
