@@ -236,12 +236,14 @@ private:
 // A helper function to create a server socket.
 // @bind_addr  A numeric IP address to be bound, or `NULL`.
 // @port       TCP port number to be bound.
+// @freebind   true to turn on IP_FREEBIND socket option.
 //
 // This is a helper function for <tcp_server_socket> template.
 // The socket is set non-blocking before return.
 //
 // @return  A UNIX file descriptor of a listening socket.
-int setup_server_socket(const char* bind_addr, std::uint16_t port);
+int
+setup_server_socket(const char* bind_addr, std::uint16_t port, bool freebind);
 
 
 // A <cybozu::resource> subclass to accept new TCP connections.
@@ -254,19 +256,21 @@ public:
     // @bind_addr  A numeric IP address to be bound, or `NULL`.
     // @port       TCP port number to be bound.
     // @on_accept  Callback function.
+    // @freebind   true to turn on IP_FREEBIND socket option.
     //
     // This creates a socket and bind it to the given address and port.
     // If `bind_addr` is `NULL`, the socket will listen on any address.
     // Both IPv4 and IPv6 addresses are supported.
     //
-    // For each new connection, `w` is called to determine if the new
-    // connection need to be closed immediately or to be added to the
-    // reactor.  If `w` returns an empty <std::unique_ptr>, the new
-    // connection is closed immediately.  Otherwise, the new connection
-    // is added to the reactor.
-    tcp_server_socket(const char* bind_addr, std::uint16_t port, wrapper w):
-        resource( setup_server_socket(bind_addr, port) ),
-        m_wrapper(w) {}
+    // For each new connection, `on_accept` is called to determine
+    // if the new connection need to be closed immediately or
+    // to be added to the reactor.  If `on_accept` returns an empty
+    // <std::unique_ptr>, the new connection is closed immediately.
+    // Otherwise, the new connection is added to the reactor.
+    tcp_server_socket(const char* bind_addr, std::uint16_t port,
+                      wrapper on_accept, bool freebind):
+        resource( setup_server_socket(bind_addr, port, freebind) ),
+        m_wrapper(on_accept) {}
     virtual ~tcp_server_socket() {}
 
 private:
@@ -279,9 +283,15 @@ private:
 
 // Utility function to create a <std::unique_ptr> of <tcp_server_socket>.
 inline std::unique_ptr<tcp_server_socket> make_server_socket(
-    const char* bind_addr, std::uint16_t port, tcp_server_socket::wrapper w) {
+    const char* bind_addr, std::uint16_t port,
+    tcp_server_socket::wrapper w, bool freebind = false) {
     return std::unique_ptr<tcp_server_socket>(
-        new tcp_server_socket(bind_addr, port, w) );
+        new tcp_server_socket(bind_addr, port, w, freebind) );
+}
+inline std::unique_ptr<tcp_server_socket> make_server_socket(
+    const ip_address& ip, std::uint16_t port,
+    tcp_server_socket::wrapper w, bool freebind = false) {
+    return make_server_socket(ip.str().c_str(), port, w, freebind);
 }
 
 } // namespace cybozu
