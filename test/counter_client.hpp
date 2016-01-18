@@ -112,7 +112,7 @@ public:
                           std::string(p + 4 + name_len, value_len) });
             p += 4 + name_len + value_len;
         }
-        return std::move(s);
+        return s;
     }
 
 private:

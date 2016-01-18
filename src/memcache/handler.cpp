@@ -227,6 +227,8 @@ std::unique_ptr<cybozu::tcp_socket> handler::make_repl_socket(int s) {
         std::unique_ptr<sync_request>(
             new sync_request([this,pt]{ m_new_slaves.push_back(pt); })
             ));
+    // explicit move is required for C++11 (and gcc-4.8.x).
+    // C++14 (and gcc-5.x) can implicitly move t.
     return std::move(t);
 }
 

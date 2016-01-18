@@ -66,7 +66,7 @@ std::vector<std::string> tokenize(const std::string& s, char c) {
     }
     if( start != end )
         v.emplace_back(start, end);
-    return std::move(v);
+    return v;
 }
 
 void (* const volatile clear_memory)(void* s, std::size_t n) = clear_memory_;
