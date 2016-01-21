@@ -101,6 +101,11 @@ inline void hton(UInt d, char* p) noexcept {
 // Tokenize a string by given delimiter.
 // @s  String to be tokenized.
 // @c  Delimiter.
+//
+// This function splits the given string using `c` as a delimiter.
+// The result will not contain the delimiter nor empty strings.
+//
+// @return  A vector of string tokens.
 std::vector<std::string> tokenize(const std::string& s, char c);
 
 

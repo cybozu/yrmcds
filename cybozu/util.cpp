@@ -50,7 +50,7 @@ void dump_stack() noexcept {
 
 std::vector<std::string> tokenize(const std::string& s, char c) {
     auto end = s.cend();
-    auto start = end;
+    auto start = end;  // initially, token start position is not set.
 
     std::vector<std::string> v;
     for( auto it = s.cbegin(); it != end; ++it ) {
