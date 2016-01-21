@@ -9,6 +9,7 @@
 #include <endian.h>
 #include <string>
 #include <system_error>
+#include <vector>
 
 namespace cybozu {
 
@@ -95,6 +96,17 @@ inline void hton(UInt d, char* p) noexcept {
         return;
     }
 }
+
+
+// Tokenize a string by given delimiter.
+// @s  String to be tokenized.
+// @c  Delimiter.
+//
+// This function splits the given string using `c` as a delimiter.
+// The result will not contain the delimiter nor empty strings.
+//
+// @return  A vector of string tokens.
+std::vector<std::string> tokenize(const std::string& s, char c);
 
 
 // Clear memory securely just like memset_s in C11.

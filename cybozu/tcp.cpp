@@ -390,7 +390,8 @@ bool tcp_socket::write_pending_data() {
     return false;
 }
 
-int setup_server_socket(const char* bind_addr, std::uint16_t port) {
+int
+setup_server_socket(const char* bind_addr, std::uint16_t port, bool freebind) {
     struct addrinfo hint, *res;
     std::string s_port = std::to_string(port);
     std::memset(&hint, 0, sizeof(hint));
@@ -428,6 +429,14 @@ int setup_server_socket(const char* bind_addr, std::uint16_t port) {
     // intentionally ignore errors
     int ok = 1;
     setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &ok, sizeof(ok));
+
+    if( freebind ) {
+        if( setsockopt(s, IPPROTO_IP, IP_FREEBIND, &ok, sizeof(ok)) == -1 ) {
+            ::close(s);
+            freeaddrinfo(res);
+            throw_unix_error(errno, "setsockopt(IP_FREEBIND)");
+        }
+    }
 
     if( bind(s, res->ai_addr, res->ai_addrlen) == -1 ) {
         ::close(s);

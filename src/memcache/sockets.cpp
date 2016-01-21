@@ -298,7 +298,7 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                     r.set( o.cas_unique() );
                 if( ! m_slaves.empty() )
                     repl_object(m_slaves, k, o);
-                return std::move(o);
+                return o;
             };
         }
         if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) ) {
@@ -454,7 +454,7 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                     r.incdec( cmd.initial(), o.cas_unique() );
                 if( ! m_slaves.empty() )
                     repl_object(m_slaves, k, o);
-                return std::move(o);
+                return o;
             };
         }
         if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
@@ -492,7 +492,7 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
                     r.incdec( cmd.initial(), o.cas_unique() );
                 if( ! m_slaves.empty() )
                     repl_object(m_slaves, k, o);
-                return std::move(o);
+                return o;
             };
         }
         if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) )
@@ -668,7 +668,7 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
                     r.stored();
                 if( ! m_slaves.empty() )
                     repl_object(m_slaves, k, o);
-                return std::move(o);
+                return o;
             };
         }
         if( ! m_hash.apply(cybozu::hash_key(p, len), h, c) && ! cmd.no_reply() )

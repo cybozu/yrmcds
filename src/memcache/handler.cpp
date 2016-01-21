@@ -68,8 +68,20 @@ void handler::on_start() {
         [this](int s, const cybozu::ip_address&) {
         return make_memcache_socket(s);
     };
-    m_reactor.add_resource(make_server_socket(NULL, g_config.port(), w),
-                           cybozu::reactor::EVENT_IN);
+    if( g_config.bind_ip().empty() ) {
+        m_reactor.add_resource(
+            make_server_socket(nullptr, g_config.port(), w),
+            cybozu::reactor::EVENT_IN);
+    } else {
+        m_reactor.add_resource(
+            make_server_socket(g_config.vip(), g_config.port(), w, true),
+            cybozu::reactor::EVENT_IN);
+        for( auto& s: g_config.bind_ip() ) {
+            m_reactor.add_resource(
+                make_server_socket(s, g_config.port(), w),
+                cybozu::reactor::EVENT_IN);
+        }
+    }
 }
 
 void handler::on_master_start() {
@@ -78,8 +90,20 @@ void handler::on_master_start() {
         [this](int s, const cybozu::ip_address&) {
         return make_repl_socket(s);
     };
-    m_reactor.add_resource(make_server_socket(NULL, g_config.repl_port(), w),
-                           cybozu::reactor::EVENT_IN);
+    if( g_config.bind_ip().empty() ) {
+        m_reactor.add_resource(
+            make_server_socket(nullptr, g_config.repl_port(), w),
+            cybozu::reactor::EVENT_IN);
+    } else {
+        m_reactor.add_resource(
+            make_server_socket(g_config.vip(), g_config.repl_port(), w, true),
+            cybozu::reactor::EVENT_IN);
+        for( auto& s: g_config.bind_ip() ) {
+            m_reactor.add_resource(
+                make_server_socket(s, g_config.repl_port(), w),
+                cybozu::reactor::EVENT_IN);
+        }
+    }
 }
 
 void handler::on_master_interval() {
@@ -203,6 +227,8 @@ std::unique_ptr<cybozu::tcp_socket> handler::make_repl_socket(int s) {
         std::unique_ptr<sync_request>(
             new sync_request([this,pt]{ m_new_slaves.push_back(pt); })
             ));
+    // explicit move is required for C++11 (and gcc-4.8.x).
+    // C++14 (and gcc-5.x) can implicitly move t.
     return std::move(t);
 }
 
