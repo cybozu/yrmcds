@@ -1,3 +1,8 @@
+version 1.1.6
+
+	* New config option "bind_ip".
+	* fixed a minor replication bug #61.
+
 version 1.1.5
 
 	* New config option "repl_buffer_size".
