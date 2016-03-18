@@ -593,7 +593,8 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
         break;
     case binary_command::Keys:
         std::tie(p, len) = cmd.key();
-        foreach_pred = [p,len,&r](const cybozu::hash_key& k, object&) {
+        foreach_pred = [p,len,&r](const cybozu::hash_key& k, object& obj) {
+            if( obj.expired() ) return;
             if( (len == 0) || k.has_prefix(p, len) )
                 r.key(k.data(), k.length());
         };
@@ -901,7 +902,8 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
         break;
     case text_command::KEYS:
         std::tie(p, len) = cmd.key();
-        foreach_pred = [p,len,&r](const cybozu::hash_key& k, object&) {
+        foreach_pred = [p,len,&r](const cybozu::hash_key& k, object& obj) {
+            if( obj.expired() ) return;
             if( (len == 0) || k.has_prefix(p, len) )
                 r.value(k);
         };
