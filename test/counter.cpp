@@ -35,11 +35,12 @@ int connect_server() {
     return s;
 }
 
-#define ASSERT_RESPONSE(c, r, s, cmd, st) do { \
-        cybozu_assert( c.recv(r) ); \
-        cybozu_assert( r.opaque() == s ); \
-        cybozu_assert( r.command() == yrmcds::counter::command::cmd ); \
-        cybozu_assert( r.status() == yrmcds::counter::status::st ); \
+#define ASSERT_RESPONSE(c, r, s, cmd, st)                               \
+    do {                                                                \
+        cybozu_assert( c.recv(r) );                                     \
+        cybozu_assert( r.opaque() == s );                               \
+        cybozu_assert( r.command() == yrmcds::counter::command::cmd );  \
+        cybozu_assert( r.status() == yrmcds::counter::status::st );     \
     } while( false )
 
 AUTOTEST(noop) {

@@ -1,9 +1,8 @@
-#include <iostream>
+#include <cybozu/test.hpp>
 
-int main(int argc, char** argv) {
+AUTOTEST(lambda) {
     int x = 3;
     auto foo = [=]() mutable { ++x; return x * x; };
-    std::cout << foo() << std::endl;
-    std::cout << foo() << std::endl;
-    return 0;
+    cybozu_assert( foo() == 16 );
+    cybozu_assert( foo() == 25 );
 }
