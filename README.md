@@ -1,7 +1,6 @@
-yrmcds
-======
+[![Build Status](https://travis-ci.org/cybozu/yrmcds.png)](https://travis-ci.org/cybozu/yrmcds)
 
-yrmcds is a memory object caching system with master/slave replication.
+**yrmcds** is a memory object caching system with master/slave replication.
 
 Currently, yrmcds supports two protocols: the first is an enhanced
 [memcached][], and another is a protocol to implement

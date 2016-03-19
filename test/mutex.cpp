@@ -1,3 +1,5 @@
+#include <cybozu/test.hpp>
+
 #include <mutex>
 #include <thread>
 #include <iostream>
@@ -14,7 +16,7 @@ void foo() {
     return;
 }
 
-int main() {
+AUTOTEST(mutex) {
     std::thread t1(foo);
     std::thread t2(foo);
     std::thread t3(foo);
@@ -22,6 +24,5 @@ int main() {
     t1.join();
     t2.join();
     t3.join();
-    std::cout << g_counter << std::endl;
-    return 0;
+    cybozu_assert( g_counter == 40000 );
 }

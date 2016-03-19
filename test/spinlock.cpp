@@ -1,8 +1,8 @@
 #include <cybozu/spinlock.hpp>
+#include <cybozu/test.hpp>
 
 #include <mutex>
 #include <thread>
-#include <iostream>
 
 alignas(CACHELINE_SIZE)
 cybozu::spinlock g_lock;
@@ -17,13 +17,12 @@ void accum(int n) {
     }
 }
 
-int main() {
+AUTOTEST(accum) {
     std::thread t1(accum, 100000);
     std::thread t2(accum, 100000);
     std::thread t3(accum, 100000);
     t1.join();
     t2.join();
     t3.join();
-    std::cout << "accumulated value = " << g_counter << std::endl;
-    return 0;
+    cybozu_assert( g_counter == 300000 );
 }
