@@ -11,5 +11,4 @@ script:
   - make -j 2
   - ./yrmcdsd &
   - sleep 1
-  - make -j 2 tests
-  - ./test/protocol_binary.exe localhost
+  - make YRMCDS_SERVER=localhost tests
