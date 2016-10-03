@@ -1,3 +1,8 @@
+version 1.1.7
+
+	* Support for systemd in "make install".
+	* fixed a minor bug in "Keys" extension (#65).
+
 version 1.1.6
 
 	* New config option "bind_ip".
