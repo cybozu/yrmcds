@@ -1,0 +1,18 @@
+# systemd service for yrmcds
+[Unit]
+Description=yrmcds server
+Wants=networking.target
+After=networking.target
+
+[Service]
+Type=simple
+LimitNOFILE=100000
+LimitMEMLOCK=infinity
+UMask=0077
+PrivateTmp=true
+ExecStartPre=/bin/mkdir -p /var/tmp/yrmcds
+ExecStart=/usr/local/sbin/yrmcdsd
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

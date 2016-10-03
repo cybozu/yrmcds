@@ -69,8 +69,13 @@ The makefile automatically detects TCMalloc if available.
 Install
 -------
 
-On Ubuntu, `sudo make install` installs yrmcds under `/usr/local`.  
-An upstart script and a logrotate configuration file are installed too.
+On Ubuntu, `sudo make install` installs yrmcds under `/usr/local`.
+What `make install` does are:
+
+* Install yrmcdsd under `/usr/local/sbin`.
+* Install service start script for systemd or upstart.
+* Install logrotate script.
+* Create `/etc/yrmcds.conf`.
 
 About the name
 --------------

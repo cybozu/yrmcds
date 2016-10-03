@@ -51,8 +51,17 @@ strip: $(EXE)
 	nm -n $(EXE) | grep -v '\( [aNUw] \)\|\(__crc_\)\|\( \$$[adt]\)' > $(EXE).map
 	strip $(EXE)
 
-install: $(EXE)
+ifeq ($(wildcard /run/systemd/system), /run/systemd/system)
+install-service:
+	cp etc/yrmcds.service /etc/systemd/system/yrmcds.service
+	systemctl daemon-reload
+else
+install-service:
 	cp etc/upstart /etc/init/yrmcds.conf
+endif
+
+install: $(EXE)
+	$(MAKE) install-service
 	cp etc/logrotate /etc/logrotate.d/yrmcds
 	cp etc/yrmcds.conf $(DEFAULT_CONFIG)
 	cp $(EXE) $(PREFIX)/sbin/yrmcdsd
@@ -95,4 +104,4 @@ setup:
 	sudo apt-get install -y --install-recommends $(PACKAGES)
 	sudo pip install cldoc --upgrade
 
-.PHONY: all strip lib tests install html serve clean setup test_env $(TESTS)
+.PHONY: all strip lib tests install install-service html serve clean setup test_env $(TESTS)
