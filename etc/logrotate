@@ -8,6 +8,10 @@
 	missingok
 	create 0644 nobody nogroup
 	postrotate
-		reload yrmcds >/dev/null 2>&1 || true
+		if [ -d /run/systemd/system ]; then
+			systemctl kill -s SIGHUP yrmcds.service || true
+		else
+			reload yrmcds >/dev/null 2>&1 || true
+		fi
 	endscript
 }
