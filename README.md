@@ -61,7 +61,7 @@ Build
 
 Just run `make`.
 
-yrmcds runs faster when linked with [TCMalloc](tcmalloc).
+yrmcds runs faster when linked with [TCMalloc][tcmalloc].
 On Debian/Ubuntu, install `libgoogle-perftools-dev` package to prepare TCMalloc.
 
 The makefile automatically detects TCMalloc if available.
