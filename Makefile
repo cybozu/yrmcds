@@ -22,12 +22,12 @@ LDFLAGS = -L. $(shell getconf LFS_LDFLAGS)
 LDLIBS = $(shell getconf LFS_LIBS) -lyrmcds $(LIBTCMALLOC) -latomic -lpthread
 CLDOC := LD_LIBRARY_PATH=$(shell llvm-config --libdir 2>/dev/null) cldoc
 
-HEADERS = $(wildcard src/*.hpp src/*/*.hpp cybozu/*.hpp)
-SOURCES = $(wildcard src/*.cpp src/*/*.cpp cybozu/*.cpp)
+HEADERS = $(sort $(wildcard src/*.hpp src/*/*.hpp cybozu/*.hpp))
+SOURCES = $(sort $(wildcard src/*.cpp src/*/*.cpp cybozu/*.cpp))
 OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
 
 EXE = yrmcdsd
-TESTS = $(patsubst %.cpp,%,$(wildcard test/*.cpp))
+TESTS = $(patsubst %.cpp,%,$(sort $(wildcard test/*.cpp)))
 LIB = libyrmcds.a
 LIB_OBJECTS = $(filter-out src/main.o,$(OBJECTS))
 PACKAGES = build-essential libgoogle-perftools-dev python-pip
