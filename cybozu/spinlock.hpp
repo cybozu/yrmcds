@@ -14,7 +14,7 @@ namespace cybozu {
 // A simple spinlock.
 class spinlock {
 public:
-    spinlock(): m_flag(ATOMIC_FLAG_INIT) {}
+    spinlock() {}
     void lock() {
         while( m_flag.test_and_set(std::memory_order_acquire) )
             pause();
@@ -24,7 +24,7 @@ public:
     }
 
 private:
-    std::atomic_flag m_flag;
+    std::atomic_flag m_flag = ATOMIC_FLAG_INIT;
     void pause() {
 #if defined(__i386__) || defined(__x86_64__)
 # if defined(__SSE__)

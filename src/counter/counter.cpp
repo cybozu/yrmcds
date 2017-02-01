@@ -13,7 +13,6 @@ namespace {
 const std::size_t HEADER_SIZE = 12;
 const std::uint8_t REQUEST_MAGIC  = 0x90;
 const std::uint8_t RESPONSE_MAGIC = 0x91;
-const char STATUS_OK[]                     = "No error";
 const char STATUS_NOT_FOUND[]              = "Not found";
 const char STATUS_INVALID[]                = "Invalid arguments";
 const char STATUS_RESOURCE_NOT_AVAILABLE[] = "Resource not available";
