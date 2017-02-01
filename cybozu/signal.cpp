@@ -9,6 +9,7 @@ namespace {
 
 const char ABORT_MESSAGE[] = "got SIGABRT.\n";
 
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
 void handle_abort [[noreturn]] (int) {
     ::write(STDERR_FILENO, ABORT_MESSAGE, sizeof(ABORT_MESSAGE) - 1);
