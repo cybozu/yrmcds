@@ -315,17 +315,7 @@ text_request::parse_lock(const char* b, const char* e) noexcept {
 
 inline void
 text_request::parse_unlock(const char* b, const char* e) noexcept {
-    while( *b == SP ) ++b;
-    if( b == e ) return;
-    const char* key_end = cfind(b, SP, e-b);
-    if( key_end == nullptr ) key_end = e;
-    m_key = item(b, key_end-b);
-    b = key_end;
-
-    while( *b == SP ) ++b;
-    if( b != e ) return; // garbage left
-
-    m_valid = true;
+    parse_lock(b, e); // same as parse_lock
 }
 
 inline void
