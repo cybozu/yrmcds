@@ -1,3 +1,7 @@
+version 1.1.9
+
+	* Support GCC7 (#70).
+
 version 1.1.8
 
 	* Fix logrotate script for systemd.
