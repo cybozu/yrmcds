@@ -445,7 +445,7 @@ setup_server_socket(const char* bind_addr, std::uint16_t port, bool freebind) {
     }
     freeaddrinfo(res);
 
-    if( listen(s, 128) == -1 ) {
+    if( listen(s, 4096) == -1 ) {
         ::close(s);
         throw_unix_error(errno, "listen");
     }
