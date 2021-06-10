@@ -23,14 +23,12 @@ jobs:
         run: |
           $CC --version
           $CXX --version
-          make -j 4
+          make -j 4 CC=$CC CXX=$CXX OPTFLAGS="-O2 -fPIE"
           ./yrmcdsd &
           sleep 1
         env:
           CC: ${{ matrix.compiler[0] }}
-          CFLAGS: -fPIE
           CXX: ${{ matrix.compiler[1] }}
-          CXXFLAGS: -fPIE
 
       - name: Run tests
         run: |
