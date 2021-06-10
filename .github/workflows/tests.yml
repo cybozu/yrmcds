@@ -1,0 +1,37 @@
+name: Tests
+
+on: [pull_request]
+
+jobs:
+  unit-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04, ubuntu-20.04]
+        compiler: [[gcc, g++], [clang, clang++]]
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y libgoogle-perftools-dev
+
+      - name: Build
+        run: |
+          $CC --version
+          $CXX --version
+          make -j 4
+          ./yrmcdsd &
+          sleep 1
+        env:
+          CC: ${{ matrix.compiler[0] }}
+          CFLAGS: -fPIE
+          CXX: ${{ matrix.compiler[1] }}
+          CXXFLAGS: -fPIE
+
+      - name: Run tests
+        run: |
+          make YRMCDS_SERVER=localhost tests
