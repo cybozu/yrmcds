@@ -9,15 +9,15 @@ ifeq ($(CACHELINE_SIZE), 0)
 	CACHELINE_SIZE = 32
 endif
 
-CC = gcc
-CXX = g++
+CC ?= gcc
+CXX ?= g++
 CPPFLAGS = -I. -DCACHELINE_SIZE=$(CACHELINE_SIZE) $(TCMALLOC_FLAGS)
 CPPFLAGS += -DDEFAULT_CONFIG=$(DEFAULT_CONFIG)
 OPTFLAGS = -O2 #-flto
 DEBUGFLAGS = -gdwarf-3 #-fsanitize=address
 WARNFLAGS = -Wall -Wnon-virtual-dtor -Woverloaded-virtual
 CPUFLAGS = #-march=core2 -mtune=corei7
-CXXFLAGS = -std=gnu++11 $(OPTFLAGS) $(DEBUGFLAGS) $(shell getconf LFS_CFLAGS) $(WARNFLAGS) $(CPUFLAGS)
+CXXFLAGS := -std=gnu++11 $(OPTFLAGS) $(DEBUGFLAGS) $(shell getconf LFS_CFLAGS) $(WARNFLAGS) $(CPUFLAGS) $(CXXFLAGS)
 LDFLAGS = -L. $(shell getconf LFS_LDFLAGS)
 LDLIBS = $(shell getconf LFS_LIBS) -lyrmcds $(LIBTCMALLOC) -latomic -lpthread
 CLDOC := LD_LIBRARY_PATH=$(shell llvm-config --libdir 2>/dev/null) cldoc
