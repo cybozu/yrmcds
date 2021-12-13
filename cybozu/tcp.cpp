@@ -27,7 +27,7 @@
 
 namespace {
 
-const unsigned int MAX_BUFCNT = 100;
+const unsigned int MAX_BUFCNT = 65536;
 const int KEEPALIVE_IDLE = 300;   // 5 min before keep alive probe
 const int KEEPALIVE_INTERVAL = 5; // 5 seconds between keep alive probes
 
