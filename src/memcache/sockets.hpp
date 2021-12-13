@@ -140,10 +140,12 @@ private:
 
     virtual bool on_readable() override final;
     virtual bool on_hangup() override final {
+        cybozu::logger::warning() << "The connection to master has hung up.";
         m_reactor->quit();
         return invalidate();
     }
     virtual bool on_error() override final {
+        cybozu::logger::warning() << "An error occurred on the connection to master.";
         m_reactor->quit();
         return invalidate();
     }
