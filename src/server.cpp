@@ -59,6 +59,7 @@ void server::serve() {
                          case SIGQUIT:
                          case SIGTERM:
                          case SIGINT:
+                             cybozu::logger::info() << "got signal (signo=" << si.ssi_signo << ").";
                              m_signaled = true;
                              r.quit();
                              break;
@@ -82,8 +83,12 @@ void server::serve() {
         for( int i = 0; i < MASTER_CHECKS; ++i ) {
             if( is_master() )
                 goto MASTER_ENTRY;
+            cybozu::logger::info()
+                << "The conditions for becoming master are not met. Sleep and retry... ("
+                << i << "/" << MASTER_CHECKS << ")";
             std::this_thread::sleep_for( std::chrono::milliseconds(100) );
         }
+        cybozu::logger::warning() << "Could not promote to master. Join the cluster again as a slave.";
     }
 
   MASTER_ENTRY:
@@ -105,6 +110,7 @@ void server::serve_slave() {
 
     m_reactor.run([this](cybozu::reactor& r) {
             if( is_master() ) {
+                cybozu::logger::info() << "Detected that this node is eligible to be master. Exit slave mode.";
                 r.quit();
                 return;
             }

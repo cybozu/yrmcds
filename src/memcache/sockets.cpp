@@ -996,12 +996,14 @@ bool repl_client_socket::on_readable() {
             if( errno == EINTR )
                 continue;
             if( errno == ECONNRESET ) {
+                cybozu::logger::warning() << "The connection to master has been reset.";
                 m_reactor->quit();
                 return invalidate();
             }
             cybozu::throw_unix_error(errno, "recv");
         }
         if( n == 0 ) {
+            cybozu::logger::info() << "The connection to master has been closed.";
             m_reactor->quit();
             return invalidate();
         }
