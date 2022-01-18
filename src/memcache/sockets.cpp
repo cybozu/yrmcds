@@ -964,12 +964,28 @@ bool repl_socket::on_readable() {
                 break;
             if( errno == EINTR )
                 continue;
-            if( errno == ECONNRESET )
+            if( errno == ECONNRESET ) {
+                std::string addr = "unknown address";
+                try {
+                    addr = cybozu::get_peer_ip_address(m_fd).str();
+                } catch (...) {
+                    // ignore errors
+                }
+                cybozu::logger::info() << "The connection to the slave (" << addr << ") has been reset.";
                 return invalidate();
+            }
             cybozu::throw_unix_error(errno, "recv");
         }
-        if( n == 0 )
+        if( n == 0 ) {
+            std::string addr = "unknown address";
+            try {
+                addr = cybozu::get_peer_ip_address(m_fd).str();
+            } catch (...) {
+                // ignore errors
+            }
+            cybozu::logger::info() << "The connection to the slave (" << addr << ") has been closed.";
             return invalidate();
+        }
         m_last_heartbeat = g_current_time.load(relaxed);
     }
     return true;
