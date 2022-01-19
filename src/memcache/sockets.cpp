@@ -964,12 +964,28 @@ bool repl_socket::on_readable() {
                 break;
             if( errno == EINTR )
                 continue;
-            if( errno == ECONNRESET )
+            if( errno == ECONNRESET ) {
+                std::string addr = "unknown address";
+                try {
+                    addr = cybozu::get_peer_ip_address(m_fd).str();
+                } catch (...) {
+                    // ignore errors
+                }
+                cybozu::logger::info() << "The connection to the slave (" << addr << ") has been reset.";
                 return invalidate();
+            }
             cybozu::throw_unix_error(errno, "recv");
         }
-        if( n == 0 )
+        if( n == 0 ) {
+            std::string addr = "unknown address";
+            try {
+                addr = cybozu::get_peer_ip_address(m_fd).str();
+            } catch (...) {
+                // ignore errors
+            }
+            cybozu::logger::info() << "The connection to the slave (" << addr << ") has been closed.";
             return invalidate();
+        }
         m_last_heartbeat = g_current_time.load(relaxed);
     }
     return true;
@@ -987,6 +1003,13 @@ bool repl_socket::on_writable() {
 }
 
 bool repl_client_socket::on_readable() {
+    // This function is executed in the same thread as the function that sends
+    // heartbeats. If this function takes a very long time, no heartbeats will
+    // be sent, and this process will be judged dead by the master. To prevent
+    // this misjudgment, set an upper limit on the number of iterations.
+    static const size_t MAX_ITER = 50;
+
+    size_t n_iter = 0;
     while( true ) {
         char* p = m_recvbuf.prepare(MAX_RECVSIZE);
         ssize_t n = ::recv(m_fd, p, MAX_RECVSIZE, 0);
@@ -1011,6 +1034,12 @@ bool repl_client_socket::on_readable() {
 
         std::size_t c = repl_recv(m_recvbuf.data(), m_recvbuf.size(), m_hash);
         m_recvbuf.erase(c);
+
+        n_iter++;
+        if (n_iter >= MAX_ITER) {
+            m_reactor->add_readable(*this);
+            return true;
+        }
     }
     return true;
 }
