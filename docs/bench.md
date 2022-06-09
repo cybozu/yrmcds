@@ -1,5 +1,3 @@
-#<cldoc:Benchmark Results>
-
 Benchmark results.
 
 Environment

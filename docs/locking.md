@@ -1,5 +1,3 @@
-#<cldoc:Server-side locking>
-
 Server-side locking support.
 
 Motivation

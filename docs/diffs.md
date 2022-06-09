@@ -1,5 +1,3 @@
-#<cldoc:Differences from memcached>
-
 Differences from memcached.
 
 Differences from memcached 1.4

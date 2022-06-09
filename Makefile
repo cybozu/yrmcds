@@ -20,7 +20,6 @@ CPUFLAGS = #-march=core2 -mtune=corei7
 CXXFLAGS = -std=gnu++11 $(OPTFLAGS) $(DEBUGFLAGS) $(shell getconf LFS_CFLAGS) $(WARNFLAGS) $(CPUFLAGS)
 LDFLAGS = -L. $(shell getconf LFS_LDFLAGS)
 LDLIBS = $(shell getconf LFS_LIBS) -lyrmcds $(LIBTCMALLOC) -latomic -lpthread
-CLDOC := LD_LIBRARY_PATH=$(shell llvm-config --libdir 2>/dev/null) cldoc
 
 HEADERS = $(sort $(wildcard src/*.hpp src/*/*.hpp cybozu/*.hpp))
 SOURCES = $(sort $(wildcard src/*.cpp src/*/*.cpp cybozu/*.cpp))
@@ -30,7 +29,7 @@ EXE = yrmcdsd
 TESTS = $(patsubst %.cpp,%,$(sort $(wildcard test/*.cpp)))
 LIB = libyrmcds.a
 LIB_OBJECTS = $(filter-out src/main.o,$(OBJECTS))
-PACKAGES = build-essential libgoogle-perftools-dev python-pip
+PACKAGES = build-essential libgoogle-perftools-dev
 
 TCMALLOC_HEADER := $(shell sh ./detect_tcmalloc.sh $(CXX) $(CPPFLAGS))
 ifeq ($(TCMALLOC_HEADER), gperftools/tcmalloc.h)
@@ -89,19 +88,10 @@ $(TESTS): $(LIB)
 	./$@.exe
 	@echo
 
-html:
-	@clang++ -v 2>/dev/null || (echo "No clang++ in PATH." && false)
-	rm -rf html
-	$(CLDOC) generate $(CPPFLAGS) $(CXXFLAGS) -w -D__STRICT_ANSI__ -- --output html --merge docs $(HEADERS)
-
-serve: html
-	@cd html; python -m SimpleHTTPServer 8888 || true
-
 clean:
 	rm -f src/*.o src/*/*.o cybozu/*.o test/*.o test/*.exe COPYING.hpp $(EXE) $(EXE).map $(LIB)
 
 setup:
 	sudo apt-get install -y --install-recommends $(PACKAGES)
-	sudo pip install cldoc --upgrade
 
-.PHONY: all strip lib tests install install-service html serve clean setup test_env $(TESTS)
+.PHONY: all strip lib tests install install-service clean setup test_env $(TESTS)

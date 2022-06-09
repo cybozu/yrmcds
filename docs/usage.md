@@ -1,5 +1,3 @@
-#<cldoc:Usage>
-
 Configuration and execution of `yrmcdsd`.
 
 `yrmcdsd` is the server program of yrmcds.  Its built-in configurations are
