@@ -1,5 +1,3 @@
-#<cldoc:Counter support>
-
 Counter support
 
 Overview

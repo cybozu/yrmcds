@@ -1,5 +1,3 @@
-#<cldoc:Future Plans>
-
 List of future plans.
 
 Future Plans

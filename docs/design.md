@@ -1,5 +1,3 @@
-#<cldoc:Design Notes>
-
 Design Notes
 ============
 

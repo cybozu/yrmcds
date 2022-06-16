@@ -1,5 +1,3 @@
-#<cldoc:ExtKeys>
-
 Key dump extesion
 =================
 
