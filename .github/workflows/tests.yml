@@ -8,28 +8,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04]
+        os: [ubuntu-20.04, ubuntu-22.04]
         compiler: [[gcc, g++], [clang, clang++]]
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get install -y libgoogle-perftools-dev
-
-      - name: Build
-        run: |
-          $CC --version
-          $CXX --version
-          make -j 4 CC=$CC CXX=$CXX OPTFLAGS="-O2 -fPIE"
-          ./yrmcdsd &
-          sleep 1
-        env:
-          CC: ${{ matrix.compiler[0] }}
-          CXX: ${{ matrix.compiler[1] }}
-
-      - name: Run tests
-        run: |
-          make YRMCDS_SERVER=localhost tests
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgoogle-perftools-dev libunwind-dev
+    - name: Build
+      run: |
+        $CC --version
+        $CXX --version
+        make -j $(nproc) CC=$CC CXX=$CXX OPTFLAGS="-O2 -fPIE"
+        ./yrmcdsd &
+        sleep 1
+      env:
+        CC: ${{ matrix.compiler[0] }}
+        CXX: ${{ matrix.compiler[1] }}
+    - name: Run tests
+      run: |
+        make YRMCDS_SERVER=localhost tests
