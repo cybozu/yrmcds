@@ -1,3 +1,10 @@
+version 1.1.10
+
+	* Increased the listen backlog from 128 to 4096 (#77).
+	* The max `repl_buffer_size` is increased from 100 to 65536 (#81).
+	* Fix slave death during huge initial replication (#83).
+	* Fix builds on GCC 13 (#85). Thanks to @yuzibo.
+
 version 1.1.9
 
 	* Support GCC7 (#70).
