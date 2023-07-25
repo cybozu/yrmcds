@@ -4,6 +4,7 @@
 #ifndef CYBOZU_IP_ADDRESS_HPP
 #define CYBOZU_IP_ADDRESS_HPP
 
+#include <cstdint>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <string>
