@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <string>
 #include <stdexcept>
+#include <cstdint>
 
 namespace cybozu {
 
@@ -96,6 +97,23 @@ public:
     int get_as_int(const std::string& key) const {
         try {
             return std::stoi(get(key));
+        } catch(const std::invalid_argument& e) {
+            throw illegal_value(key);
+        } catch(const std::out_of_range& e) {
+            throw illegal_value(key);
+        }
+    }
+
+    // Get an uint64_t integer converted from the value associated with `key`.
+    // @key   A configuration key.
+    //
+    // Get an uint64_t integer converted from the value associated with `key`.
+    // Raise <not_found> or <illegal_value>.
+    //
+    // @return An uint64_t integer converted from the associated value.
+    std::uint64_t get_as_uint64(const std::string& key) const {
+        try {
+            return std::stoull(get(key));
         } catch(const std::invalid_argument& e) {
             throw illegal_value(key);
         } catch(const std::out_of_range& e) {

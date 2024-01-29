@@ -24,6 +24,7 @@ const char MAX_DATA_SIZE[] = "max_data_size";
 const char HEAP_DATA_LIMIT[] = "heap_data_limit";
 const char MEMORY_LIMIT[] = "memory_limit";
 const char REPL_BUFSIZE[] = "repl_buffer_size";
+const char INITIAL_REPL_SLEEP_DELAY[] = "initial_repl_sleep_delay";
 const char SECURE_ERASE[] = "secure_erase";
 const char LOCK_MEMORY[] = "lock_memory";
 const char WORKERS[] = "workers";
@@ -204,6 +205,11 @@ void config::load(const std::string& path) {
         if( bufs < 1 )
             throw bad_config("repl_buffer_size must be > 0");
         m_repl_bufsize = bufs;
+    }
+
+    if( cp.exists(INITIAL_REPL_SLEEP_DELAY) ) {
+        std::uint64_t n = cp.get_as_uint64(INITIAL_REPL_SLEEP_DELAY);
+        m_initial_repl_sleep_delay = n;
     }
 
     if( cp.exists(SECURE_ERASE) ) {

@@ -111,6 +111,9 @@ public:
     unsigned int repl_bufsize() const noexcept {
         return m_repl_bufsize;
     }
+    std::uint64_t initial_repl_sleep_delay() const noexcept {
+        return m_initial_repl_sleep_delay;
+    }
     bool secure_erase() const noexcept {
         return m_secure_erase;
     }
@@ -152,6 +155,7 @@ private:
     std::size_t m_heap_data_limit = DEFAULT_HEAP_DATA_LIMIT;
     std::size_t m_memory_limit = DEFAULT_MEMORY_LIMIT;
     unsigned int m_repl_bufsize = DEFAULT_REPL_BUFSIZE;
+    uint64_t m_initial_repl_sleep_delay = DEFAULT_INITIAL_REPL_SLEEP_DELAY;
     bool m_secure_erase = false;
     bool m_lock_memory = false;
     unsigned int m_workers = DEFAULT_WORKER_THREADS;

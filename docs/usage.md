@@ -51,6 +51,8 @@ These options are to configure memcache protocol:
     Objects larger than this will be stored in temporary files.
 * `repl_buffer_size` (Default: 30)  
     The replication buffer size.  Unit is MiB.
+* `initial_repl_sleep_delay` (Default: 0)  
+    Slow down the scan of the entire hash by the GC thread to prevent errors with the message "Replication buffer is full." during the initial replication. The GC thread sleeps for the time specified here for each scan of the hash bucket. Unit is microseconds.
 * `secure_erase` (Default: false)  
     If `true`, object memory will be cleared as soon as the object is removed.
 * `lock_memory` (Default: false)  
