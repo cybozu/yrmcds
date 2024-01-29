@@ -125,7 +125,7 @@ void gc_thread::gc() {
     // Putting the thread to sleep tens of microseconds with each loop is desired, but due to the precision of the timer,
     // it's not appropriate to do sleep with each loop. The `initial_repl_sleep_delay` is accumulated until it
     // exceeds 10000 microseconds (10 milliseconds), and then the thread is put to sleep all at once when this limit is exceeded.
-    static const std::uint64_t SLEEP_THRESHOLD = 10000;
+    const std::uint64_t SLEEP_THRESHOLD = 10000;
     std::uint64_t sleep_sum = 0;
 
     for( auto it = m_hash.begin(); it != m_hash.end(); ++it ) {
