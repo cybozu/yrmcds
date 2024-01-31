@@ -17,6 +17,7 @@ const std::size_t   DEFAULT_MAX_DATA_SIZE  = static_cast<std::size_t>(1) << 20;
 const std::size_t   DEFAULT_HEAP_DATA_LIMIT= 256 << 10;
 const std::size_t   DEFAULT_MEMORY_LIMIT   = static_cast<std::size_t>(1) << 30;
 const unsigned int  DEFAULT_REPL_BUFSIZE   = 30;
+const std::uint64_t DEFAULT_INITIAL_REPL_SLEEP_DELAY_USEC = 0;
 const int           DEFAULT_WORKER_THREADS = 8;
 const unsigned int  DEFAULT_GC_INTERVAL    = 10;
 const unsigned int  DEFAULT_SLAVE_TIMEOUT  = 10;

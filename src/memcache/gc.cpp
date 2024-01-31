@@ -122,10 +122,25 @@ void gc_thread::gc() {
         return false;
     };
 
+    // Putting the thread to sleep tens of microseconds with each loop is desired, but due to the precision of the timer,
+    // it's not appropriate to sleep with each loop. The `initial_repl_sleep_delay_usec` is accumulated until it
+    // exceeds 10000 microseconds (10 milliseconds), and then the thread is put to sleep all at once when this limit is exceeded.
+    constexpr std::uint64_t SLEEP_THRESHOLD = 10000;
+    std::uint64_t sleep_sum = 0;
+
     for( auto it = m_hash.begin(); it != m_hash.end(); ++it ) {
         m_objects_in_bucket = 0;
         it->gc(pred);
         m_flushers.clear();
+
+        if( ! m_new_slaves.empty() ) {
+            sleep_sum += g_config.initial_repl_sleep_delay_usec();
+            if( sleep_sum >= SLEEP_THRESHOLD ) {
+                std::this_thread::sleep_for(
+                    std::chrono::microseconds(sleep_sum));
+                sleep_sum = 0;
+            }
+        }
     }
 
     if( flush )
