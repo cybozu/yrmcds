@@ -73,9 +73,12 @@ void handler::on_start() {
             make_server_socket(nullptr, g_config.port(), w),
             cybozu::reactor::EVENT_IN);
     } else {
-        m_reactor.add_resource(
-            make_server_socket(g_config.vip(), g_config.port(), w, true),
-            cybozu::reactor::EVENT_IN);
+        if( g_config.vip() ) {
+            auto vip = g_config.vip()->str();
+            m_reactor.add_resource(
+                make_server_socket(vip.c_str(), g_config.port(), w, true),
+                cybozu::reactor::EVENT_IN);
+        }
         for( auto& s: g_config.bind_ip() ) {
             m_reactor.add_resource(
                 make_server_socket(s, g_config.port(), w),
@@ -95,8 +98,9 @@ void handler::on_master_start() {
             make_server_socket(nullptr, g_config.repl_port(), w),
             cybozu::reactor::EVENT_IN);
     } else {
+        auto master_host = g_config.master_host();
         m_reactor.add_resource(
-            make_server_socket(g_config.vip(), g_config.repl_port(), w, true),
+            make_server_socket(master_host.c_str(), g_config.repl_port(), w, true),
             cybozu::reactor::EVENT_IN);
         for( auto& s: g_config.bind_ip() ) {
             m_reactor.add_resource(
@@ -145,7 +149,8 @@ void handler::on_master_end() {
 }
 
 bool handler::on_slave_start() {
-    int fd = cybozu::tcp_connect(g_config.vip().str().c_str(),
+    auto master_host = g_config.master_host();
+    int fd = cybozu::tcp_connect(master_host.c_str(),
                                  g_config.repl_port());
     if( fd == -1 ) {
         m_reactor.run_once();

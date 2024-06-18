@@ -38,4 +38,10 @@ const char          VERSION[] = "yrmcds version 1.1.11";
 
 } // namespace yrmcds
 
+// Define CACHELINE_SIZE if it is not defined to prevent IDE from throwing an error
+// The actual value used is written in Makefile.
+#ifndef CACHELINE_SIZE
+#define CACHELINE_SIZE 32
+#endif
+
 #endif // YRMCDS_CONSTANTS_HPP

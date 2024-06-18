@@ -1,6 +1,7 @@
 // (C) 2013 Cybozu.
 
 #include "../config.hpp"
+#include "../election.hpp"
 #include "gc.hpp"
 #include "replication.hpp"
 #include "stats.hpp"
@@ -11,8 +12,8 @@
 namespace yrmcds { namespace memcache {
 
 void gc_thread::run() {
-    if( ! cybozu::has_ip_address(g_config.vip()) ) {
-        cybozu::logger::error() << "VIP has been lost.  Exiting quickly...";
+    if( ! yrmcds::is_master() ) {
+        cybozu::logger::error() << "I am no longer the master.  Exiting quickly...";
         std::quick_exit(2);
     }
 
