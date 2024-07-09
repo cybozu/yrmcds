@@ -78,12 +78,10 @@ void server::serve() {
         if( m_signaled ) return;
 
         // disconnected from the master
+        cybozu::logger::info() << "Try to promote to master...";
         for( int i = 0; i < MASTER_CHECKS; ++i ) {
             if( yrmcds::is_master() )
                 goto MASTER_ENTRY;
-            cybozu::logger::info()
-                << "The conditions for becoming master are not met. Sleep and retry... ("
-                << i << "/" << MASTER_CHECKS << ")";
             std::this_thread::sleep_for( std::chrono::milliseconds(100) );
         }
         cybozu::logger::warning() << "Could not promote to master. Join the cluster again as a slave.";
