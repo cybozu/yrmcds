@@ -156,6 +156,11 @@ bool handler::on_slave_start() {
         m_reactor.run_once();
         return false;
     }
+
+    // on_slave_start may be called multiple times over the lifetime.
+    // Therefore we need to clear the hash table.
+    clear();
+
     m_repl_client_socket = new repl_client_socket(fd, m_hash);
     m_reactor.add_resource(std::unique_ptr<cybozu::resource>(m_repl_client_socket),
                            cybozu::reactor::EVENT_IN|cybozu::reactor::EVENT_OUT );

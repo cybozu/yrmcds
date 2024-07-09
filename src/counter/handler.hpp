@@ -24,10 +24,11 @@ public:
     virtual void on_master_start() override;
     virtual void on_master_interval() override;
     virtual void on_master_end() override;
+    virtual bool on_slave_start() override;
     virtual void dump_stats() override;
-    virtual void clear() override;
 
 private:
+    void clear();
     bool gc_ready();
     std::unique_ptr<cybozu::tcp_socket> make_counter_socket(int s);
 
