@@ -149,10 +149,19 @@ void handler::on_master_end() {
 }
 
 bool handler::on_slave_start() {
+    using logger = cybozu::logger;
+
     auto master_host = g_config.master_host();
-    int fd = cybozu::tcp_connect(master_host.c_str(),
-                                 g_config.repl_port());
+    int fd;
+    try {
+        fd = cybozu::tcp_connect(master_host.c_str(), g_config.repl_port());
+    } catch( std::runtime_error& err ) {
+        logger::error() << "Failed to connect to the master (" << master_host << "): " << err.what();
+        m_reactor.run_once();
+        return false;
+    }
     if( fd == -1 ) {
+        logger::error() << "Failed to connect to the master (" << master_host << ")";
         m_reactor.run_once();
         return false;
     }
