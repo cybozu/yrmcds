@@ -83,6 +83,10 @@ void handler::on_master_end() {
     m_gc_thread = nullptr; // join
 }
 
+bool handler::on_slave_start() {
+    clear();
+}
+
 void handler::dump_stats() {
     std::uint64_t ops = 0;
     for( auto& v: g_stats.ops ) {

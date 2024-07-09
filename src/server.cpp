@@ -73,9 +73,6 @@ void server::serve() {
     if( is_master() )
         goto MASTER_ENTRY;
     while( true ) {
-        for( auto& handler: m_handlers )
-            handler->clear();
-
         serve_slave();
         if( m_signaled ) return;
 
