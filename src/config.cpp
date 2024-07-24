@@ -128,6 +128,9 @@ void config::load(const std::string& path) {
             cybozu::ip_address vip(cp.get(VIRTUAL_IP));
             m_vip = std::optional(vip);
         }
+    } else {
+        // m_vip should have a value only when leader_election_method is virtual_ip.
+        m_vip = std::nullopt;
     }
 
     if( cp.exists(PORT) ) {

@@ -57,7 +57,7 @@ private:
 class config {
 public:
     // Setup default configurations.
-    config(): m_vip(std::optional("127.0.0.1")), m_tempdir(DEFAULT_TMPDIR) {
+    config() {
         static_assert( sizeof(std::size_t) >= 4, "std::size_t is too small" );
     }
 
@@ -166,14 +166,14 @@ private:
 
     alignas(CACHELINE_SIZE)
     yrmcds::leader_election_method m_leader_election_method = yrmcds::leader_election_method::virtual_ip;
-    std::optional<cybozu::ip_address> m_vip;
+    std::optional<cybozu::ip_address> m_vip = std::optional(cybozu::ip_address("127.0.0.1"));
     std::optional<std::string> m_master_host;
     std::optional<std::string> m_master_file_path;
     std::uint16_t m_port = DEFAULT_MEMCACHE_PORT;
     std::uint16_t m_repl_port = DEFAULT_REPL_PORT;
     std::vector<cybozu::ip_address> m_bind_ip;
     unsigned int m_max_connections = 0;
-    std::string m_tempdir;
+    std::string m_tempdir = DEFAULT_TMPDIR;
     std::string m_user;
     std::string m_group;
     cybozu::severity m_threshold = cybozu::severity::info;
