@@ -88,6 +88,7 @@ void handler::on_master_end() {
 
 bool handler::on_slave_start() {
     clear();
+    return true;
 }
 
 void handler::dump_stats() {
