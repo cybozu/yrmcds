@@ -1,6 +1,7 @@
 // (C) 2013-2014 Cybozu.
 
 #include "constants.hpp"
+#include "election.hpp"
 #include "memcache/handler.hpp"
 #include "counter/handler.hpp"
 #include "server.hpp"
@@ -70,22 +71,17 @@ void server::serve() {
     for( auto& handler: m_handlers )
         handler->on_start();
 
-    if( is_master() )
+    if( yrmcds::is_master() )
         goto MASTER_ENTRY;
     while( true ) {
-        for( auto& handler: m_handlers )
-            handler->clear();
-
         serve_slave();
         if( m_signaled ) return;
 
         // disconnected from the master
+        cybozu::logger::info() << "Try to promote to master...";
         for( int i = 0; i < MASTER_CHECKS; ++i ) {
-            if( is_master() )
+            if( yrmcds::is_master() )
                 goto MASTER_ENTRY;
-            cybozu::logger::info()
-                << "The conditions for becoming master are not met. Sleep and retry... ("
-                << i << "/" << MASTER_CHECKS << ")";
             std::this_thread::sleep_for( std::chrono::milliseconds(100) );
         }
         cybozu::logger::warning() << "Could not promote to master. Join the cluster again as a slave.";
@@ -97,11 +93,14 @@ void server::serve() {
 }
 
 void server::serve_slave() {
+    cybozu::logger::info() << "Entering slave mode";
+
     for( auto it1 = m_handlers.begin(); it1 != m_handlers.end(); ++it1 ) {
         if( ! (*it1)->on_slave_start() ) {
             // failed to start. stop already started handlers.
             for( auto it2 = m_handlers.begin(); it2 != it1; ++it2 )
                 (*it2)->on_slave_end();
+            cybozu::logger::error() << "Failed to start handler.";
             return;
         }
     }
@@ -109,7 +108,7 @@ void server::serve_slave() {
     cybozu::logger::info() << "Slave start";
 
     m_reactor.run([this](cybozu::reactor& r) {
-            if( is_master() ) {
+            if( yrmcds::is_master() ) {
                 cybozu::logger::info() << "Detected that this node is eligible to be master. Exit slave mode.";
                 r.quit();
                 return;

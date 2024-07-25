@@ -601,7 +601,7 @@ void text_response::stats_settings() {
     os << "STAT maxbytes " << g_config.memory_limit() << CRLF;
     os << "STAT tcpport " << g_config.port() << CRLF;
     os << "STAT replport " << g_config.repl_port() << CRLF;
-    os << "STAT virtual_ip " << g_config.vip().str() << CRLF;
+    os << "STAT virtual_ip " << g_config.vip().value_or(cybozu::ip_address()).str() << CRLF;
     os << "STAT evictions on" << CRLF;
     os << "STAT cas_enabled on" << CRLF;
     os << "STAT locking on" << CRLF;
@@ -1078,7 +1078,7 @@ binary_response::stats_settings() {
     send_stat("maxbytes", std::to_string(g_config.memory_limit()));
     send_stat("tcpport", std::to_string(g_config.port()));
     send_stat("replport", std::to_string(g_config.repl_port()));
-    send_stat("virtual_ip", g_config.vip().str());
+    send_stat("virtual_ip", g_config.vip().value_or(cybozu::ip_address()).str());
     send_stat("evictions", "on");
     send_stat("cas_enabled", "on");
     send_stat("locking", "on");

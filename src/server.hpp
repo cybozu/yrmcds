@@ -22,11 +22,6 @@ namespace yrmcds {
 class server {
 public:
     server();
-
-    static bool is_master() {
-        return cybozu::has_ip_address( g_config.vip() );
-    }
-
     void serve();
 
 private:

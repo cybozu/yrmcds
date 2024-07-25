@@ -45,9 +45,6 @@ public:
     // Implementations should use `cybozu::logger::info()` to emit stats.
     virtual void dump_stats() = 0;
 
-    // Called when the server discards all stored data.
-    virtual void clear() {}
-
     // If this protocol handler is ready for the reactor GC,
     // returns true. Otherwise, return false.
     virtual bool reactor_gc_ready() const { return true; }

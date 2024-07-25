@@ -31,10 +31,10 @@ public:
     virtual void on_slave_end() override;
     virtual void on_slave_interval() override;
     virtual void dump_stats() override;
-    virtual void clear() override;
     virtual bool reactor_gc_ready() const override;
 
 private:
+    void clear();
     bool gc_ready(std::time_t now);
     std::unique_ptr<cybozu::tcp_socket> make_memcache_socket(int s);
     std::unique_ptr<cybozu::tcp_socket> make_repl_socket(int s);
