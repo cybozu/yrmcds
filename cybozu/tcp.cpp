@@ -484,7 +484,8 @@ bool tcp_server_socket::on_readable() {
                 continue;
             if( errno == EMFILE || errno == ENFILE ) {
                 logger::error() << "accept: Too many open files.";
-                continue;
+                m_reactor->add_readable(*this);
+                break;
             }
             if( errno == EAGAIN || errno == EWOULDBLOCK )
                 break;
