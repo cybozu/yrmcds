@@ -185,7 +185,7 @@ protected:
     }
 
     virtual void on_invalidate() override {
-        ::shutdown(m_fd, SHUT_RDWR);
+        ::shutdown(fileno(), SHUT_RDWR);
         free_buffers();
         m_cond_write.notify_all();
     }
@@ -223,10 +223,13 @@ private:
         return m_pending.empty() && m_tmpbuf.empty();
     }
     void _flush() {
+        int fd = fileno();
+        if( fd == -1 ) return;
+
         // with TCP_CORK, setting TCP_NODELAY effectively flushes
         // the kernel send buffer.
         int v = 1;
-        if( setsockopt(m_fd, IPPROTO_TCP, TCP_NODELAY, &v, sizeof(v)) == -1 )
+        if( setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &v, sizeof(v)) == -1 )
             throw_unix_error(errno, "setsockopt(TCP_NODELAY)");
     }
     void free_buffers();

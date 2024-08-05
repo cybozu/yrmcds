@@ -43,8 +43,11 @@ memcache_socket::memcache_socket(int fd,
     g_stats.total_connections.fetch_add(1, relaxed);
 
     m_recvjob = [this](cybozu::dynbuf& buf) {
+        int fd = fileno();
+        if( fd == -1 ) return;
+
         // set lock context for objects.
-        g_context = m_fd;
+        g_context = fd;
 
         // load pending data
         if( ! m_pending.empty() ) {
@@ -54,7 +57,7 @@ memcache_socket::memcache_socket(int fd,
 
         while( true ) {
             char* p = buf.prepare(MAX_RECVSIZE);
-            ssize_t n = ::recv(m_fd, p, MAX_RECVSIZE, 0);
+            ssize_t n = ::recv(fd, p, MAX_RECVSIZE, 0);
             if( n == -1 ) {
                 if( errno == EAGAIN || errno == EWOULDBLOCK )
                     break;
@@ -956,9 +959,12 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
 }
 
 bool repl_socket::on_readable() {
+    int fd = fileno();
+    if( fd == -1 ) return true;
+ 
     // recv and drop.
     while( true ) {
-        ssize_t n = ::recv(m_fd, &m_recvbuf[0], MAX_RECVSIZE, 0);
+        ssize_t n = ::recv(fd, &m_recvbuf[0], MAX_RECVSIZE, 0);
         if( n == -1 ) {
             if( errno == EAGAIN || errno == EWOULDBLOCK )
                 break;
@@ -967,7 +973,7 @@ bool repl_socket::on_readable() {
             if( errno == ECONNRESET ) {
                 std::string addr = "unknown address";
                 try {
-                    addr = cybozu::get_peer_ip_address(m_fd).str();
+                    addr = cybozu::get_peer_ip_address(fd).str();
                 } catch (...) {
                     // ignore errors
                 }
@@ -979,7 +985,7 @@ bool repl_socket::on_readable() {
         if( n == 0 ) {
             std::string addr = "unknown address";
             try {
-                addr = cybozu::get_peer_ip_address(m_fd).str();
+                addr = cybozu::get_peer_ip_address(fd).str();
             } catch (...) {
                 // ignore errors
             }
@@ -1003,6 +1009,9 @@ bool repl_socket::on_writable() {
 }
 
 bool repl_client_socket::on_readable() {
+    int fd = fileno();
+    if( fd == -1 ) return true;
+
     // This function is executed in the same thread as the function that sends
     // heartbeats. If this function takes a very long time, no heartbeats will
     // be sent, and this process will be judged dead by the master. To prevent
@@ -1012,7 +1021,7 @@ bool repl_client_socket::on_readable() {
     size_t n_iter = 0;
     while( true ) {
         char* p = m_recvbuf.prepare(MAX_RECVSIZE);
-        ssize_t n = ::recv(m_fd, p, MAX_RECVSIZE, 0);
+        ssize_t n = ::recv(fd, p, MAX_RECVSIZE, 0);
         if( n == -1 ) {
             if( errno == EAGAIN || errno == EWOULDBLOCK )
                 break;

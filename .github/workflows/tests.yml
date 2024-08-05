@@ -8,26 +8,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04]
-        compiler: [[gcc, g++], [clang, clang++]]
+        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
+        compiler: [{cc: gcc, cxx: g++}, {cc: clang, cxx: clang++}]
     timeout-minutes: 30
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y libgoogle-perftools-dev libunwind-dev
     - name: Build
+      env:
+        CC: ${{ matrix.compiler.cc }}
+        CXX: ${{ matrix.compiler.cxx }}
       run: |
         $CC --version
         $CXX --version
         make -j $(nproc) CC=$CC CXX=$CXX OPTFLAGS="-O2 -fPIE"
         ./yrmcdsd &
         sleep 1
-      env:
-        CC: ${{ matrix.compiler[0] }}
-        CXX: ${{ matrix.compiler[1] }}
     - name: Run tests
       run: |
         make YRMCDS_SERVER=localhost tests
