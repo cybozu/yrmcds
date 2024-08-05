@@ -31,7 +31,7 @@ public:
     signal_reader(const sigset_t *mask, callback_t callback):
         resource( signalfd(-1, mask, SFD_NONBLOCK|SFD_CLOEXEC) ),
         m_callback(callback) {
-        if( m_fd == -1 )
+        if( fileno() == -1 )
             throw_unix_error(errno, "signalfd");
     }
     // Constructor.
@@ -54,8 +54,11 @@ private:
 
     virtual bool on_readable() override final {
         while( true ) {
+            int fd = fileno();
+            if( fd == -1 ) return true;
+
             struct signalfd_siginfo si;
-            ssize_t n = read(m_fd, &si, sizeof(si));
+            ssize_t n = read(fd, &si, sizeof(si));
             if( n == -1 ) {
                 if( errno == EINTR ) continue;
                 if( errno == EAGAIN || errno ==EWOULDBLOCK ) return true;

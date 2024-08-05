@@ -37,11 +37,16 @@ public:
 
     // Close the file descriptor.
     virtual ~resource() {
-        ::close(m_fd);
+        close();
     }
 
     // Return the UNIX file descriptor for this resource.
-    int fileno() const { return m_fd; }
+    // This returns -1 after the resource is invalidated.
+    int fileno() const { 
+        lock_guard g(m_lock);
+        if( ! m_valid ) return -1;
+        return m_fd; 
+    }
 
     // `true` if this resource is still valid.
     bool valid() const {
@@ -118,13 +123,14 @@ public:
     }
 
 protected:
-    const int m_fd;
     reactor* m_reactor = nullptr;
 
     friend class reactor;
 
 private:
+    const int m_fd;
     bool m_valid = true;
+    bool m_closed = false;
     mutable spinlock m_lock;
     typedef std::unique_lock<spinlock> lock_guard;
 
@@ -132,6 +138,13 @@ private:
         m_valid = false;
         g.unlock();
         on_invalidate();
+    }
+
+    void close() {
+        lock_guard g(m_lock);
+        if( m_closed ) return;
+        ::close(m_fd);
+        m_closed = true;
     }
 };
 
@@ -191,7 +204,7 @@ public:
     // Only <resource::on_readable> may call this when it stops reading
     // from a resource before it encounters `EAGAIN` or `EWOULDBLOCK`.
     void add_readable(const resource& res) {
-        m_readables.push_back(res.fileno());
+        m_readables.push_back(res.m_fd);
     }
 
     // Add a removal request for a resource.
@@ -202,7 +215,7 @@ public:
     // calling this.
     void request_removal(const resource& res) {
         lock_guard g(m_lock);
-        m_drop_req.push_back(res.fileno());
+        m_drop_req.push_back(res.m_fd);
     }
 
     bool has_garbage() const noexcept {
@@ -238,7 +251,7 @@ public:
     // Remove a registered resource.
     // This is only for the reactor thread.
     void remove_resource(const resource& res) {
-        remove_resource(res.fileno());
+        remove_resource(res.m_fd);
     }
 
 private:

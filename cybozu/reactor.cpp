@@ -37,7 +37,7 @@ void reactor::add_resource(std::unique_ptr<resource> res, int events) {
     if( res->m_reactor != nullptr )
         throw std::logic_error("<reactor::add_resource> already added!");
     res->m_reactor = this;
-    const int fd = res->fileno();
+    const int fd = res->m_fd;
     struct epoll_event ev;
     ev.events = events | EPOLLET;
     ev.data.fd = fd;
@@ -47,7 +47,7 @@ void reactor::add_resource(std::unique_ptr<resource> res, int events) {
 }
 
 void reactor::modify_events(const resource& res, int events) {
-    const int fd = res.fileno();
+    const int fd = res.m_fd;
     struct epoll_event ev;
     ev.events = events | EPOLLET;
     ev.data.fd = fd;
@@ -78,12 +78,15 @@ void reactor::remove_resource(int fd) {
         dump_stack();
         throw std::logic_error("bug in remove_resource");
     }
+    auto res = it->second.get();
     m_garbage.emplace_back( std::move(it->second) );
     m_resources.erase(it);
     if( epoll_ctl(m_fd, EPOLL_CTL_DEL, fd, NULL) == -1 )
         throw_unix_error(errno, "epoll_ctl(EPOLL_CTL_DEL)");
     m_readables.erase(std::remove(m_readables.begin(), m_readables.end(), fd),
                       m_readables.end());
+
+    res->close();
 }
 
 void reactor::poll() {

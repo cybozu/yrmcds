@@ -24,6 +24,9 @@ counter_socket::counter_socket(int fd,
     g_stats.total_connections.fetch_add(1);
 
     m_recvjob = [this](cybozu::dynbuf& buf) {
+        int fd = fileno();
+        if( fd == -1 ) return;
+
         // load pending data
         if( ! m_pending.empty() ) {
             buf.append(m_pending.data(), m_pending.size());
@@ -32,7 +35,7 @@ counter_socket::counter_socket(int fd,
 
         while( true ) {
             char* p = buf.prepare(MAX_RECVSIZE);
-            ssize_t n = ::recv(m_fd, p, MAX_RECVSIZE, 0);
+            ssize_t n = ::recv(fd, p, MAX_RECVSIZE, 0);
             if( n == -1 ) {
                 if( errno == EAGAIN || errno == EWOULDBLOCK )
                     break;
