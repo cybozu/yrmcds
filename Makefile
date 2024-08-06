@@ -1,5 +1,5 @@
 # Makefile for yrmcds
-# Prerequisites: gcc 4.8+ or clang 3.3+
+# Prerequisites: gcc 11.1+ or clang 14+
 
 PREFIX = /usr/local
 DEFAULT_CONFIG = $(PREFIX)/etc/yrmcds.conf
@@ -17,7 +17,7 @@ OPTFLAGS = -O2 #-flto
 DEBUGFLAGS = -gdwarf-3 #-fsanitize=address
 WARNFLAGS = -Wall -Wnon-virtual-dtor -Woverloaded-virtual
 CPUFLAGS = #-march=core2 -mtune=corei7
-CXXFLAGS = -std=gnu++11 $(OPTFLAGS) $(DEBUGFLAGS) $(shell getconf LFS_CFLAGS) $(WARNFLAGS) $(CPUFLAGS)
+CXXFLAGS = -std=gnu++17 $(OPTFLAGS) $(DEBUGFLAGS) $(shell getconf LFS_CFLAGS) $(WARNFLAGS) $(CPUFLAGS)
 LDFLAGS = -L. $(shell getconf LFS_LDFLAGS)
 LDLIBS = $(shell getconf LFS_LIBS) -lyrmcds $(LIBTCMALLOC) -latomic -lpthread
 

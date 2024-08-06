@@ -8,8 +8,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04]
-        compiler: [[gcc, g++], [clang, clang++]]
+        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
+        compiler: [{cc: gcc, cxx: g++}, {cc: clang, cxx: clang++}]
     timeout-minutes: 30
 
     steps:
@@ -26,8 +26,8 @@ jobs:
         ./yrmcdsd &
         sleep 1
       env:
-        CC: ${{ matrix.compiler[0] }}
-        CXX: ${{ matrix.compiler[1] }}
+        CC: ${{ matrix.compiler.cc }}
+        CXX: ${{ matrix.compiler.cxx }}
     - name: Run tests
       run: |
         make YRMCDS_SERVER=localhost tests
