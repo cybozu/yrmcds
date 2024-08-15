@@ -8,13 +8,23 @@
 #include "spinlock.hpp"
 #include "util.hpp"
 
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <stdexcept>
 #include <sys/epoll.h>
 #include <unistd.h>
 #include <unordered_map>
+#include <utility>
 #include <vector>
+
+// hack the pthread_rwlock initializer to avoid writer starvation
+// see man pthread_rwlockattr_setkind_np(3)
+#ifdef PTHREAD_RWLOCK_WRITER_NONRECURSIVE_INITIALIZER_NP
+#undef PTHREAD_RWLOCK_INITIALIZER
+#define PTHREAD_RWLOCK_INITIALIZER PTHREAD_RWLOCK_WRITER_NONRECURSIVE_INITIALIZER_NP
+#endif
+#include <shared_mutex>
 
 namespace cybozu {
 
@@ -25,8 +35,8 @@ class reactor;
 // An abstraction of a file descriptor for use with <reactor>.
 // The file descriptor should be set non-blocking.
 //
-// All member functions except for <invalidate_and_close> are for the
-// reactor thread.  Sub classes can add methods for the other threads.
+// All member functions except for <with_fd> are for the reactor thread.
+// Sub classes can add methods for non-reactor threads.
 class resource {
 public:
     // Constructor.
@@ -37,42 +47,38 @@ public:
 
     // Close the file descriptor.
     virtual ~resource() {
-        ::close(m_fd);
+        if( ! m_closed ) {
+            ::close(m_fd);
+        }
     }
-
-    // Return the UNIX file descriptor for this resource.
-    int fileno() const { return m_fd; }
 
     // `true` if this resource is still valid.
     bool valid() const {
-        lock_guard g(m_lock);
-        return m_valid;
+        return m_valid.load();
     }
 
     // Invalidate this resource.
     //
     // This is for the reactor thread only.
     // You may call this from within <on_readable> or <on_writable>.
+    //
+    // This returns `false` only if it successfully invalidates the resource.
     bool invalidate() {
-        lock_guard g(m_lock);
-        if( ! m_valid ) return true;
-        invalidate_( std::move(g) );
+        bool expected = true;
+        if( ! m_valid.compare_exchange_strong(expected, false) ) {
+            return true;
+        }
+
+        // no need to read-lock `m_lock` because this is on the reactor thread.
+        on_invalidate(m_fd);
         return false;
     }
 
-    // Invalidate this resource then request the reactor to remove this.
+    // A template method called from within <invalidate> and <with_fd>.
     //
-    // This method invalidates this resource then requests the reactor
-    // thread to remove this resource from the reactor.
-    //
-    // **Do not use this in the reactor thread**.
-    void invalidate_and_close();
-
-    // A template method called from within invalidate.
-    //
-    // A template method called from within invalidate.
-    // Subclasses can override this to clean up something.
-    virtual void on_invalidate() {}
+    // Subclasses can override this to clean up something when the resource
+    // is invalidated.  This is called only once.
+    virtual void on_invalidate(int fd) {}
 
     // Called when the reactor finds this resource is readable.
     //
@@ -90,7 +96,7 @@ public:
     // the client may still be waiting for the response.
     //
     // @return `true` or return value of <invalidate>.
-    virtual bool on_readable() = 0;
+    virtual bool on_readable(int fd) = 0;
 
     // Called when the reactor finds this resource is writable.
     //
@@ -101,38 +107,91 @@ public:
     // If some error happened, execute `return invalidate();`.
     //
     // @return `true` or return value of <invalidate>.
-    virtual bool on_writable() = 0;
+    virtual bool on_writable(int fd) = 0;
 
     // Called when the reactor finds this resource has hanged up.
     //
     // This method is called when the reactor detects unexpected hangup.
-    virtual bool on_hangup() {
+    virtual bool on_hangup(int fd) {
         return invalidate();
     }
 
     // Called when the reactor finds an error on this resource.
     //
     // This method is called when the reactor detects some error.
-    virtual bool on_error() {
+    virtual bool on_error(int fd) {
         return invalidate();
     }
 
 protected:
-    const int m_fd;
     reactor* m_reactor = nullptr;
 
     friend class reactor;
 
-private:
-    bool m_valid = true;
-    mutable spinlock m_lock;
-    typedef std::unique_lock<spinlock> lock_guard;
+    // Call `f` with the file descriptor of this resource.
+    // `f` should be a function like `bool f(int fd)`.
+    // This is intended to be called by non-reactor threads.
+    //
+    // This calls `f` only if this resource is still valid.
+    // If it is invalid, this returns `false`. Otherwise, the
+    // return value will be the return value of `f`.
+    //
+    // The template function `f` should return `true` if it wants to keep
+    // the resource valid.  If it should returns `false`, then `with_fd`
+    // invalidates the resource.
+    template<typename Func>
+    bool with_fd(Func&& f) {
+        read_lock g(m_lock);
+        if( ! valid() ) return false;
+        // no need to check m_closed because it becomes true only after m_valid is set to false.
 
-    void invalidate_(lock_guard g) {
-        m_valid = false;
-        g.unlock();
-        on_invalidate();
+        if( std::forward<Func>(f)(m_fd) ) {
+            return true;
+        }
+
+        invalidate_and_close();
+        return false;
     }
+
+private:
+
+    // The resource status is represented with the following two flags.
+    // `m_valid`: This atomic flag represents the validity of this resource.
+    // `m_closed`: This flag represents the open/close status of the file descriptor.
+    //
+    // We have to have `m_closed` separately from `m_valid` because we want to
+    // close the file descriptor as early as possible, but it cannot always be
+    // done immediately.  See `try_close` for details.
+    //
+    // References to `m_fd` must be protected because the reactor may close the file descriptor.
+    // To ensure this, we use a shared mutex `m_lock` to protect `m_closed` and references
+    // to `m_fd`. We get a write lock when we modify `m_closed` and get a read lock when we
+    // reference `m_fd`.
+    std::atomic_bool m_valid = true;
+    mutable std::shared_mutex m_lock;
+    typedef std::shared_lock<std::shared_mutex> read_lock;
+    typedef std::unique_lock<std::shared_mutex> write_lock;
+    const int m_fd;
+    bool m_closed = false;
+
+    // Called only from the friend class <reactor> to early close the fd.
+    // This tries to close the file descriptor if no other threads are using it.
+    //
+    // If another thread is using it, this does nothing and returns `false`.
+    // The file descriptor will be closed when this resource is destructed.
+    bool try_close() {
+        write_lock g(m_lock, std::try_to_lock);
+        if( ! g ) return false;
+
+        if( ! m_closed ) {
+            ::close(m_fd);
+            m_closed = true;
+        }
+        return true;
+    }
+
+    // A supplementary method for <with_fd>.
+    void invalidate_and_close();
 };
 
 
@@ -191,7 +250,7 @@ public:
     // Only <resource::on_readable> may call this when it stops reading
     // from a resource before it encounters `EAGAIN` or `EWOULDBLOCK`.
     void add_readable(const resource& res) {
-        m_readables.push_back(res.fileno());
+        m_readables.push_back(res.m_fd);
     }
 
     // Add a removal request for a resource.
@@ -202,7 +261,7 @@ public:
     // calling this.
     void request_removal(const resource& res) {
         lock_guard g(m_lock);
-        m_drop_req.push_back(res.fileno());
+        m_drop_req.push_back(res.m_fd);
     }
 
     bool has_garbage() const noexcept {
@@ -238,7 +297,7 @@ public:
     // Remove a registered resource.
     // This is only for the reactor thread.
     void remove_resource(const resource& res) {
-        remove_resource(res.fileno());
+        remove_resource(res.m_fd);
     }
 
 private:
@@ -262,14 +321,6 @@ private:
     void remove_resource(int fd);
     void poll();
 };
-
-
-inline void resource::invalidate_and_close() {
-    lock_guard g(m_lock);
-    if( ! m_valid ) return;
-    invalidate_( std::move(g) );
-    m_reactor->request_removal(*this);
-}
 
 } // namespace cybozu
 

@@ -16,6 +16,17 @@ const int POLLING_TIMEOUT = 100; // milli seconds
 
 namespace cybozu {
 
+void resource::invalidate_and_close() {
+    bool expected = true;
+    if( ! m_valid.compare_exchange_strong(expected, false) )
+        return;
+
+    // no need to read-lock `m_lock` here because `m_fd` will not be
+    // closed before this function calls `reactor::request_removal`.
+    on_invalidate(m_fd);
+    m_reactor->request_removal(*this);
+}
+
 reactor::reactor():
     m_fd( epoll_create1(EPOLL_CLOEXEC) ), m_running(true)
 {
@@ -37,7 +48,7 @@ void reactor::add_resource(std::unique_ptr<resource> res, int events) {
     if( res->m_reactor != nullptr )
         throw std::logic_error("<reactor::add_resource> already added!");
     res->m_reactor = this;
-    const int fd = res->fileno();
+    const int fd = res->m_fd;
     struct epoll_event ev;
     ev.events = events | EPOLLET;
     ev.data.fd = fd;
@@ -47,7 +58,7 @@ void reactor::add_resource(std::unique_ptr<resource> res, int events) {
 }
 
 void reactor::modify_events(const resource& res, int events) {
-    const int fd = res.fileno();
+    const int fd = res.m_fd;
     struct epoll_event ev;
     ev.events = events | EPOLLET;
     ev.data.fd = fd;
@@ -78,12 +89,17 @@ void reactor::remove_resource(int fd) {
         dump_stack();
         throw std::logic_error("bug in remove_resource");
     }
+    auto res = it->second.get();
     m_garbage.emplace_back( std::move(it->second) );
     m_resources.erase(it);
     if( epoll_ctl(m_fd, EPOLL_CTL_DEL, fd, NULL) == -1 )
         throw_unix_error(errno, "epoll_ctl(EPOLL_CTL_DEL)");
     m_readables.erase(std::remove(m_readables.begin(), m_readables.end(), fd),
                       m_readables.end());
+
+    if( ! res->try_close() ) {
+        logger::debug() << "failed to close fd (will be closed later): " << fd;
+    }
 }
 
 void reactor::poll() {
@@ -93,7 +109,7 @@ void reactor::poll() {
                      std::back_inserter(m_readables_copy));
     m_readables.clear();
     for( int fd: m_readables_copy ) {
-        if( ! m_resources[fd]->on_readable() )
+        if( ! m_resources[fd]->on_readable(fd) )
             remove_resource(fd);
     }
     m_readables_copy.clear();
@@ -120,24 +136,24 @@ void reactor::poll() {
         const int fd = ev.data.fd;
         resource& r = *(m_resources[fd]);
         if( ev.events & EPOLLERR ) {
-            if( ! r.on_error() )
+            if( ! r.on_error(fd) )
                 remove_resource(fd);
             continue;
         }
         if( ev.events & EPOLLHUP ) {
-            if( ! r.on_hangup() ) {
+            if( ! r.on_hangup(fd) ) {
                 remove_resource(fd);
                 continue;
             }
         }
         if( ev.events & EPOLLIN ) {
-            if( ! r.on_readable() ) {
+            if( ! r.on_readable(fd) ) {
                 remove_resource(fd);
                 continue;
             }
         }
         if( ev.events & EPOLLOUT ) {
-            if( ! r.on_writable() )
+            if( ! r.on_writable(fd) )
                 remove_resource(fd);
         }
     }
