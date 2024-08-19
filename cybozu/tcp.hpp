@@ -183,10 +183,10 @@ public:
     // @max_recvsize  Maximum size of data to be received.
     //
     // This function receives data from the socket.  Since this uses `with_fd`
-    // internally, the reactor thread should not call this, or it may be blocked.
+    // internally, the reactor thread should not call this.
     //
     // @return The result of the operation.
-    recv_result recv(dynbuf& buf, const std::size_t max_recvsize) {
+    recv_result receive(dynbuf& buf, const std::size_t max_recvsize) {
         char* p = buf.prepare(max_recvsize);
         ::ssize_t n;
         auto ret = with_fd([=, &n](int fd) -> bool {

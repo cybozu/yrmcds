@@ -56,7 +56,7 @@ memcache_socket::memcache_socket(int fd,
         }
 
         while( true ) {
-            auto res = recv(buf, MAX_RECVSIZE);
+            auto res = receive(buf, MAX_RECVSIZE);
             if( res == recv_result::AGAIN )
                 break;
             if( res == recv_result::RESET || res == recv_result::NONE ) {
@@ -89,7 +89,7 @@ memcache_socket::memcache_socket(int fd,
                                           << len << " bytes.";
                 buf.reset();
                 unlock_all();
-                with_fd([](int) -> bool { return false; });
+                invalidate_and_close();
                 break;
             }
             buf.erase(head - buf.data());
@@ -545,7 +545,7 @@ void memcache_socket::cmd_bin(const memcache::binary_request& cmd) {
     case binary_command::QuitQ:
         unlock_all();
         if( cmd.quiet() ) {
-            with_fd([](int) -> bool { return false; });
+            invalidate_and_close();
         } else {
             r.quit();
         }
@@ -936,7 +936,7 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
         break;
     case text_command::QUIT:
         unlock_all();
-        with_fd([](int) -> bool { return false; });
+        invalidate_and_close();
         break;
     default:
         cybozu::logger::info() << "not implemented";

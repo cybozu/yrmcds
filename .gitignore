@@ -4,6 +4,7 @@
 # Editors
 *~
 .*.swp
+.vscode/settings.json
 
 # Directories
 html

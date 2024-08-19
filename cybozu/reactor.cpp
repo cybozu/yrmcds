@@ -16,7 +16,7 @@ const int POLLING_TIMEOUT = 100; // milli seconds
 
 namespace cybozu {
 
-void resource::invalidate_and_close() {
+void resource::invalidate_and_close_() {
     bool expected = true;
     if( ! m_valid.compare_exchange_strong(expected, false) )
         return;

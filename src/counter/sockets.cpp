@@ -31,7 +31,7 @@ counter_socket::counter_socket(int fd,
         }
 
         while( true ) {
-            auto res = recv(buf, MAX_RECVSIZE);
+            auto res = receive(buf, MAX_RECVSIZE);
             if( res == recv_result::AGAIN )
                 break;
             if( res == recv_result::RESET || res == recv_result::NONE ) {
@@ -55,7 +55,7 @@ counter_socket::counter_socket(int fd,
                                           << len << " bytes.";
                 buf.reset();
                 release_all();
-                with_fd([](int) -> bool { return false; });
+                invalidate_and_close();
                 break;
             }
             buf.erase(head - buf.data());

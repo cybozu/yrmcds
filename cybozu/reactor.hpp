@@ -46,6 +46,13 @@ public:
     resource& operator=(const resource&) = delete;
 
     // Close the file descriptor.
+    //
+    // It is guaranteed that no other threads are using this resource
+    // when being destructed. See the design doc for details.
+    // https://github.com/cybozu/yrmcds/blob/master/docs/design.md#strategy-to-reclaim-shared-sockets
+    //
+    // `m_closed` is edited and checked only by the reactor thread, so no memory synchronization
+    // is necessary here. `m_fd` is a constant, so no synchronization is necessary either.
     virtual ~resource() {
         if( ! m_closed ) {
             ::close(m_fd);
@@ -137,7 +144,7 @@ protected:
     // return value will be the return value of `f`.
     //
     // The template function `f` should return `true` if it wants to keep
-    // the resource valid.  If it should returns `false`, then `with_fd`
+    // the resource valid.  If it should returns `false`, then <with_fd>
     // invalidates the resource.
     template<typename Func>
     bool with_fd(Func&& f) {
@@ -149,36 +156,57 @@ protected:
             return true;
         }
 
-        invalidate_and_close();
+        invalidate_and_close_();
         return false;
+    }
+
+    // Invalidates this resource and closes the file descriptor.
+    // This is intended to be called by non-reactor threads.
+    //
+    // This is a simple wrapper of <with_fd> just to invalidate
+    // the resource and close the file descriptor.
+    void invalidate_and_close() {
+        with_fd([](int) -> bool { return false; });
     }
 
 private:
 
     // The resource status is represented with the following two flags.
-    // `m_valid`: This atomic flag represents the validity of this resource.
+    // `m_valid`: New operations (such as read, write) on this resource can be initiated only when `m_valid` is true.
+    //            Note that even if `m_valid` is false, there may still be outstanding operations.
     // `m_closed`: This flag represents the open/close status of the file descriptor.
+    //             The file descriptor is closed only after `m_valid` is set to false.
     //
     // We have to have `m_closed` separately from `m_valid` because we want to
     // close the file descriptor as early as possible, but it cannot always be
     // done immediately.  See `try_close` for details.
     //
-    // References to `m_fd` must be protected because the reactor may close the file descriptor.
-    // To ensure this, we use a shared mutex `m_lock` to protect `m_closed` and references
-    // to `m_fd`. We get a write lock when we modify `m_closed` and get a read lock when we
-    // reference `m_fd`.
+    // Since `m_closed` is used only by the reactor thread, we do not need to
+    // protect it with a guarding lock.
     std::atomic_bool m_valid = true;
+    bool m_closed = false;
+
+    // `m_fd` is the file descriptor of this resource.
+    //
+    // The file descriptor may be closed by the reactor thread earlier than the resource is destructed.
+    // To avoid closing the file descriptor while other threads are using it, we use a shared mutex `m_lock`.
+    //
+    // The reactor thread tries to acquire a write lock when it closes the file descriptor.
+    // Other threads must acquire a read lock while it uses the file descriptor through <with_fd>.
+    //
+    // Since the reactor thread is the only thread that can close `m_fd`, the reactor thread does
+    // not need to acquire a read lock when it uses `m_fd`.
     mutable std::shared_mutex m_lock;
     typedef std::shared_lock<std::shared_mutex> read_lock;
     typedef std::unique_lock<std::shared_mutex> write_lock;
     const int m_fd;
-    bool m_closed = false;
 
-    // Called only from the friend class <reactor> to early close the fd.
     // This tries to close the file descriptor if no other threads are using it.
+    // Called only from the friend class <reactor> to early close the file descriptor.
+    // That means that only the reactor thread can use this.
     //
-    // If another thread is using it, this does nothing and returns `false`.
-    // The file descriptor will be closed when this resource is destructed.
+    // If another thread is using the file descriptor, this does nothing and returns `false`.
+    // In that case, the file descriptor will be closed when this resource is destructed.
     bool try_close() {
         write_lock g(m_lock, std::try_to_lock);
         if( ! g ) return false;
@@ -191,7 +219,7 @@ private:
     }
 
     // A supplementary method for <with_fd>.
-    void invalidate_and_close();
+    void invalidate_and_close_();
 };
 
 
@@ -247,8 +275,10 @@ public:
 
     // Add a resource to the readable resource list.
     //
-    // Only <resource::on_readable> may call this when it stops reading
-    // from a resource before it encounters `EAGAIN` or `EWOULDBLOCK`.
+    // This can be used only in an `on_readable` hook of a resource when
+    // it stops reading from the file descriptor before it encounters
+    // `EAGAIN` or `EWOULDBLOCK`. Note that `on_readable` is executed by
+    // the reactor thread.
     void add_readable(const resource& res) {
         m_readables.push_back(res.m_fd);
     }
