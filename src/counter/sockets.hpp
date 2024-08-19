@@ -42,13 +42,13 @@ private:
     std::unordered_map<const cybozu::hash_key*, std::uint32_t>
         m_acquired_resources;
 
-    virtual void on_invalidate() override final {
+    virtual void on_invalidate(int fd) override final {
         g_stats.curr_connections.fetch_sub(1);
-        cybozu::tcp_socket::on_invalidate();
+        cybozu::tcp_socket::on_invalidate(fd);
     }
 
-    bool on_readable() override;
-    bool on_writable() override;
+    bool on_readable(int) override;
+    bool on_writable(int) override;
 
     void cmd_get(const counter::request& cmd, counter::response& r);
     void cmd_acquire(const counter::request& cmd, counter::response& r);

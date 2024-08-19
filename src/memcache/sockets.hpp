@@ -78,15 +78,15 @@ private:
     cybozu::worker::job m_sendjob;
     std::vector<std::reference_wrapper<const cybozu::hash_key>> m_locks;
 
-    virtual void on_invalidate() override final {
+    virtual void on_invalidate(int fd) override final {
         // In order to avoid races and deadlocks, remaining locks
         // are not released here.  They are released in the destructor
         // where no other threads have access to this object.
         g_stats.curr_connections.fetch_sub(1);
-        cybozu::tcp_socket::on_invalidate();
+        cybozu::tcp_socket::on_invalidate(fd);
     }
-    virtual bool on_readable() override final;
-    virtual bool on_writable() override final;
+    virtual bool on_readable(int) override final;
+    virtual bool on_writable(int) override final;
 };
 
 
@@ -102,8 +102,9 @@ public:
           m_last_heartbeat(g_current_time.load(std::memory_order_relaxed))
     {
         m_sendjob = [this](cybozu::dynbuf&) {
-            if( ! write_pending_data() )
-                invalidate_and_close();
+            with_fd([=](int fd) -> bool {
+                return write_pending_data(fd);
+            });
         };
     }
 
@@ -112,6 +113,19 @@ public:
         return m_last_heartbeat + g_config.slave_timeout() <= now;
     }
 
+    std::string peer_ip() {
+        std::string addr = "unknown address";
+        try {
+            with_fd([&addr](int fd) -> bool {
+                addr = cybozu::get_peer_ip_address(fd).str();
+                return true;
+            });
+        } catch (...) {
+            // ignore errors
+        }
+        return addr;
+    }
+    
     virtual void on_buffer_full() override {
         cybozu::logger::warning()
             << "Replication buffer is full. "
@@ -124,8 +138,8 @@ private:
     cybozu::worker::job m_sendjob;
     std::time_t m_last_heartbeat;
 
-    virtual bool on_readable() override final;
-    virtual bool on_writable() override final;
+    virtual bool on_readable(int) override final;
+    virtual bool on_writable(int) override final;
 };
 
 
@@ -138,13 +152,13 @@ private:
     cybozu::hash_map<object>& m_hash;
     cybozu::dynbuf m_recvbuf;
 
-    virtual bool on_readable() override final;
-    virtual bool on_hangup() override final {
+    virtual bool on_readable(int) override final;
+    virtual bool on_hangup(int) override final {
         cybozu::logger::warning() << "The connection to master has hung up.";
         m_reactor->quit();
         return invalidate();
     }
-    virtual bool on_error() override final {
+    virtual bool on_error(int) override final {
         cybozu::logger::warning() << "An error occurred on the connection to master.";
         m_reactor->quit();
         return invalidate();
