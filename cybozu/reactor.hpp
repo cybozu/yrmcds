@@ -15,7 +15,6 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 // hack the pthread_rwlock initializer to avoid writer starvation
@@ -152,7 +151,7 @@ protected:
         if( ! valid() ) return false;
         // no need to check m_closed because it becomes true only after m_valid is set to false.
 
-        if( std::forward<Func>(f)(m_fd) ) {
+        if( f(m_fd) ) {
             return true;
         }
 
