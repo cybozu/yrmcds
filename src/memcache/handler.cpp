@@ -114,14 +114,10 @@ void handler::on_master_interval() {
             continue;
         }
         if( slave->timed_out() ) {
-            std::string addr = "unknown address";
-            try {
-                addr = cybozu::get_peer_ip_address(slave->fileno()).str();
-            } catch (...) {
-                // ignore errors
-            }
-            cybozu::logger::info() << "No heartbeats from a slave (" << addr
-                                   << "). Close the replication socket.";
+            cybozu::logger::info()
+                << "No heartbeats from a slave ("
+                << slave->peer_ip()
+                << "). Close the replication socket.";
             // close the socket and release resources
             if( ! slave->invalidate() )
                 m_reactor.remove_resource(*slave);

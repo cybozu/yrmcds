@@ -159,7 +159,7 @@ void tcp_socket::free_buffers() {
     m_shutdown = true;
 }
 
-bool tcp_socket::_send(const char* p, std::size_t len, lock_guard& g) {
+bool tcp_socket::_send(int fd, const char* p, std::size_t len, lock_guard& g) {
     while( ! can_send(len) ) {
         on_buffer_full();
         m_cond_write.wait(g);
@@ -168,7 +168,7 @@ bool tcp_socket::_send(const char* p, std::size_t len, lock_guard& g) {
 
     if( m_pending.empty() ) {
         while( len > 0 ) {
-            ssize_t n = ::send(m_fd, p, len, 0);
+            ssize_t n = ::send(fd, p, len, 0);
             if( n == -1 ) {
                 if( errno == EAGAIN || errno == EWOULDBLOCK ) break;
                 if( errno == EINTR ) continue;
@@ -177,8 +177,6 @@ bool tcp_socket::_send(const char* p, std::size_t len, lock_guard& g) {
                     logger::error() << "<tcp_socket::_send>: ("
                                     << ecnd.value() << ") "
                                     << ecnd.message();
-                g.unlock();
-                invalidate_and_close();
                 return false;
             }
             p += n;
@@ -225,7 +223,7 @@ bool tcp_socket::_send(const char* p, std::size_t len, lock_guard& g) {
     return true;
 }
 
-bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
+bool tcp_socket::_sendv(int fd, const iovec* iov, const int iovcnt, lock_guard& g) {
     std::size_t total = 0;
     for( int i = 0; i < iovcnt; ++i ) {
         total += iov[i].len;
@@ -250,7 +248,7 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
 
     if( m_pending.empty() ) {
         while( ind < v_size ) {
-            ssize_t n = ::writev(m_fd, &(v[ind]), v_size - ind);
+            ssize_t n = ::writev(fd, &(v[ind]), v_size - ind);
             if( n == -1 ) {
                 if( errno == EAGAIN || errno == EWOULDBLOCK ) break;
                 if( errno == EINTR ) continue;
@@ -259,8 +257,6 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
                     logger::error() << "<tcp_socket::_sendv>: ("
                                     << ecnd.value() << ") "
                                     << ecnd.message();
-                g.unlock();
-                invalidate_and_close();
                 return false;
             }
             while( n > 0 ) {
@@ -326,11 +322,11 @@ bool tcp_socket::_sendv(const iovec* iov, const int iovcnt, lock_guard& g) {
     return true;
 }
 
-bool tcp_socket::write_pending_data() {
+bool tcp_socket::write_pending_data(int fd) {
     lock_guard g(m_lock);
 
     while( ! m_tmpbuf.empty() ) {
-        ssize_t n = ::send(m_fd, m_tmpbuf.data(), m_tmpbuf.size(), 0);
+        ssize_t n = ::send(fd, m_tmpbuf.data(), m_tmpbuf.size(), 0);
         if( n == -1 ) {
             if( errno == EINTR ) continue;
             if( errno == EAGAIN || errno == EWOULDBLOCK ) return true;
@@ -353,7 +349,7 @@ bool tcp_socket::write_pending_data() {
         std::tie(p, len, sent) = t;
 
         while( len != sent ) {
-            ssize_t n = ::send(m_fd, p+sent, len-sent, 0);
+            ssize_t n = ::send(fd, p+sent, len-sent, 0);
             if( n == -1 ) {
                 if( errno == EINTR ) continue;
                 if( errno == EAGAIN || errno == EWOULDBLOCK ) break;
@@ -378,7 +374,7 @@ bool tcp_socket::write_pending_data() {
     }
 
     // all data have been sent.
-    _flush();
+    _flush(fd);
 
     if( ! m_shutdown ) {
         g.unlock();
@@ -452,7 +448,7 @@ setup_server_socket(const char* bind_addr, std::uint16_t port, bool freebind) {
     return s;
 }
 
-bool tcp_server_socket::on_readable() {
+bool tcp_server_socket::on_readable(int fd) {
     while( true ) {
         union {
             struct sockaddr sa;
@@ -460,7 +456,7 @@ bool tcp_server_socket::on_readable() {
         } addr;
         socklen_t addrlen = sizeof(addr);
 #ifdef _GNU_SOURCE
-        int s = ::accept4(m_fd, &(addr.sa), &addrlen,
+        int s = ::accept4(fd, &(addr.sa), &addrlen,
                           SOCK_NONBLOCK|SOCK_CLOEXEC);
 #else
         int s = ::accept(m_fd, &(addr.sa), &addrlen);

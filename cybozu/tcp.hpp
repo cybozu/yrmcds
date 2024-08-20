@@ -4,6 +4,7 @@
 #ifndef CYBOZU_TCP_HPP
 #define CYBOZU_TCP_HPP
 
+#include "dynbuf.hpp"
 #include "ip_address.hpp"
 #include "reactor.hpp"
 #include "util.hpp"
@@ -86,12 +87,14 @@ public:
     //
     // @return `true` if this socket is valid, `false` otherwise.
     bool send(const char* p, std::size_t len, bool flush=false) {
-        lock_guard g(m_lock);
-        if( ! _send(p, len, g) )
-            return false;
-        if( flush && empty() )
-            _flush();
-        return true;
+        return with_fd([=](int fd) -> bool {
+            lock_guard g(m_lock);
+            if( ! _send(fd, p, len, g) )
+                return false;
+            if( flush && empty() )
+                _flush(fd);
+            return true;
+        });
     }
 
     // Atomically send multiple data.
@@ -104,14 +107,16 @@ public:
     //
     // @return `true` if this socket is valid, `false` otherwise.
     bool sendv(const iovec* iov, int iovcnt, bool flush=false) {
-        if( iovcnt >= MAX_IOVCNT )
-            throw std::logic_error("<tcp_socket::sendv> too many iovec.");
-        lock_guard g(m_lock);
-        if( ! _sendv(iov, iovcnt, g) )
-            return false;
-        if( flush && empty() )
-            _flush();
-        return true;
+        return with_fd([=](int fd) -> bool {
+            if( iovcnt >= MAX_IOVCNT )
+                throw std::logic_error("<tcp_socket::sendv> too many iovec.");
+            lock_guard g(m_lock);
+            if( ! _sendv(fd, iov, iovcnt, g) )
+                return false;
+            if( flush && empty() )
+                _flush(fd);
+            return true;
+        });
     }
 
     // Atomically send data, then close the socket.
@@ -124,19 +129,19 @@ public:
     //
     // @return `true` if this socket is valid, `false` otherwise.
     bool send_close(const char* p, std::size_t len) {
-        lock_guard g(m_lock);
-        if( ! _send(p, len, g) )
-            return false;
-        m_shutdown = true;
-        if( empty() ) {
-            _flush();
+        return with_fd([=](int fd) -> bool {
+            lock_guard g(m_lock);
+            if( ! _send(fd, p, len, g) )
+                return false;
+            m_shutdown = true;
+            if( empty() ) {
+                _flush(fd);
+                return false;
+            }
             g.unlock();
-            invalidate_and_close();
+            m_cond_write.notify_all();
             return true;
-        }
-        g.unlock();
-        m_cond_write.notify_all();
-        return true;
+        });
     }
 
     // Atomically send multiple data, then close the socket.
@@ -149,21 +154,65 @@ public:
     //
     // @return `true` if this socket is valid, `false` otherwise.
     bool sendv_close(const iovec* iov, int iovcnt) {
-        if( iovcnt >= MAX_IOVCNT )
-            throw std::logic_error("<tcp_socket::sendv> too many iov.");
-        lock_guard g(m_lock);
-        if( ! _sendv(iov, iovcnt, g) )
-            return false;
-        m_shutdown = true;
-        if( empty() ) {
-            _flush();
+        return with_fd([=](int fd) -> bool {
+            if( iovcnt >= MAX_IOVCNT )
+                throw std::logic_error("<tcp_socket::sendv> too many iov.");
+            lock_guard g(m_lock);
+            if( ! _sendv(fd, iov, iovcnt, g) )
+                return false;
+            m_shutdown = true;
+            if( empty() ) {
+                _flush(fd);
+                return false;
+            }
             g.unlock();
-            invalidate_and_close();
+            m_cond_write.notify_all();
             return true;
+        });
+    }
+
+    enum class recv_result {
+        OK,    // Received some data.
+        AGAIN, // No data was available.
+        RESET, // Connection reset by peer.
+        NONE,  // Peer half-closed the connection.
+    };
+
+    // Receive data from the socket.
+    // @buf           A buffer to store received data.
+    // @max_recvsize  Maximum size of data to be received.
+    //
+    // This function receives data from the socket.  Since this uses `with_fd`
+    // internally, the reactor thread should not call this.
+    //
+    // @return The result of the operation.
+    recv_result receive(dynbuf& buf, const std::size_t max_recvsize) {
+        char* p = buf.prepare(max_recvsize);
+        ::ssize_t n;
+        auto ret = with_fd([=, &n](int fd) -> bool {
+            do {
+                n = ::recv(fd, p, max_recvsize, 0);
+            } while( n == -1 && errno == EINTR );
+
+            return (n != -1) || (errno != ECONNRESET);
+        });
+
+        if( ! ret ) {
+            return recv_result::RESET;
         }
-        g.unlock();
-        m_cond_write.notify_all();
-        return true;
+
+        if( n == 0 ) {
+            return recv_result::NONE;
+        }
+
+        if( n == -1 ) {
+            if( errno == EAGAIN || errno == EWOULDBLOCK )
+                return recv_result::AGAIN;
+            throw_unix_error(errno, "recv");
+        }
+
+        buf.consume(n);
+        return recv_result::OK;
     }
 
 protected:
@@ -172,20 +221,20 @@ protected:
     // This method tries to send pending data as much as possible.
     //
     // @return `false` if some error happened, `true` otherwise.
-    bool write_pending_data();
+    bool write_pending_data(int fd);
 
     // Just call <write_pending_data>.
     //
     // The default implementation just invoke <write_pending_data>.
     // You may override this to dispatch the job to another thread.
-    virtual bool on_writable() override {
-        if( write_pending_data() )
+    virtual bool on_writable(int fd) override {
+        if( write_pending_data(fd) )
             return true;
         return invalidate();
     }
 
-    virtual void on_invalidate() override {
-        ::shutdown(m_fd, SHUT_RDWR);
+    virtual void on_invalidate(int fd) override {
+        ::shutdown(fd, SHUT_RDWR);
         free_buffers();
         m_cond_write.notify_all();
     }
@@ -217,16 +266,16 @@ private:
         if( m_pending.empty() ) return true;
         return capacity() >= len;
     }
-    bool _send(const char* p, std::size_t len, lock_guard& g);
-    bool _sendv(const iovec* iov, const int iovcnt, lock_guard& g);
+    bool _send(int fd, const char* p, std::size_t len, lock_guard& g);
+    bool _sendv(int fd, const iovec* iov, const int iovcnt, lock_guard& g);
     bool empty() const {
         return m_pending.empty() && m_tmpbuf.empty();
     }
-    void _flush() {
+    void _flush(int fd) {
         // with TCP_CORK, setting TCP_NODELAY effectively flushes
         // the kernel send buffer.
         int v = 1;
-        if( setsockopt(m_fd, IPPROTO_TCP, TCP_NODELAY, &v, sizeof(v)) == -1 )
+        if( setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &v, sizeof(v)) == -1 )
             throw_unix_error(errno, "setsockopt(TCP_NODELAY)");
     }
     void free_buffers();
@@ -276,8 +325,8 @@ public:
 private:
     wrapper m_wrapper;
 
-    virtual bool on_readable() override final;
-    virtual bool on_writable() override final { return true; }
+    virtual bool on_readable(int) override final;
+    virtual bool on_writable(int) override final { return true; }
 };
 
 

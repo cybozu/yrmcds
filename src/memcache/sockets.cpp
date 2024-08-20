@@ -44,7 +44,10 @@ memcache_socket::memcache_socket(int fd,
 
     m_recvjob = [this](cybozu::dynbuf& buf) {
         // set lock context for objects.
-        g_context = m_fd;
+        with_fd([](int fd) -> bool {
+            g_context = fd;
+            return true;
+        });
 
         // load pending data
         if( ! m_pending.empty() ) {
@@ -53,29 +56,14 @@ memcache_socket::memcache_socket(int fd,
         }
 
         while( true ) {
-            char* p = buf.prepare(MAX_RECVSIZE);
-            ssize_t n = ::recv(m_fd, p, MAX_RECVSIZE, 0);
-            if( n == -1 ) {
-                if( errno == EAGAIN || errno == EWOULDBLOCK )
-                    break;
-                if( errno == EINTR )
-                    continue;
-                if( errno == ECONNRESET ) {
-                    buf.reset();
-                    unlock_all();
-                    invalidate_and_close();
-                    break;
-                }
-                cybozu::throw_unix_error(errno, "recv");
-            }
-            if( n == 0 ) {
+            auto res = receive(buf, MAX_RECVSIZE);
+            if( res == recv_result::AGAIN )
+                break;
+            if( res == recv_result::RESET || res == recv_result::NONE ) {
                 buf.reset();
                 unlock_all();
-                invalidate_and_close();
                 break;
             }
-            // if (n != -1) && (n != 0)
-            buf.consume(n);
 
             const char* head = buf.data();
             std::size_t len = buf.size();
@@ -115,8 +103,9 @@ memcache_socket::memcache_socket(int fd,
     };
 
     m_sendjob = [this](cybozu::dynbuf&) {
-        if( ! write_pending_data() )
-            invalidate_and_close();
+        with_fd([=](int fd) -> bool {
+            return write_pending_data(fd);
+        });
     };
 }
 
@@ -131,7 +120,7 @@ memcache_socket::~memcache_socket() {
     }
 }
 
-bool memcache_socket::on_readable() {
+bool memcache_socket::on_readable(int) {
     if( m_busy.load(std::memory_order_acquire) ) {
         m_reactor->add_readable(*this);
         return true;
@@ -152,11 +141,11 @@ bool memcache_socket::on_readable() {
     return true;
 }
 
-bool memcache_socket::on_writable() {
+bool memcache_socket::on_writable(int fd) {
     cybozu::worker* w = m_finder();
     if( w == nullptr ) {
         // if there is no idle worker, fallback to the default.
-        return cybozu::tcp_socket::on_writable();
+        return cybozu::tcp_socket::on_writable(fd);
     }
 
     w->post_job(m_sendjob);
@@ -955,10 +944,10 @@ void memcache_socket::cmd_text(const memcache::text_request& cmd) {
     }
 }
 
-bool repl_socket::on_readable() {
+bool repl_socket::on_readable(int fd) {
     // recv and drop.
     while( true ) {
-        ssize_t n = ::recv(m_fd, &m_recvbuf[0], MAX_RECVSIZE, 0);
+        ssize_t n = ::recv(fd, &m_recvbuf[0], MAX_RECVSIZE, 0);
         if( n == -1 ) {
             if( errno == EAGAIN || errno == EWOULDBLOCK )
                 break;
@@ -967,7 +956,7 @@ bool repl_socket::on_readable() {
             if( errno == ECONNRESET ) {
                 std::string addr = "unknown address";
                 try {
-                    addr = cybozu::get_peer_ip_address(m_fd).str();
+                    addr = cybozu::get_peer_ip_address(fd).str();
                 } catch (...) {
                     // ignore errors
                 }
@@ -979,7 +968,7 @@ bool repl_socket::on_readable() {
         if( n == 0 ) {
             std::string addr = "unknown address";
             try {
-                addr = cybozu::get_peer_ip_address(m_fd).str();
+                addr = cybozu::get_peer_ip_address(fd).str();
             } catch (...) {
                 // ignore errors
             }
@@ -991,18 +980,18 @@ bool repl_socket::on_readable() {
     return true;
 }
 
-bool repl_socket::on_writable() {
+bool repl_socket::on_writable(int fd) {
     cybozu::worker* w = m_finder();
     if( w == nullptr ) {
         // if there is no idle worker, fallback to the default.
-        return cybozu::tcp_socket::on_writable();
+        return cybozu::tcp_socket::on_writable(fd);
     }
 
     w->post_job(m_sendjob);
     return true;
 }
 
-bool repl_client_socket::on_readable() {
+bool repl_client_socket::on_readable(int fd) {
     // This function is executed in the same thread as the function that sends
     // heartbeats. If this function takes a very long time, no heartbeats will
     // be sent, and this process will be judged dead by the master. To prevent
@@ -1012,7 +1001,7 @@ bool repl_client_socket::on_readable() {
     size_t n_iter = 0;
     while( true ) {
         char* p = m_recvbuf.prepare(MAX_RECVSIZE);
-        ssize_t n = ::recv(m_fd, p, MAX_RECVSIZE, 0);
+        ssize_t n = ::recv(fd, p, MAX_RECVSIZE, 0);
         if( n == -1 ) {
             if( errno == EAGAIN || errno == EWOULDBLOCK )
                 break;

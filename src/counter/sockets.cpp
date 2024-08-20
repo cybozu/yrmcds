@@ -31,29 +31,14 @@ counter_socket::counter_socket(int fd,
         }
 
         while( true ) {
-            char* p = buf.prepare(MAX_RECVSIZE);
-            ssize_t n = ::recv(m_fd, p, MAX_RECVSIZE, 0);
-            if( n == -1 ) {
-                if( errno == EAGAIN || errno == EWOULDBLOCK )
-                    break;
-                if( errno == EINTR )
-                    continue;
-                if( errno == ECONNRESET ) {
-                    buf.reset();
-                    release_all();
-                    invalidate_and_close();
-                    break;
-                }
-                cybozu::throw_unix_error(errno, "recv");
-            }
-            if( n == 0 ) {
+            auto res = receive(buf, MAX_RECVSIZE);
+            if( res == recv_result::AGAIN )
+                break;
+            if( res == recv_result::RESET || res == recv_result::NONE ) {
                 buf.reset();
                 release_all();
-                invalidate_and_close();
                 break;
             }
-            // if (n != -1) && (n != 0)
-            buf.consume(n);
 
             const char* head = buf.data();
             std::size_t len = buf.size();
@@ -84,8 +69,9 @@ counter_socket::counter_socket(int fd,
     };
 
     m_sendjob = [this](cybozu::dynbuf& buf) {
-        if( ! write_pending_data() )
-            invalidate_and_close();
+        with_fd([=](int fd) -> bool {
+            return write_pending_data(fd);
+        });
     };
 }
 
@@ -94,7 +80,7 @@ counter_socket::~counter_socket() {
     release_all();
 }
 
-bool counter_socket::on_readable() {
+bool counter_socket::on_readable(int fd) {
     if( m_busy.load(std::memory_order_acquire) ) {
         m_reactor->add_readable(*this);
         return true;
@@ -112,11 +98,11 @@ bool counter_socket::on_readable() {
     return true;
 }
 
-bool counter_socket::on_writable() {
+bool counter_socket::on_writable(int fd) {
     cybozu::worker* w = m_finder();
     if( w == nullptr ) {
         // if there is no idle worker, fallback to the default.
-        return cybozu::tcp_socket::on_writable();
+        return cybozu::tcp_socket::on_writable(fd);
     }
 
     w->post_job(m_sendjob);

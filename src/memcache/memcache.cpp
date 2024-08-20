@@ -50,6 +50,8 @@ inline const char* cfind(const char* p, char c, std::size_t len) {
 
 template<typename UInt>
 inline UInt to_uint(const char* p, bool& result) {
+    static_assert( sizeof(UInt) <= sizeof(unsigned long long),
+                   "UInt is larger than unsigned long long" );
     result = false;
     char* end;
     unsigned long long i = strtoull(p, &end, 10);
@@ -58,7 +60,7 @@ inline UInt to_uint(const char* p, bool& result) {
         errno == ERANGE ) return 0;
     char c = *end;
     if( c != CR && c != LF && c != SP ) return 0;
-    if( i > std::numeric_limits<UInt>::max() ) return 0;
+    if( i > static_cast<unsigned long long>(std::numeric_limits<UInt>::max()) ) return 0;
     result = true;
     return static_cast<UInt>(i);
 }

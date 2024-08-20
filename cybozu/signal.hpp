@@ -30,10 +30,15 @@ public:
     // need to be blocked on all threads.
     signal_reader(const sigset_t *mask, callback_t callback):
         resource( signalfd(-1, mask, SFD_NONBLOCK|SFD_CLOEXEC) ),
-        m_callback(callback) {
-        if( m_fd == -1 )
-            throw_unix_error(errno, "signalfd");
+        m_callback(callback)
+    {
+        with_fd([](int fd) -> bool {
+            if( fd == -1 )
+                throw_unix_error(errno, "signalfd");
+            return true;
+        });
     }
+
     // Constructor.
     // @mask      A set of signals to be handled by this resource.
     //
@@ -52,10 +57,10 @@ public:
 private:
     callback_t m_callback;
 
-    virtual bool on_readable() override final {
+    virtual bool on_readable(int fd) override final {
         while( true ) {
             struct signalfd_siginfo si;
-            ssize_t n = read(m_fd, &si, sizeof(si));
+            ssize_t n = read(fd, &si, sizeof(si));
             if( n == -1 ) {
                 if( errno == EINTR ) continue;
                 if( errno == EAGAIN || errno ==EWOULDBLOCK ) return true;
@@ -66,7 +71,10 @@ private:
             if( m_callback ) m_callback(si, *m_reactor);
         }
     }
-    virtual bool on_writable() override final { return true; }
+
+    virtual bool on_writable(int) override final { 
+        return true;
+    }
 };
 
 

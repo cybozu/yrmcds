@@ -38,7 +38,7 @@ AUTOTEST(fd_exhausted) {
 
         struct dummy_socket : public cybozu::tcp_socket {
             dummy_socket(int s): cybozu::tcp_socket(s) {}
-            virtual bool on_readable() override { return true; }
+            virtual bool on_readable(int) override { return true; }
         };
         auto on_accept = [](int s, const cybozu::ip_address addr) {
             return std::unique_ptr<cybozu::tcp_socket>(new dummy_socket(s));
