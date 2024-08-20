@@ -288,6 +288,10 @@ public:
     // When such a thread successfully invalidates a resource, the thread
     // need to request the reactor thread to remove the resource by
     // calling this.
+    //
+    // Note that the use of `m_fd` here does not initiate any new syscalls.
+    // The value is used just as a map key to find the resource to remove
+    // from the reactor. So, no read-lock for `m_fd` is necessary.
     void request_removal(const resource& res) {
         lock_guard g(m_lock);
         m_drop_req.push_back(res.m_fd);
