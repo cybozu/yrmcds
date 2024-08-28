@@ -1,3 +1,8 @@
+version 1.1.12
+
+	* Fix busy loop when FDs are exhausted (#91).
+	* Early close resource file descriptors (#95).
+
 version 1.1.11
 
 	* New config option "initial_repl_sleep_delay_usec" (#88).
