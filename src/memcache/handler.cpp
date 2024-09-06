@@ -73,9 +73,12 @@ void handler::on_start() {
             make_server_socket(nullptr, g_config.port(), w),
             cybozu::reactor::EVENT_IN);
     } else {
-        m_reactor.add_resource(
-            make_server_socket(g_config.vip(), g_config.port(), w, true),
-            cybozu::reactor::EVENT_IN);
+        if( g_config.vip() ) {
+            auto vip = g_config.vip()->str();
+            m_reactor.add_resource(
+                make_server_socket(vip.c_str(), g_config.port(), w, true),
+                cybozu::reactor::EVENT_IN);
+        }
         for( auto& s: g_config.bind_ip() ) {
             m_reactor.add_resource(
                 make_server_socket(s, g_config.port(), w),
@@ -95,8 +98,9 @@ void handler::on_master_start() {
             make_server_socket(nullptr, g_config.repl_port(), w),
             cybozu::reactor::EVENT_IN);
     } else {
+        auto master_host = g_config.master_host();
         m_reactor.add_resource(
-            make_server_socket(g_config.vip(), g_config.repl_port(), w, true),
+            make_server_socket(master_host.c_str(), g_config.repl_port(), w, true),
             cybozu::reactor::EVENT_IN);
         for( auto& s: g_config.bind_ip() ) {
             m_reactor.add_resource(
@@ -141,12 +145,27 @@ void handler::on_master_end() {
 }
 
 bool handler::on_slave_start() {
-    int fd = cybozu::tcp_connect(g_config.vip().str().c_str(),
-                                 g_config.repl_port());
-    if( fd == -1 ) {
+    using logger = cybozu::logger;
+
+    auto master_host = g_config.master_host();
+    int fd;
+    try {
+        fd = cybozu::tcp_connect(master_host.c_str(), g_config.repl_port());
+    } catch( std::runtime_error& err ) {
+        logger::error() << "Failed to connect to the master (" << master_host << "): " << err.what();
         m_reactor.run_once();
         return false;
     }
+    if( fd == -1 ) {
+        logger::error() << "Failed to connect to the master (" << master_host << ")";
+        m_reactor.run_once();
+        return false;
+    }
+
+    // on_slave_start may be called multiple times over the lifetime.
+    // Therefore we need to clear the hash table.
+    clear();
+
     m_repl_client_socket = new repl_client_socket(fd, m_hash);
     m_reactor.add_resource(std::unique_ptr<cybozu::resource>(m_repl_client_socket),
                            cybozu::reactor::EVENT_IN|cybozu::reactor::EVENT_OUT );
