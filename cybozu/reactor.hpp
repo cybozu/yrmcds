@@ -315,6 +315,11 @@ public:
 
         logger::debug() << "reactor: collecting " << n << " resources.";
         m_garbage_copy.swap(m_garbage);
+
+        // eagerly close the file descriptors before gc() is called.
+        for( auto& res: m_garbage_copy )
+            res->try_close();
+
         return true;
     }
 
