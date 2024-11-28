@@ -51,9 +51,12 @@ void handler::on_master_start() {
             make_server_socket(nullptr, port, w),
             cybozu::reactor::EVENT_IN);
     } else {
-        m_reactor.add_resource(
-            make_server_socket(g_config.vip(), port, w, true),
-            cybozu::reactor::EVENT_IN);
+        if( g_config.vip() ) {
+            auto vip = g_config.vip()->str();
+            m_reactor.add_resource(
+                make_server_socket(vip.c_str(), port, w, true),
+                cybozu::reactor::EVENT_IN);
+        }
         for( auto& s: g_config.bind_ip() ) {
             m_reactor.add_resource(
                 make_server_socket(s, port, w),
@@ -81,6 +84,11 @@ void handler::on_master_interval() {
 
 void handler::on_master_end() {
     m_gc_thread = nullptr; // join
+}
+
+bool handler::on_slave_start() {
+    clear();
+    return true;
 }
 
 void handler::dump_stats() {

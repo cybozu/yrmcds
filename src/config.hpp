@@ -10,11 +10,16 @@
 #include <cybozu/ip_address.hpp>
 #include <cybozu/logger.hpp>
 
-#include <stdexcept>
 #include <cstdint>
+#include <optional>
+#include <stdexcept>
 #include <vector>
 
 namespace yrmcds {
+
+enum class leader_election_method {
+    virtual_ip, file,
+};
 
 // Configurations for counter extension.
 class counter_config {
@@ -52,7 +57,7 @@ private:
 class config {
 public:
     // Setup default configurations.
-    config(): m_vip("127.0.0.1"), m_tempdir(DEFAULT_TMPDIR) {
+    config() {
         static_assert( sizeof(std::size_t) >= 4, "std::size_t is too small" );
     }
 
@@ -66,14 +71,32 @@ public:
     // This may throw miscellaneous <std::runtime_error> exceptions.
     void load(const std::string& path);
 
-    const cybozu::ip_address& vip() const noexcept {
+    yrmcds::leader_election_method leader_election_method() const noexcept {
+        return m_leader_election_method;
+    }
+    const std::optional<cybozu::ip_address>& vip() const noexcept {
         return m_vip;
+    }
+    // Returns the address of the master server.
+    // If the leader election method is virtual_ip, this returns "virtual_ip".
+    // Otherwise, this returns "master_host".
+    std::string master_host() const {
+        if( m_master_host ) {
+            return *m_master_host;
+        } else if( m_vip ) {
+            return m_vip->str();
+        } else {
+            throw bad_config("[bug] both of vip and master_host are not set");
+        }
     }
     std::uint16_t port() const noexcept {
         return m_port;
     }
     std::uint16_t repl_port() const noexcept {
         return m_repl_port;
+    }
+    const std::optional<std::string>& master_file_path() {
+        return m_master_file_path;
     }
     const std::vector<cybozu::ip_address>& bind_ip() const noexcept {
         return m_bind_ip;
@@ -139,13 +162,18 @@ public:
     }
 
 private:
+    void sanity_check();
+
     alignas(CACHELINE_SIZE)
-    cybozu::ip_address m_vip;
+    yrmcds::leader_election_method m_leader_election_method = yrmcds::leader_election_method::virtual_ip;
+    std::optional<cybozu::ip_address> m_vip = std::optional(cybozu::ip_address("127.0.0.1"));
+    std::optional<std::string> m_master_host;
+    std::optional<std::string> m_master_file_path;
     std::uint16_t m_port = DEFAULT_MEMCACHE_PORT;
     std::uint16_t m_repl_port = DEFAULT_REPL_PORT;
     std::vector<cybozu::ip_address> m_bind_ip;
     unsigned int m_max_connections = 0;
-    std::string m_tempdir;
+    std::string m_tempdir = DEFAULT_TMPDIR;
     std::string m_user;
     std::string m_group;
     cybozu::severity m_threshold = cybozu::severity::info;

@@ -9,9 +9,12 @@
 
 namespace {
 
+const char LEADER_ELECTION_METHOD[] = "leader_election_method";
 const char VIRTUAL_IP[] = "virtual_ip";
 const char PORT[] = "port";
 const char REPL_PORT[] = "repl_port";
+const char MASTER_HOST[] = "master_host";
+const char MASTER_FILE[] = "master_file";
 const char BIND_IP[] = "bind_ip";
 const char MAX_CONNECTIONS[] = "max_connections";
 const char TEMP_DIR[] = "temp_dir";
@@ -109,8 +112,26 @@ void counter_config::load(const cybozu::config_parser& cp) {
 void config::load(const std::string& path) {
     cybozu::config_parser cp(path);
 
-    if( cp.exists(VIRTUAL_IP) )
-        m_vip.parse(cp.get(VIRTUAL_IP));
+    if( cp.exists(LEADER_ELECTION_METHOD) ) {
+        auto& m = cp.get(LEADER_ELECTION_METHOD);
+        if( m == "virtual_ip" ) {
+            m_leader_election_method = leader_election_method::virtual_ip;
+        } else if( m == "file" ) {
+            m_leader_election_method = leader_election_method::file;
+        } else {
+            throw bad_config("Invalid leader election method: " + m);
+        }
+    }
+
+    if( m_leader_election_method == leader_election_method::virtual_ip ) {
+        if( cp.exists(VIRTUAL_IP) ) {
+            cybozu::ip_address vip(cp.get(VIRTUAL_IP));
+            m_vip = std::optional(vip);
+        }
+    } else {
+        // m_vip should have a value only when leader_election_method is virtual_ip.
+        m_vip = std::nullopt;
+    }
 
     if( cp.exists(PORT) ) {
         int n = cp.get_as_int(PORT);
@@ -124,6 +145,16 @@ void config::load(const std::string& path) {
         if( n < 1 || n > 65535 )
             throw bad_config("Bad repl port: " + cp.get(REPL_PORT));
         m_repl_port = static_cast<std::uint16_t>(n);
+    }
+
+    if( m_leader_election_method == leader_election_method::file ) {
+        if( cp.exists(MASTER_HOST) ) {
+            m_master_host = std::optional(cp.get(MASTER_HOST));
+        }
+
+        if( cp.exists(MASTER_FILE) ) {
+            m_master_file_path = std::optional(cp.get(MASTER_FILE));
+        }
     }
 
     if( cp.exists(BIND_IP) ) {
@@ -245,6 +276,25 @@ void config::load(const std::string& path) {
     }
 
     m_counter_config.load(cp);
+
+    sanity_check();
+}
+
+void config::sanity_check() {
+    switch( m_leader_election_method ) {
+    case leader_election_method::virtual_ip:
+        if( !m_vip )
+            throw bad_config("virtual_ip must be set when leader_election_method is 'virtual_ip'");
+        break;
+    case leader_election_method::file:
+        if( !m_master_file_path )
+            throw bad_config("master_file_path must be set when leader_election_method is 'file'");
+        if( !m_master_host )
+            throw bad_config("master_host must be set when leader_election_method is 'file'");
+        break;
+    default:
+        throw bad_config("Invalid leader_election_method");
+    }
 }
 
 config g_config;
