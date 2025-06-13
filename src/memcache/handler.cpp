@@ -141,12 +141,27 @@ void handler::on_master_end() {
 }
 
 bool handler::on_slave_start() {
-    int fd = cybozu::tcp_connect(g_config.vip().str().c_str(),
-                                 g_config.repl_port());
-    if( fd == -1 ) {
+    using logger = cybozu::logger;
+
+    auto master_host = g_config.vip().str();
+    int fd;
+    try {
+        fd = cybozu::tcp_connect(master_host.c_str(), g_config.repl_port());
+    } catch( std::runtime_error& err ) {
+        logger::error() << "Failed to connect to the master (" << master_host << "): " << err.what();
         m_reactor.run_once();
         return false;
     }
+    if( fd == -1 ) {
+        logger::error() << "Failed to connect to the master (" << master_host << ")";
+        m_reactor.run_once();
+        return false;
+    }
+
+    // on_slave_start may be called multiple times over the lifetime.
+    // Therefore we need to clear the hash table.
+    clear();
+
     m_repl_client_socket = new repl_client_socket(fd, m_hash);
     m_reactor.add_resource(std::unique_ptr<cybozu::resource>(m_repl_client_socket),
                            cybozu::reactor::EVENT_IN|cybozu::reactor::EVENT_OUT );

@@ -73,19 +73,14 @@ void server::serve() {
     if( is_master() )
         goto MASTER_ENTRY;
     while( true ) {
-        for( auto& handler: m_handlers )
-            handler->clear();
-
         serve_slave();
         if( m_signaled ) return;
 
         // disconnected from the master
+        cybozu::logger::info() << "Try to promote to master...";
         for( int i = 0; i < MASTER_CHECKS; ++i ) {
             if( is_master() )
                 goto MASTER_ENTRY;
-            cybozu::logger::info()
-                << "The conditions for becoming master are not met. Sleep and retry... ("
-                << i << "/" << MASTER_CHECKS << ")";
             std::this_thread::sleep_for( std::chrono::milliseconds(100) );
         }
         cybozu::logger::warning() << "Could not promote to master. Join the cluster again as a slave.";
