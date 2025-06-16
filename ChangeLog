@@ -1,3 +1,8 @@
+version 1.1.13
+
+	* Prevent slave from deleting data when unable to connect to master (#100).
+	* Reactor: eager close of resource fds in the pending destruction list (#98).
+
 version 1.1.12
 
 	* Fix busy loop when FDs are exhausted (#91).
